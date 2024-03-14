@@ -4,9 +4,11 @@ namespace DataBaseGenerator.Core
 {
     public class WorkList
     {
-        public int WorkListID { get; set; }
+        //public int WorkListID { get; set; }
 
         public int ID_WorkList { get; set; }
+
+        public int ID_Patient { get; set; }
 
         public DateTime CreateDate { get; set; }
         
@@ -16,11 +18,9 @@ namespace DataBaseGenerator.Core
 
         public TimeSpan? CompleteTime { get; set; }
 
-        public int ID_Patient { get; set; }
+        public string? State { get; set; }
 
-        public string State { get; set; }
-
-        public string SOPInstanceUID { get; set; }
+        public string? SOPInstanceUID { get; set; }
 
         public string Modality { get; set; }
 

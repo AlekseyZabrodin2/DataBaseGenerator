@@ -60,11 +60,11 @@ namespace DataBaseGenerator.Core.Data
             #region Configure Primary Keys
 
 
-            modelBuilder.Entity<Patient>().HasKey(patient => patient.PatientID).HasName("PK_Patient");
+            modelBuilder.Entity<Patient>().HasKey(patient => patient.ID_Patient).HasName("PK_Patient");
 
             modelBuilder.Entity<Patient>().HasCharSet("Utf8");
 
-            modelBuilder.Entity<WorkList>().HasKey(worklist => worklist.WorkListID).HasName("PK_WorkList");
+            modelBuilder.Entity<WorkList>().HasKey(worklist => worklist.ID_WorkList).HasName("PK_WorkList");
 
             modelBuilder.Entity<WorkList>().HasCharSet("Utf8");
 
@@ -76,7 +76,7 @@ namespace DataBaseGenerator.Core.Data
 
             //Patient index 
 
-            modelBuilder.Entity<Patient>().HasIndex(patient => patient.PatientID).HasDatabaseName("Idx_Primary");
+            modelBuilder.Entity<Patient>().HasIndex(patient => patient.ID_Patient).HasDatabaseName("Idx_Primary");
 
             modelBuilder.Entity<Patient>().HasIndex(patient => patient.PatientID).HasDatabaseName("PatientID_Unique").IsUnique();
 
@@ -125,7 +125,7 @@ namespace DataBaseGenerator.Core.Data
             #region Configure columns table WorkList
 
             
-            modelBuilder.Entity<WorkList>().Property(patient => patient.WorkListID).HasColumnType("INT UNSIGNED NOT NULL").IsRequired();
+            //modelBuilder.Entity<WorkList>().Property(patient => patient.WorkListID).HasColumnType("INT UNSIGNED NOT NULL").IsRequired();
 
             modelBuilder.Entity<WorkList>().Property(patient => patient.ID_WorkList).HasColumnType("INT UNSIGNED NOT NULL").IsRequired();
 

@@ -52,9 +52,9 @@ namespace DataBaseGenerator.Core.Migrations
                     CompleteTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     ID_Patient = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    State = table.Column<string>(type: "longtext", nullable: true)
+                    State = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    SOPInstanceUID = table.Column<string>(type: "longtext", nullable: true)
+                    SOPInstanceUID = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Modality = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
