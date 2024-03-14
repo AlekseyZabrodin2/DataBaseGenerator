@@ -42,7 +42,7 @@ namespace DataBaseGenerator.Core.Data
             {
                 for (var patientindex = 0; patientindex < patientGeneratorParameters.PatientCount; patientindex++)
                 {
-                    var patients = CreatePatient(patientindex, patientGeneratorParameters);
+                    var patients = CreatePatient(patientindex + 1, patientGeneratorParameters);
 
                     dataBaseGenerators.Add(patientGeneratorParameters);
                 }
@@ -61,7 +61,7 @@ namespace DataBaseGenerator.Core.Data
             {
                 for (var workListIndex = 0; workListIndex < workListGeneratorParameters.WorkListCount; workListIndex++)
                 {
-                    var workList = CreateWorkList(workListIndex, workListGeneratorParameters);
+                    var workList = CreateWorkList(workListIndex + 1, workListGeneratorParameters);
 
                     workListGenerators.Add(workListGeneratorParameters);
                 }
