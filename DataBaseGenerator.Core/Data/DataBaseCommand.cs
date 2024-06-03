@@ -175,17 +175,67 @@ namespace DataBaseGenerator.Core.Data
         }
 
 
-
-        public static string DeletePatient(Patient patient)
+        public static string DeleteFirstPatient(PatientGeneratorParameters patientGeneratorParameters)
         {
             string result = "Patient is not create";
 
             using (BaseGenerateContext dataBase = new BaseGenerateContext())
             {
-                dataBase.Patient.Remove(patient);
+                dataBase.Patient.Remove(dataBase.Patient.First());
                 dataBase.SaveChanges();
 
                 result = $"Сделано! Пациент удален из базы";
+
+            }
+
+            return result;
+        }
+
+
+        public static string DeleteAllPatients(PatientGeneratorParameters patientGeneratorParameters)
+        {
+            string result = "Patient is not create";
+
+            using (BaseGenerateContext dataBase = new BaseGenerateContext())
+            {
+                dataBase.Patient.RemoveRange(dataBase.Patient);
+                dataBase.SaveChanges();
+
+                result = $"Сделано! Все Пациенты удалены из базы";
+
+            }
+
+            return result;
+        }
+
+
+        public static string DeleteFirstWorkList(WorkListGeneratorParameters workListGeneratorParameters)
+        {
+            string result = "WorkList is not create";
+
+            using (BaseGenerateContext dataBase = new BaseGenerateContext())
+            {
+                dataBase.WorkList.Remove(dataBase.WorkList.First());
+                dataBase.SaveChanges();
+
+                result = $"Сделано! Первый из Рабочего списка удален";
+
+            }
+
+            return result;
+        }
+
+
+        public static string DeleteAllWorkList(WorkListGeneratorParameters workListGeneratorParameters)
+        {
+            string result = "WorkList is not create";
+
+            using (BaseGenerateContext dataBase = new BaseGenerateContext())
+            {
+                dataBase.WorkList.RemoveRange(dataBase.WorkList);
+                dataBase.SaveChanges();
+
+                result = $"Сделано! Весь рабочий список удален";
 
             }
 

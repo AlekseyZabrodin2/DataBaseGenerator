@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
+using DataBaseGenerator.UI.Wpf.View;
+using DataBaseGenerator.UI.Wpf.ViewModel;
 
 namespace DataBaseGenerator.UI.Wpf
 {
@@ -15,11 +12,21 @@ namespace DataBaseGenerator.UI.Wpf
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            base.OnStartup(e);
+            try
+            {
+                base.OnStartup(e);
 
-            var mainWindow = new MainWindow();
-            mainWindow.DataContext = new MainViewModel();
-            mainWindow.Show();
+                var mainWindow = new MainWindow();
+                mainWindow.DataContext = new MainViewModel();
+                mainWindow.Show();
+            }
+
+            catch(Exception ex)
+            {
+                MessageBox.Show("Check your connection settings !!!");                
+                base.Shutdown();
+            }
+
         }
 
     }
