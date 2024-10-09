@@ -543,6 +543,7 @@
                 Width="120"
                 Height="50"
                 HorizontalAlignment="Right"
+                AutomationProperties.AutomationId="DeleteAllWorkListButton" 
                 Command="{Binding DeleteAllWorkList}"
                 Content="Delete All WL" />
 
