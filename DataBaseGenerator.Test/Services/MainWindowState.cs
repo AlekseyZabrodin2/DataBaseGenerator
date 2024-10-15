@@ -40,7 +40,7 @@ namespace DataBaseGenerator.Test.Services
 
             var cancellationTokenSource = new CancellationTokenSource();
 
-            var toStateTask = Task.Run(() => 
+            var toStateTask = Task.Run(() =>
             {
                 state = this;
                 while (!state.Name.Equals(stateName))
@@ -98,7 +98,50 @@ namespace DataBaseGenerator.Test.Services
                 result = true;
             }
 
+            
             return result;
+            
+        }
+        public int GetViewAllPatientTableRowCount()
+        {
+            var viewAllPatientTable = _mainWindowStateLocators.ViewAllPatientTable;
+            viewAllPatientTable.DrawHighlight();
+            int rowCount = viewAllPatientTable.AsGrid().RowCount;
+            return rowCount;
+        }
+
+        public void ClickDeleteAllPatientButton()
+        {
+            var DeleteAllPatientButton = _mainWindowStateLocators.DeleteAllPatientButton;
+            DeleteAllPatientButton.DrawHighlight();
+            DeleteAllPatientButton.Click();
+        }
+
+        public void ClickAddPatientButton()
+        {
+            var AddPatientButton = _mainWindowStateLocators.AddPatientButton;
+            AddPatientButton.DrawHighlight();
+            AddPatientButton.Click();
+        }
+
+        public void InputPatientCountTextBox()
+        {
+            var PatientCountTextBox = _mainWindowStateLocators.PatientCountTextBox;
+                PatientCountTextBox.DrawHighlight();
+                PatientCountTextBox.AsTextBox().Focus();
+                PatientCountTextBox.AsTextBox().Text = "7";
+        }
+
+        public void CloseDialogWindow()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                _mainWindowStateLocators.DialogWindowOkButton.DrawHighlight().Click();
+            }
+          //  _mainWindowStateLocators.DialogWindowOkButton.DrawHighlight().Click();
+           // _mainWindowStateLocators.DialogWindowOkButton.DrawHighlight().Click();
+           // _mainWindowStateLocators.DialogWindowOkButton.DrawHighlight().Click();
+
         }
     }
 }

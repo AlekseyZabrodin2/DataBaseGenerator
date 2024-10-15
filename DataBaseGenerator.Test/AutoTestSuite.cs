@@ -16,7 +16,7 @@ namespace DataBaseGenerator.Test
         private readonly NLog.ILogger _logger = NLog.LogManager.GetCurrentClassLogger();
         private ITestClient _testClient;
 
-        private string _pathToTestClient = "D:\\Develop\\DataBaseGenerator\\DataBaseGenerator\\bin\\Debug\\net8.0-windows\\DataBaseGenerator.UI.Wpf.exe";
+        private string _pathToTestClient = "D:\\C#\\DataBaseGenerator\\DataBaseGenerator\\bin\\Debug\\net8.0-windows\\DataBaseGenerator.UI.Wpf.exe";
 
         public AutoTestSuite()
         {
@@ -42,9 +42,21 @@ namespace DataBaseGenerator.Test
                 {
                     mainWindowState.ClickConnectButton();
 
-                    var openDialogWindow = mainWindowState.CheckDialogWindowOpen();
+                    bool openDialogWindow = mainWindowState.CheckDialogWindowOpen();
 
                     Assert.IsTrue(openDialogWindow);
+
+                    mainWindowState.CloseDialogWindow();
+                    mainWindowState.ClickDeleteAllPatientButton();
+                    mainWindowState.InputPatientCountTextBox();
+                    mainWindowState.ClickAddPatientButton();
+
+                    int patientCount = mainWindowState.GetViewAllPatientTableRowCount();
+
+                    Assert.AreEqual(7,patientCount);
+
+
+
                 }
             }
             catch (Exception exception)
