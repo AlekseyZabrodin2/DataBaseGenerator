@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using DataBaseGenerator.Test.Core;
 using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Conditions;
 using FlaUI.UIA3;
-using NLog;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Polly;
 
 namespace DataBaseGenerator.Test.Services
@@ -19,7 +18,7 @@ namespace DataBaseGenerator.Test.Services
 
         private readonly string _programPath;
         private readonly string _arguments;
-        private readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+        private readonly ILogger _logger = AssemblyInitializeTests.Hosts.Services.GetRequiredService<ILogger<DataBaseTestClient>>();
         private TimeSpan _retryDelay = TimeSpan.FromSeconds(1);
         private Application _application;
 
@@ -30,7 +29,7 @@ namespace DataBaseGenerator.Test.Services
 
         public async Task<IClientState> StartAsync(TimeSpan timeout)
         {
-            _logger.Trace("Entering in StartAsync in DataBaseTestClient");
+            _logger.LogTrace("Entering in StartAsync in DataBaseTestClient");
 
             Window mainWindow = null;
             ConditionFactory cf = null;
@@ -48,7 +47,7 @@ namespace DataBaseGenerator.Test.Services
 
             await mainWindowWaitPolicy.ExecuteAsync(async () =>
             {
-                _logger.Trace("Try to find Main window");
+                _logger.LogTrace("Try to find Main window");
 
                 var automation = new UIA3Automation();
                 var windows = _application.GetAllTopLevelWindows(automation);
@@ -56,44 +55,44 @@ namespace DataBaseGenerator.Test.Services
 
                 if (windows.All(w => w.FrameworkType != FrameworkType.Wpf))
                 {
-                    _logger.Error("Main window did not find");
+                    _logger.LogError("Main window did not find");
                     throw new Exception("Main window did not find");
                 }
 
                 mainWindow = windows.Single(w => w.FrameworkType == FrameworkType.Wpf);
                 await Task.CompletedTask;
-                _logger.Trace("Main window is found");
+                _logger.LogTrace("Main window is found");
             });
 
-            _logger.Trace("Wait for MainWindow state");
+            _logger.LogTrace("Wait for MainWindow state");
             //wait for Authenticate state
             var menuWindowWaitPolicy = Policy.Handle<Exception>()
                 .WaitAndRetryAsync(retryCounts, retryAttempt => _retryDelay);
             await menuWindowWaitPolicy.ExecuteAsync(async () =>
             {
-                _logger.Trace("Try to find ConnectButton");
+                _logger.LogTrace("Try to find ConnectButton");
 
                 var connectButton = mainWindow.FindFirstDescendant(cf.ByAutomationId("ConnectButton"))
                     .AsButton();
                 connectButton.DrawHighlight();
                 if (connectButton == null)
                 {
-                    _logger.Error("Can`t go to MainWindow State");
+                    _logger.LogError("Can`t go to MainWindow State");
                     throw new Exception("Button did not find");
                 }
 
                 await Task.CompletedTask;
-                _logger.Trace("ConnectButton is found");
+                _logger.LogTrace("ConnectButton is found");
             });
 
-            _logger.Debug("DataBaseTestClient Started");
+            _logger.LogDebug("DataBaseTestClient Started");
             return new MainWindowState(mainWindow, cf);
         }
 
 
         public void Kill()
         {
-            _logger.Trace($"DataBaseTestClient is Kill");
+            _logger.LogTrace($"DataBaseTestClient is Kill");
             _application.Kill();
         }
     }

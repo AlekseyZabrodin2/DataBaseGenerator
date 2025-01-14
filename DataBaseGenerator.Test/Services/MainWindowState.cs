@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DataBaseGenerator.Test.Core;
 using DataBaseGenerator.Test.Locators;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Conditions;
-using NLog;
+using Microsoft.Extensions.Logging;
 
 namespace DataBaseGenerator.Test.Services
 {
@@ -20,7 +17,7 @@ namespace DataBaseGenerator.Test.Services
         private TimeSpan _nextStateDelay = TimeSpan.FromSeconds(1);
         private string _firstName;
         private const int _nextStateRetry = 30;
-        private readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+        private ILogger<MainWindowState> _logger;
 
         public string Name { get; } = "MainWindowState";
 
@@ -66,7 +63,7 @@ namespace DataBaseGenerator.Test.Services
 
         public bool IsState(Window window)
         {
-            _logger.Trace("Entering in IClientState IsState in MainWindowState");
+            _logger.LogTrace("Entering in IClientState IsState in MainWindowState");
 
             var result = false;
 
@@ -76,7 +73,7 @@ namespace DataBaseGenerator.Test.Services
                 result = true;
             }
 
-            _logger.Debug($"MainWindowState State - [{result}]");
+            _logger.LogDebug($"MainWindowState State - [{result}]");
             return result;
         }
 
