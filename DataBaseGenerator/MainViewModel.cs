@@ -54,6 +54,8 @@ namespace DataBaseGenerator.UI.Wpf
         private string _addWorkPlase;
         private string _addInfo;
 
+        
+        /// Comments is pathes to resource in release version
 
         [ObservableProperty]
         private string _pathToResourceForDialogMessage = "D:\\Develop\\DataBaseGenerator\\DataBaseGenerator.Core\\Resources\\333.jpg";
