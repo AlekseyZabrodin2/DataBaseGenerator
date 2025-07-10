@@ -8,7 +8,7 @@
     xmlns:wpf="clr-namespace:DataBaseGenerator.UI.Wpf.ViewModel"
     Title="DataBase Generator"
     Width="1100"
-    Height="700"
+    Height="757"
     d:DataContext="{d:DesignInstance Type=wpf:MainViewModel,
                                      IsDesignTimeCreatable=False}"
     Icon="{Binding PathToIcon}"
@@ -134,29 +134,33 @@
                     <TextBlock
                         Margin="5,5,0,0"
                         FontWeight="DemiBold"
-                        Text="ИД пациента" />
-                    <TextBox Margin="5" Text="{Binding AddIdPatieent, Mode=TwoWay}" />
+                        Text="ИД паzиента *" />
+                    <TextBox Margin="5" Text="{Binding AddIdPatient, Mode=TwoWay}" />
 
                     <TextBlock
                         Margin="5,5,0,0"
                         FontWeight="DemiBold"
-                        Text="Фамилия:" />
+                        Text="Фамилия: *" />
                     <TextBox Margin="5" Text="{Binding AddFamily, Mode=TwoWay}" />
 
                     <TextBlock
                         Margin="5,5,0,0"
                         FontWeight="DemiBold"
-                        Text="Имя:" />
-                    <TextBox Margin="5" Text="{Binding AddName, Mode=TwoWay}" />
+                        Text="Отчество: *" />
+                    <TextBox
+                        Margin="5"
+                        IsTabStop="False"
+                        Text="{Binding AddName, Mode=TwoWay}" />
 
                     <TextBlock
                         Margin="5,5,0,0"
                         FontWeight="DemiBold"
-                        Text="Отчество:" />
+                        Text="Имя: *" />
                     <TextBox
                         Margin="5"
                         FontWeight="Bold"
-                        Text="{Binding AddMiddleName, Mode=TwoWay}" />
+                        Text="{Binding AddMiddleName, Mode=TwoWay}"
+                        ToolTip="Ну что смотришь, вводи давай !" />
 
                     <TextBlock
                         Margin="5,5,0,0"
@@ -164,8 +168,12 @@
                         Text="Дата рождения:" />
                     <mah:DateTimePicker
                         Margin="5"
+                        Culture="ru"
+                        Cursor="Hand"
                         SelectedDateFormat="Short"
-                        SelectedDateTime="{Binding PatientBirthDate}" />
+                        SelectedDateTime="{Binding PatientBirthDate, Mode=TwoWay}"
+                        SelectedTimeFormat="Long"
+                        ToolTip="{Binding BirthDateToolTip}" />
 
                     <TextBlock
                         Margin="5,5,0,0"
@@ -173,6 +181,7 @@
                         Text="Пол:" />
                     <ComboBox
                         Margin="5"
+                        Cursor="AppStarting"
                         ItemsSource="{Binding Gender}"
                         SelectedItem="{Binding SelecedGender}" />
 
@@ -187,7 +196,19 @@
                         Margin="5,5,0,0"
                         FontWeight="DemiBold"
                         Text="Место работы" />
-                    <TextBox Margin="5" Text="{Binding AddWorkPlase, Mode=TwoWay}" />
+                    <TextBox
+                        Margin="5"
+                        Cursor="None"
+                        Text="{Binding AddWorkPlase, Mode=TwoWay}" />
+
+                    <TextBlock
+                        Margin="5,5,0,0"
+                        FontWeight="DemiBold"
+                        Text="Номер мед.страхования: *" />
+                    <TextBox
+                        Margin="5"
+                        Cursor="Pen"
+                        Text="{Binding MedicalInsuranceNumber}" />
 
                     <TextBlock
                         Margin="5,5,0,0"
@@ -196,7 +217,8 @@
                     <TextBox
                         Height="67"
                         Margin="5"
-                        Text="{Binding AddInfo, Mode=TwoWay}" />
+                        Text="{Binding AddInfo, Mode=TwoWay}"
+                        ToolTip="Ну давай вводи уже, чуть-чуть осталось, СОБЕРИСЬ !!!" />
 
                 </StackPanel>
             </Border>
@@ -208,7 +230,8 @@
                 Margin="25,10,0,0"
                 HorizontalAlignment="Left"
                 Command="{Binding AddOnePatient}"
-                Content="Добавить" />
+                Content="Добавить"
+                Cursor="No" />
             <Button
                 Grid.Row="1"
                 Width="70"
@@ -428,6 +451,8 @@
                 HorizontalContentAlignment="Center"
                 VerticalContentAlignment="Center"
                 Background="{DynamicResource MahApps.Brushes.Button.Border}"
+                FontFamily="Century Gothic"
+                FontSize="14"
                 FontWeight="Bold"
                 Text="{Binding SetWorkListCount, UpdateSourceTrigger=PropertyChanged}" />
 
@@ -484,7 +509,8 @@
                 VerticalContentAlignment="Center"
                 Background="{DynamicResource MahApps.Brushes.Button.Border}"
                 FontWeight="Bold"
-                Text="{Binding SetAeTitle, UpdateSourceTrigger=PropertyChanged}" />
+                Text="{Binding SetAeTitle, UpdateSourceTrigger=PropertyChanged}"
+                ToolTip="Ну и что ты сюда навел(а) мышку?" />
 
         </Grid>
 
@@ -533,7 +559,7 @@
                 Width="120"
                 Height="50"
                 HorizontalAlignment="Left"
-                Command="{Binding DeleteFirstWorkList}"
+                Command="{Binding DeleteAllWorkList}"
                 Content="Delete First WL" />
 
         </Grid>
@@ -549,8 +575,8 @@
                 Width="120"
                 Height="50"
                 HorizontalAlignment="Right"
-                Command="{Binding DeleteAllWorkList}"
-                Content="Delete All WL" />
+                Command="{Binding DeleteFirstWorkList}"
+                Content="Delte All WL" />
 
         </Grid>
 
@@ -584,10 +610,11 @@
             <Button
                 Name="Connect"
                 Width="150"
-                Height="50"
+                Height="40"
                 HorizontalAlignment="Center"
                 Command="{Binding ConnectDB}"
-                Content="Connect" />
+                Content="Connect"
+                FontSize="8" />
 
         </Grid>
 
