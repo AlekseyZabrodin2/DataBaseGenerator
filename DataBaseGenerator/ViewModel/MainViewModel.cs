@@ -1,48 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Data;
+using System.Diagnostics;
 using System.Threading;
 using System.Windows;
-using System.Windows.Input;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using DataBaseGenerator.Core;
 using DataBaseGenerator.Core.Data;
 using DataBaseGenerator.Core.GeneratorRules.Patient;
 using DataBaseGenerator.Core.GeneratorRules.WorkList;
 using DataBaseGenerator.UI.Wpf.View;
-using MySqlConnector;
-using Prism.Commands;
 
 namespace DataBaseGenerator.UI.Wpf.ViewModel
 {
     public partial class MainViewModel : ObservableObject
     {
-
-        public MainViewModel()
-        {
-            var defaultAeTitle = new RandomModalityRule("DX");
-            ModalityRules = new ObservableCollection<RandomModalityRule>
-            {
-                defaultAeTitle,
-                new RandomModalityRule("MG")
-            };
-
-            SelectModality = defaultAeTitle;
-
-            Gender = new List<string> { "Man", "Female", "Other" };
-        }
-
-
-        private PatientGeneratorParameters _patientGeneratorParameters;
-        private readonly RandomModalityRule _modalityRule;
-        private MySqlConnection _myConnection;
-        private MySqlCommand _mySqlCommand;
-        private MySqlDataReader _dataReader;
-        private MySqlDataAdapter _adapter;
-        private DataTable _tablet;
-        private string _connect = "Server=localhost;DataBase=medxregistry;Uid=root;pwd=root;";
+        private readonly BaseGenerateContext _context;
+        private readonly PatientService _patientService;
+        private readonly WorklistService _worklistService;
         private string _updateText;
         private int _setPatientCount;
         private int _setWorkListCount;
@@ -59,9 +36,34 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private string _medInsurNumber;
         private DialogMessageWindow _dialogMessage = new DialogMessageWindow();
         private MediaPlayer _mediaPlayer = new MediaPlayer();
-        private MainViewModel _mainViewModel;
         private SpecificationWindow _specificationWindow = new SpecificationWindow();
         private static readonly Random _random = new Random();
+        private List<Patient> _allPatients = new List<Patient>();
+        private List<WorkList> _allWorkLists = new List<WorkList>();
+
+
+        public MainViewModel(BaseGenerateContext context)
+        {
+            _context = context;
+
+            var defaultAeTitle = new RandomModalityRule("DX");
+            ModalityRules = new ObservableCollection<RandomModalityRule>
+            {
+                defaultAeTitle,
+                new RandomModalityRule("MG")
+            };
+
+            SelectModality = defaultAeTitle;
+
+            Gender = new List<string> { "Man", "Female", "Other" };
+
+            _patientService = new PatientService(_context);
+            _worklistService = new WorklistService(_context);
+
+            Initialize();
+        }
+
+
 
         [ObservableProperty]
         private string _pathToResourceAudio = "D:\\Develop\\DataBaseGenerator\\DataBaseGenerator.Core\\Resources\\NoNo.mp3";
@@ -250,9 +252,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             set => SetProperty(ref _medInsurNumber, value);
         }
 
-        //[ObservableProperty]
-        //public DateTime _patientBirthDate = DateTime.Today.AddYears(-100);
-
         public DateTime _patientBirthDate = DateTime.Now;
 
         public DateTime PatientBirthDate
@@ -279,11 +278,29 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             set => SetProperty(ref _birthDateToolTip, value);
         }
 
+        public List<Patient> AllPatients
+        {
+            get => _allPatients;
+            set => SetProperty(ref _allPatients, value);
+        }
 
-        private DelegateCommand _connectDB;
-        public ICommand ConnectDB => _connectDB = new DelegateCommand(PerformConnectDB);
+        public List<WorkList> AllWorkLists
+        {
+            get => _allWorkLists;
+            set => SetProperty(ref _allWorkLists, value);
+        }
 
-        private void PerformConnectDB()
+
+
+        private void Initialize()
+        {
+            _allPatients = _patientService.GetAll();
+            _allWorkLists = _worklistService.GetAll();
+        }
+
+
+        [RelayCommand]
+        public void ConnectDB()
         {
             MessageBox.Show("Ну да конечно, хахахах !!!");
             MessageBox.Show("Попробуй еще раз !!!");
@@ -291,43 +308,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             MessageBox.Show("У тебя все получится ;) !!!");
         }
 
-        private List<Patient> _allPatients = DataBaseCommand.GetAllPatients();
-
-        public List<Patient> AllPatients
+        
+        [RelayCommand]
+        public void RefreshPatients()
         {
-            get
-            {
-                return _allPatients;
-            }
-            set
-            {
-                SetProperty(ref _allPatients, value);
-            }
-        }
-
-
-        private List<WorkList> _allWorkLists = DataBaseCommand.GetAllWorkLists();
-
-        public List<WorkList> AllWorkLists
-        {
-            get
-            {
-                return _allWorkLists;
-            }
-            set
-            {
-                SetProperty(ref _allWorkLists, value);
-            }
-        }
-
-
-
-        private DelegateCommand refreshPatients;
-        public ICommand RefreshPatients => refreshPatients ??= new DelegateCommand(PerformRefreshPatients);
-
-        private void PerformRefreshPatients()
-        {
-            AllPatients = DataBaseCommand.GetAllPatients();
+            AllPatients = _patientService.GetAll();
             MainWindow.AllPatientView.ItemsSource = null;
             MainWindow.AllPatientView.Items.Clear();
             MainWindow.AllPatientView.ItemsSource = AllPatients;
@@ -336,26 +321,20 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
 
-
-        private DelegateCommand refreshWorkList;
-        public ICommand RefreshWorkList => refreshWorkList ??= new DelegateCommand(PerformRefreshWorkList);
-
-        private void PerformRefreshWorkList()
+        [RelayCommand]
+        public void RefreshWorkList()
         {
-            AllWorkLists = DataBaseCommand.GetAllWorkLists();
+            AllWorkLists = _worklistService.GetAll();
             MainWindow.AllWorkListView.ItemsSource = null;
             MainWindow.AllWorkListView.Items.Clear();
             MainWindow.AllWorkListView.ItemsSource = AllWorkLists;
             MainWindow.AllWorkListView.Items.Refresh();
             UpdateText = "WorkList table is update";
         }
-        
 
 
-        private DelegateCommand _addPatient;
-        public ICommand AddPatient => _addPatient ??= new DelegateCommand(PerformAddPatient);
-
-        private void PerformAddPatient()
+        [RelayCommand]
+        public void AddPatient()
         {
             try
             {
@@ -390,9 +369,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     return;
                 }
 
-                var addPatient = DataBaseCommand.GeneratePatientDateBase(newPatient);
+                _patientService.Generate(newPatient);
 
-                PerformRefreshPatients();
+                RefreshPatients();
                 LolMessageForPatientCount(SetPatientCount);
 
                 UpdateText = "Пациент успешно добавлен";
@@ -484,10 +463,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
         }
 
-        private DelegateCommand _addWorkList;
-        public ICommand AddWorkList => _addWorkList ??= new DelegateCommand(PerformAddWorkList);
 
-        private void PerformAddWorkList()
+        [RelayCommand]
+        public void AddWorkList()
         {
             try
             {
@@ -511,9 +489,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     WorkListCount = SetWorkListCount
                 };
 
-                var addWorkList = DataBaseCommand.GenerateWorkListBase(newWorkList);
+                _worklistService.Generate(newWorkList);
 
-                PerformRefreshWorkList();
+                RefreshWorkList();
 
                 UpdateText = "WorkList added";
             }
@@ -525,11 +503,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
 
-
-        private DelegateCommand _deleteFirstPatient;
-        public ICommand DeleteFirstPatient => _deleteFirstPatient ??= new DelegateCommand(PerformDeleteFirstPatient);
-
-        private void PerformDeleteFirstPatient()
+        [RelayCommand]
+        public void DeleteFirstPatient()
         {
             try
             {
@@ -548,9 +523,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     PatientCount = SetPatientCount
                 };
 
-                var deletePatient = DataBaseCommand.DeleteFirstPatient(patient);
+                var deletePatient = _patientService.DeleteFirst();
 
-                PerformRefreshPatients();
+                RefreshPatients();
 
                 UpdateText = "First Patient is Delete";
             }
@@ -561,10 +536,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
 
-        private DelegateCommand _deleteAllPatient;
-        public ICommand DeleteAllPatient => _deleteAllPatient ??= new DelegateCommand(PerformDeleteAllPatient);
 
-        private void PerformDeleteAllPatient()
+        [RelayCommand]
+        public void DeleteAllPatient()
         {
             try
             {
@@ -583,9 +557,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     PatientCount = SetPatientCount
                 };
 
-                var deletePatient = DataBaseCommand.DeleteAllPatients(patient);
+                var deletePatient = _patientService.DeleteAll();
 
-                PerformRefreshPatients();
+                RefreshPatients();
 
                 UpdateText = "Patient Table Deletion completed";
             }
@@ -596,10 +570,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
 
-        private DelegateCommand _deleteFirstWorkList;
-        public ICommand DeleteFirstWorkList => _deleteFirstWorkList ??= new DelegateCommand(PerformDeleteFirstWorkList);
 
-        private void PerformDeleteFirstWorkList()
+        [RelayCommand]
+        public void DeleteFirstWorkList()
         {
             try
             {
@@ -623,9 +596,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     WorkListCount = SetWorkListCount
                 };
 
-                var deleteWorkList = DataBaseCommand.DeleteFirstWorkList(workList);
+                var deleteWorkList = _worklistService.DeleteFirst();
 
-                PerformRefreshWorkList();
+                RefreshWorkList();
 
                 UpdateText = "First in WorkList Delete";
             }
@@ -636,10 +609,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
 
-        private DelegateCommand _deleteAllWorkList;
-        public ICommand DeleteAllWorkList => _deleteAllWorkList ??= new DelegateCommand(PerformDeleteAllWorkList);
 
-        private void PerformDeleteAllWorkList()
+        [RelayCommand]
+        public void DeleteAllWorkList()
         {
             try
             {
@@ -663,9 +635,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     WorkListCount = SetWorkListCount
                 };
 
-                var deletePatient = DataBaseCommand.DeleteAllWorkList(workList);
+                var deletePatient = _worklistService.DeleteAll();
 
-                PerformRefreshWorkList();
+                RefreshWorkList();
 
                 UpdateText = "WorkList Table Deletion completed";
             }
@@ -676,18 +648,16 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
 
-        private DelegateCommand _deleteAllTables;
-        public ICommand DeleteAllTables => _deleteAllTables ??= new DelegateCommand(PerformDeleteAllTables);
-
-        private void PerformDeleteAllTables()
+        [RelayCommand]
+        public void DeleteAllTables()
         {
             try
             {
-                PerformDeleteAllPatient();
-                PerformRefreshPatients();
+                DeleteAllPatient();
+                RefreshPatients();
 
-                PerformDeleteAllWorkList();
-                PerformRefreshWorkList();
+                DeleteAllWorkList();
+                RefreshWorkList();
 
                 ShakeWindow(Application.Current.MainWindow);
                 ShowDeleteAllTablesEasterEgg();
@@ -745,70 +715,62 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         /// Dialog Window Commands
         /// </summary>
 
-        private DelegateCommand _aboutProgram;
-        public ICommand AboutProgram => _aboutProgram = new DelegateCommand(InformationMessage);
 
-        private void InformationMessage()
+        [RelayCommand]
+        public void AboutProgram()
         {
             _dialogMessage.DataContext = this;
             _dialogMessage.ShowDialog();
         }
 
-        private DelegateCommand _dialog;
-        public ICommand ClosingDialogWindow => _dialog = new DelegateCommand(ClosingDialog);
 
-        private void ClosingDialog()
+        [RelayCommand]
+        public void ClosingDialogWindow()
         {
             _mediaPlayer.Open(new Uri(PathToResourceAudio));
             _mediaPlayer.Play();
             _dialogMessage.Close();
         }
 
-        private DelegateCommand _hotkey;
-        public ICommand HotkeyForDialogWindow => _hotkey = new DelegateCommand(HotkeyForDialog);
 
-        private void HotkeyForDialog()
+        [RelayCommand]
+        public void HotkeyForDialogWindow()
         {
             MessageBox.Show("Отличная попытка ДРУЖИЩЕ", "ага )))", MessageBoxButton.OK, MessageBoxImage.Stop);
         }
 
-        private DelegateCommand _hotkeyExit;
-        public ICommand HotkeyExitFromProgram => _hotkeyExit = new DelegateCommand(HotkeyExit);
 
-        private void HotkeyExit()
+        [RelayCommand]
+        public void HotkeyExitFromProgram()
         {
             Application.Current.Shutdown();
         }
 
-        private DelegateCommand _specification;
-        public ICommand OpenSpecificationWindow => _specification = new DelegateCommand(PerformSpecification);
 
-        private void PerformSpecification()
+        [RelayCommand]
+        public void OpenSpecificationWindow()
         {
             _specificationWindow.DataContext = this;
             _specificationWindow.Show();
         }
 
-        private DelegateCommand _closeSpecification;
-        public ICommand CloseSpecificationWindow => _closeSpecification = new DelegateCommand(CloseSpecification);
 
-        private void CloseSpecification()
+        [RelayCommand]
+        public void CloseSpecificationWindow()
         {
             _specificationWindow.Close();
         }
 
-        private DelegateCommand _tools;
-        public ICommand ToolMessage => _tools = new DelegateCommand(ToolMessageBox);
 
-        private void ToolMessageBox()
+        [RelayCommand]
+        public void ToolMessage()
         {
             MessageBox.Show("Ну я же просил !!!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
-        private DelegateCommand _cancelAddPatient;
-        public ICommand CancelAddPatient => _cancelAddPatient ??= new DelegateCommand(PerformCancelAddPatient);
 
-        private void PerformCancelAddPatient()
+        [RelayCommand]
+        public void CancelAddPatient()
         {
             AddIdPatient = string.Empty;
 
@@ -830,11 +792,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             UpdateText = "Как скажете, отменяю !";
         }
+        
 
-        private DelegateCommand _addOnePatient;
-        public ICommand AddOnePatient => _addOnePatient ??= new DelegateCommand(PerformAddOnePatient);
-
-        private void PerformAddOnePatient()
+        [RelayCommand]
+        public void AddOnePatient()
         {
             var messageToUpdateText = string.Empty;
 
@@ -857,9 +818,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     PatientCount = SetPatientCount
                 };
 
-                var addPatient = DataBaseCommand.AddPatientInDateBase(newPatient);
+                _patientService.AddOne(newPatient);
 
-                PerformRefreshPatients();
+                RefreshPatients();
                 CleareFields();
 
                 if (_random.Next(0, 100) < 30)
@@ -925,6 +886,25 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             AddInfo = string.Empty;
             MedicalInsuranceNumber = string.Empty;
         }
+
+        [RelayCommand]
+        public void OpenWebPage()
+        {
+            var url = "http://localhost:5289"; // или любой нужный маршрут
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true // важно для Windows — откроет в браузере
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Не удалось открыть веб-страницу: " + ex.Message);
+            }
+        }
+
 
     }
 }
