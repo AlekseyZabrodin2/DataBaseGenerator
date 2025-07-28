@@ -5,12 +5,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:wpf="clr-namespace:DataBaseGenerator.UI.Wpf.ViewModel"
+    xmlns:viewmodels="clr-namespace:DataBaseGenerator.UI.Wpf.ViewModel"
     Title="DataBase Generator"
     Width="1100"
     Height="757"
-    d:DataContext="{d:DesignInstance Type=wpf:MainViewModel,
-                                     IsDesignTimeCreatable=False}"
+    d:DataContext="{d:DesignInstance viewmodels:MainViewModel}"
     Icon="{Binding PathToIcon}"
     WindowStartupLocation="CenterScreen"
     WindowStyle="ThreeDBorderWindow"
@@ -18,8 +17,8 @@
 
 
     <Window.InputBindings>
-        <KeyBinding Command="{Binding HotkeyForDialogWindow}" Gesture="Ctrl+O" />
-        <KeyBinding Command="{Binding HotkeyExitFromProgram}" Gesture="Alt+X" />
+        <KeyBinding Command="{Binding HotkeyForDialogWindowCommand}" Gesture="Ctrl+O" />
+        <KeyBinding Command="{Binding HotkeyExitFromProgramCommand}" Gesture="Alt+X" />
     </Window.InputBindings>
 
     <Grid ShowGridLines="False">
@@ -69,7 +68,7 @@
                             <MenuItem Header="Сохранить (Ctrl + S)" />
                             <MenuItem Header="Сохранить как... (Ctrl + N)" />
                             <MenuItem Header="Печать (Ctrl + P)" />
-                            <MenuItem Command="{Binding HotkeyExitFromProgram}" Header="Выход (Alt + X)" />
+                            <MenuItem Command="{Binding HotkeyExitFromProgramCommand}" Header="Выход (Alt + X)" />
                         </MenuItem>
                         <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Вид">
                             <MenuItem Header="Поверх всех окон" />
@@ -94,7 +93,7 @@
                                 <MenuItem Header="Лучше вообще не трогать" />
                             </MenuItem>
                             <MenuItem Header="SHA-256">
-                                <MenuItem Command="{Binding ToolMessage}" Header="Не нажимать" />
+                                <MenuItem Command="{Binding ToolMessageCommand}" Header="Не нажимать" />
                             </MenuItem>
                         </MenuItem>
                         <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Плагины">
@@ -102,11 +101,11 @@
                             <MenuItem Header="Просто плагин" />
                             <MenuItem Header="Бла-Бла плагин" />
                             <MenuItem Header="Управление плагинами" />
-                            <MenuItem Header="Открыть папку плагинов" />
+                            <MenuItem Command="{Binding OpenWebPageCommand}" Header="Открыть папку плагинов" />
                         </MenuItem>
                         <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Справка">
-                            <MenuItem Command="{Binding OpenSpecificationWindow}" Header="Вызвать справку" />
-                            <MenuItem Command="{Binding AboutProgram}" Header="О программе...  (Ctrl+O)" />
+                            <MenuItem Command="{Binding OpenSpecificationWindowCommand}" Header="Вызвать справку" />
+                            <MenuItem Command="{Binding AboutProgramCommand}" Header="О программе...  (Ctrl+O)" />
                         </MenuItem>
                     </Menu>
                 </StackPanel>
@@ -229,7 +228,7 @@
                 Height="50"
                 Margin="25,10,0,0"
                 HorizontalAlignment="Left"
-                Command="{Binding AddOnePatient}"
+                Command="{Binding AddOnePatientCommand}"
                 Content="Добавить"
                 Cursor="No" />
             <Button
@@ -238,7 +237,7 @@
                 Height="50"
                 Margin="0,10,25,0"
                 HorizontalAlignment="Right"
-                Command="{Binding CancelAddPatient}"
+                Command="{Binding CancelAddPatientCommand}"
                 Content="Отмена" />
         </Grid>
 
@@ -321,7 +320,7 @@
                 Width="120"
                 Height="50"
                 HorizontalAlignment="Left"
-                Command="{Binding DeleteFirstPatient}"
+                Command="{Binding DeleteFirstPatientCommand}"
                 Content="Add Patient" />
 
         </Grid>
@@ -337,7 +336,7 @@
                 Width="120"
                 Height="50"
                 HorizontalAlignment="Right"
-                Command="{Binding RefreshPatients}"
+                Command="{Binding RefreshPatientsCommand}"
                 Content="Update Patient" />
 
         </Grid>
@@ -354,7 +353,7 @@
                 Width="120"
                 Height="50"
                 HorizontalAlignment="Left"
-                Command="{Binding AddPatient}"
+                Command="{Binding AddPatientCommand}"
                 Content="Delet First" />
 
         </Grid>
@@ -370,7 +369,7 @@
                 Width="120"
                 Height="50"
                 HorizontalAlignment="Right"
-                Command="{Binding DeleteAllPatient}"
+                Command="{Binding DeleteAllPatientCommand}"
                 Content="Delet All" />
 
         </Grid>
@@ -525,7 +524,7 @@
                 Width="120"
                 Height="50"
                 HorizontalAlignment="Center"
-                Command="{Binding AddWorkList}"
+                Command="{Binding AddWorkListCommand}"
                 Content="Add WorkList" />
 
         </Grid>
@@ -542,7 +541,7 @@
                 Width="120"
                 Height="50"
                 HorizontalAlignment="Center"
-                Command="{Binding RefreshWorkList}"
+                Command="{Binding RefreshWorkListCommand}"
                 Content="Update WorkList" />
 
         </Grid>
@@ -559,7 +558,7 @@
                 Width="120"
                 Height="50"
                 HorizontalAlignment="Left"
-                Command="{Binding DeleteAllWorkList}"
+                Command="{Binding DeleteAllWorkListCommand}"
                 Content="Delete First WL" />
 
         </Grid>
@@ -575,7 +574,7 @@
                 Width="120"
                 Height="50"
                 HorizontalAlignment="Right"
-                Command="{Binding DeleteFirstWorkList}"
+                Command="{Binding DeleteFirstWorkListCommand}"
                 Content="Delte All WL" />
 
         </Grid>
@@ -612,7 +611,7 @@
                 Width="150"
                 Height="40"
                 HorizontalAlignment="Center"
-                Command="{Binding ConnectDB}"
+                Command="{Binding ConnectDBCommand}"
                 Content="Connect"
                 FontSize="8" />
 
@@ -629,7 +628,7 @@
                 Width="150"
                 Height="50"
                 HorizontalAlignment="Center"
-                Command="{Binding DeleteAllTables}"
+                Command="{Binding DeleteAllTablesCommand}"
                 Content="Удалить все таблицы" />
 
         </Grid>

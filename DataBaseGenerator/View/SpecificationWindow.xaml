@@ -52,7 +52,7 @@
                 Height="50"
                 HorizontalAlignment="Center"
                 Background="{DynamicResource MahApps.Brushes.Accent}"
-                Command="{Binding CloseSpecificationWindow}"
+                Command="{Binding CloseSpecificationWindowCommand}"
                 Content="Да уж..." />
         </Grid>
 

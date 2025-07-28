@@ -1,4 +1,5 @@
 ﻿using System.Windows.Controls;
+using DataBaseGenerator.UI.Wpf.ViewModel;
 
 namespace DataBaseGenerator.UI.Wpf.View
 {
@@ -13,12 +14,17 @@ namespace DataBaseGenerator.UI.Wpf.View
         public static ListView AllPatientView;
         public static ListView AllWorkListView;
 
+        public MainViewModel ViewModel { get; }
+
         public MainWindow()
         {
+            ViewModel = App.GetService<MainViewModel>();
+
             InitializeComponent();
 
-            AllPatientView = ViewAllPatient;
+            DataContext = ViewModel;
 
+            AllPatientView = ViewAllPatient;
             AllWorkListView = ViewAllWorkList;
         }
     }

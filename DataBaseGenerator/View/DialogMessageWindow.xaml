@@ -35,7 +35,7 @@
             Grid.Column="0"
             Margin="5">
 
-            <Button Command="{Binding ClosingDialogWindow}">
+            <Button Command="{Binding ClosingDialogWindowCommand}">
                 <Button.Content>
                     <Image x:Name="DialogImage" Source="{Binding PathToResourceForDialogMessage}" />
                 </Button.Content>
