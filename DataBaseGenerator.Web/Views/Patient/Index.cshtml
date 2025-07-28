@@ -1,0 +1,42 @@
+﻿@model IEnumerable<DataBaseGenerator.Web.ViewModels.PatientViewModel>
+
+<h2>Список пациентов</h2>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">Пациенты не найдены.</p>
+}
+else
+{
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Фамилия</th>
+                <th>Имя</th>
+                <th>Отчество</th>
+                <th>Дата рождения</th>
+                <th>Пол</th>
+                <th>Адрес</th>
+                <th>Доп. информация</th>
+                <th>Место работы</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var patient in Model)
+            {
+                <tr>
+                    <td>@patient.Id</td>
+                    <td>@patient.LastName</td>
+                    <td>@patient.FirstName</td>
+                    <td>@patient.MiddleName</td>
+                    <td>@patient.BirthDate.ToShortDateString()</td>
+                    <td>@patient.Sex</td>
+                    <td>@patient.Address</td>
+                    <td>@patient.AddInfo</td>
+                    <td>@patient.Occupation</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
