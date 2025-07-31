@@ -7,10 +7,10 @@ namespace DataBaseGenerator.Core
         List<Patient> GetAll();
         void Generate(PatientGeneratorParameters inputParameters);
         void AddOne(PatientInputParameters inputParameters);
-        string Create(int patientIndex, PatientGeneratorParameters patientGeneratorParameters);
-        string CreateOne(PatientInputParameters patientGeneratorParameters);
-        string DeleteFirst();
-        string DeleteAll();
-        string Edite(Patient oldPatient, int iD, string lastName, string name);
+        void Create(int patientIndex, PatientGeneratorParameters patientGeneratorParameters);
+        void CreateOne(PatientInputParameters patientGeneratorParameters);
+        void DeleteFirst();
+        void DeleteAll();
+        void Edite(Patient oldPatient, int iD, string lastName, string name);
     }
 }

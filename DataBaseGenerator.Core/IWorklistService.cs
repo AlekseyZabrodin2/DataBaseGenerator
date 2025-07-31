@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using DataBaseGenerator.Core.Data;
 
 namespace DataBaseGenerator.Core
 {
@@ -6,8 +7,8 @@ namespace DataBaseGenerator.Core
     {
         List<WorkList> GetAll();
         void Generate(WorkListGeneratorParameters inputParameters);
-        string Create(int workListIndex, WorkListGeneratorParameters inputParameters);
-        string DeleteFirst();
-        string DeleteAll();
+        void Create(int workListIndex, WorkListGeneratorParameters inputParameters, BaseGenerateContext context);
+        void DeleteFirst();
+        void DeleteAll();
     }
 }

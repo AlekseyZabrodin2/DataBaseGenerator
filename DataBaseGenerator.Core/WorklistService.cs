@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using DataBaseGenerator.Core.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +9,11 @@ namespace DataBaseGenerator.Core
     public class WorklistService : IWorklistService
     {
         private readonly BaseGenerateContext _context;
+        private WorkList _newWorkList;
+        private DbContextOptions<BaseGenerateContext> _options = new DbContextOptionsBuilder<BaseGenerateContext>()
+            .UseMySql("server = localhost; database = medxregistry; user = root; password = root; port = 3306"
+            , new MySqlServerVersion(new Version(8, 0, 28))).Options;
+
 
         public WorklistService(BaseGenerateContext context)
         {
@@ -23,23 +28,18 @@ namespace DataBaseGenerator.Core
 
         public void Generate(WorkListGeneratorParameters inputParameters)
         {
-            var workListGenerators = new List<WorkListGeneratorParameters>();
-
             for (var workListIndex = 0; workListIndex < inputParameters.WorkListCount; workListIndex++)
             {
-                var workList = Create(workListIndex, inputParameters);
-
-                workListGenerators.Add(inputParameters);
+                using var context = new BaseGenerateContext(_options);
+                Create(workListIndex, inputParameters, context);
             }
-
-            //return workListGenerators;
         }
 
-        public string Create(int workListIndex, WorkListGeneratorParameters inputParameters)
+        public void Create(int workListIndex, WorkListGeneratorParameters inputParameters, BaseGenerateContext context)
         {
-            string result = "WorkList created";
+            _newWorkList = GenerateWorkList(workListIndex, inputParameters);
 
-            bool checkIsExist = _context.WorkList.Any(
+            bool checkIsExist = context.WorkList.Any(
                      workList => workList.ID_WorkList == inputParameters.ID_WorkList.Generate(workListIndex) &&
                                  workList.CreateDate == inputParameters.CreateDate.Generate() &&
                                  workList.CreateTime == inputParameters.CreateTime.Generate() &&
@@ -52,59 +52,45 @@ namespace DataBaseGenerator.Core
                                  workList.PerformingPhysiciansName == inputParameters.PerformingPhysiciansName.Generate() &&
                                  workList.StudyDescription == inputParameters.StudyDescription.Generate() &&
                                  workList.ReferringPhysiciansName == inputParameters.ReferringPhysiciansName.Generate() &&
-                                 workList.RequestingPhysician == inputParameters.RequestingPhysician.Generate()
-                                 );
+                                 workList.RequestingPhysician == inputParameters.RequestingPhysician.Generate());
 
-            if (!checkIsExist)
-            {
-                WorkList newWorkList = new WorkList()
-                {
-                    ID_WorkList = inputParameters.ID_WorkList.Generate(workListIndex),
-                    CreateDate = inputParameters.CreateDate.Generate(),
-                    CreateTime = inputParameters.CreateTime.Generate(),
-                    ID_Patient = inputParameters.ID_Patient.Generate(workListIndex),
-                    State = inputParameters.State.Generate(),
-                    SOPInstanceUID = inputParameters.SOPInstanceUID.Generate(),
-                    Modality = inputParameters.Modality.Generate(),
-                    StationAeTitle = inputParameters.StationAeTitle.Generate(),
-                    ProcedureStepStartDateTime = inputParameters.ProcedureStepStartDateTime.Generate(),
-                    PerformingPhysiciansName = inputParameters.PerformingPhysiciansName.Generate(),
-                    StudyDescription = inputParameters.StudyDescription.Generate(),
-                    ReferringPhysiciansName = inputParameters.ReferringPhysiciansName.Generate(),
-                    RequestingPhysician = inputParameters.RequestingPhysician.Generate()
-                };
+            if (checkIsExist)
+                return;
 
-                _context.WorkList.Add(newWorkList);
-                _context.SaveChanges();
-
-                result = "Done";
-            }
-
-            return result;
-        }       
-
-        public string DeleteFirst()
-        {
-            string result = "WorkList is not create";
-
-            _context.WorkList.Remove(_context.WorkList.First());
-            _context.SaveChanges();
-
-            result = $"Сделано! Первый из Рабочего списка удален";
-
-            return result;
+            context.WorkList.Add(_newWorkList);
+            context.SaveChanges();
         }
 
-        public string DeleteAll()
+        private WorkList GenerateWorkList(int workListIndex, WorkListGeneratorParameters inputParameters)
         {
-            string result = "WorkList is not create";
+            return new WorkList()
+            {
+                ID_WorkList = inputParameters.ID_WorkList.Generate(workListIndex),
+                CreateDate = inputParameters.CreateDate.Generate(),
+                CreateTime = inputParameters.CreateTime.Generate(),
+                ID_Patient = inputParameters.ID_Patient.Generate(workListIndex),
+                State = inputParameters.State.Generate(),
+                SOPInstanceUID = inputParameters.SOPInstanceUID.Generate(),
+                Modality = inputParameters.Modality.Generate(),
+                StationAeTitle = inputParameters.StationAeTitle.Generate(),
+                ProcedureStepStartDateTime = inputParameters.ProcedureStepStartDateTime.Generate(),
+                PerformingPhysiciansName = inputParameters.PerformingPhysiciansName.Generate(),
+                StudyDescription = inputParameters.StudyDescription.Generate(),
+                ReferringPhysiciansName = inputParameters.ReferringPhysiciansName.Generate(),
+                RequestingPhysician = inputParameters.RequestingPhysician.Generate()
+            };
+        }
 
+        public void DeleteFirst()
+        {
+            _context.WorkList.Remove(_context.WorkList.First());
+            _context.SaveChanges();
+        }
+
+        public void DeleteAll()
+        {
             _context.WorkList.RemoveRange(_context.WorkList);
             _context.SaveChanges();
-
-            result = $"Сделано! Весь рабочий список удален";
-
-            return result;
         }
     }
 }

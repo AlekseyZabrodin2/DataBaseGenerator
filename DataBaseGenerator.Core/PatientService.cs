@@ -7,6 +7,8 @@ namespace DataBaseGenerator.Core
     public class PatientService : IPatientService
     {
         private readonly BaseGenerateContext _context;
+        private Patient _patient;
+
 
         public PatientService(BaseGenerateContext context)
         {
@@ -21,115 +23,89 @@ namespace DataBaseGenerator.Core
 
         public void Generate(PatientGeneratorParameters inputParameters)
         {
-            var dataBaseGenerators = new List<PatientGeneratorParameters>();
-            var options = _context;
-
             for (var patientindex = 0; patientindex < inputParameters.PatientCount; patientindex++)
             {
-                var patients = Create(patientindex, inputParameters);
-
-                dataBaseGenerators.Add(inputParameters);
+                Create(patientindex, inputParameters);
             }
+        }        
+
+        public void Create(int patientIndex, PatientGeneratorParameters patientGeneratorParameters)
+        {
+            bool checkIsExist = _context.Patient.Any(element => element.ID_Patient == patientGeneratorParameters.ID_Patient.Generate(patientIndex));
+
+            if (checkIsExist)
+                return;
+
+            _patient = GeneratePatients(patientIndex, patientGeneratorParameters);
+            _context.Patient.Add(_patient);
+            _context.SaveChanges();
+        }
+
+        private Patient GeneratePatients(int patientIndex, PatientGeneratorParameters patientGeneratorParameters)
+        {
+            return new Patient
+            {
+                ID_Patient = patientGeneratorParameters.ID_Patient.Generate(patientIndex),
+                LastName = patientGeneratorParameters.LastName.Generate(),
+                FirstName = patientGeneratorParameters.FirstName.Generate(),
+                MiddleName = patientGeneratorParameters.MiddleName.Generate(),
+                PatientID = patientGeneratorParameters.PatientID.Generate(patientIndex),
+                BirthDate = patientGeneratorParameters.BirthDate.Generate(),
+                Sex = patientGeneratorParameters.Sex.Generate(),
+                Address = patientGeneratorParameters.Address.Generate(),
+                AddInfo = patientGeneratorParameters.AddInfo.Generate(),
+                Occupation = patientGeneratorParameters.Occupation.Generate()
+            };
         }
 
         public void AddOne(PatientInputParameters inputParameters)
         {
-            var dataBaseGenerators = new List<PatientInputParameters>();
-
-            var patients = CreateOne(inputParameters);
-            dataBaseGenerators.Add(inputParameters);
+            CreateOne(inputParameters);
         }
 
-        public string Create(int patientIndex, PatientGeneratorParameters patientGeneratorParameters)
+        public void CreateOne(PatientInputParameters patientGeneratorParameters)
         {
-            string result = "Patient created";
-
-            bool checkIsExist = _context.Patient.Any(element => element.ID_Patient == patientGeneratorParameters.ID_Patient.Generate(patientIndex));
-
-            if (!checkIsExist)
-            {
-                Patient newPatient = new Patient
-                {
-                    ID_Patient = patientGeneratorParameters.ID_Patient.Generate(patientIndex),
-                    LastName = patientGeneratorParameters.LastName.Generate(),
-                    FirstName = patientGeneratorParameters.FirstName.Generate(),
-                    MiddleName = patientGeneratorParameters.MiddleName.Generate(),
-                    PatientID = patientGeneratorParameters.PatientID.Generate(patientIndex),
-                    BirthDate = patientGeneratorParameters.BirthDate.Generate(),
-                    Sex = patientGeneratorParameters.Sex.Generate(),
-                    Address = patientGeneratorParameters.Address.Generate(),
-                    AddInfo = patientGeneratorParameters.AddInfo.Generate(),
-                    Occupation = patientGeneratorParameters.Occupation.Generate()
-                };
-
-                _context.Patient.Add(newPatient);
-                _context.SaveChanges();
-
-                result = "Done";
-            }
-
-            return result;
-        }
-
-        public string CreateOne(PatientInputParameters patientGeneratorParameters)
-        {
-            string result = "Patient created";
-
             bool checkIsExist = _context.Patient.Any(element => element.PatientID == patientGeneratorParameters.PatientID);
 
-            if (!checkIsExist)
-            {
-                Patient newPatient = new Patient
-                {
-                    ID_Patient = patientGeneratorParameters.ID_Patient,
-                    LastName = patientGeneratorParameters.LastName,
-                    FirstName = patientGeneratorParameters.FirstName,
-                    MiddleName = patientGeneratorParameters.MiddleName,
-                    PatientID = patientGeneratorParameters.PatientID,
-                    BirthDate = patientGeneratorParameters.BirthDate,
-                    Sex = patientGeneratorParameters.Sex,
-                    Address = patientGeneratorParameters.Address,
-                    AddInfo = patientGeneratorParameters.AddInfo,
-                    Occupation = patientGeneratorParameters.Occupation
-                };
+            if (checkIsExist)
+                return;
 
-                _context.Patient.Add(newPatient);
-                _context.SaveChanges();
-
-                result = "Done";
-            }
-
-            return result;
+            _patient = CreateOnePatient(patientGeneratorParameters);
+            _context.Patient.Add(_patient);
+            _context.SaveChanges();
         }
 
-        public string DeleteFirst()
+        private Patient CreateOnePatient(PatientInputParameters patientGeneratorParameters)
         {
-            string result = "Patient is not create";
+            return new Patient
+            {
+                ID_Patient = patientGeneratorParameters.ID_Patient,
+                LastName = patientGeneratorParameters.LastName,
+                FirstName = patientGeneratorParameters.FirstName,
+                MiddleName = patientGeneratorParameters.MiddleName,
+                PatientID = patientGeneratorParameters.PatientID,
+                BirthDate = patientGeneratorParameters.BirthDate,
+                Sex = patientGeneratorParameters.Sex,
+                Address = patientGeneratorParameters.Address,
+                AddInfo = patientGeneratorParameters.AddInfo,
+                Occupation = patientGeneratorParameters.Occupation
+            };
+        }
 
+        public void DeleteFirst()
+        {
             _context.Patient.Remove(_context.Patient.First());
             _context.SaveChanges();
-
-            result = $"Сделано! Пациент удален из базы";
-
-            return result;
         }
 
-        public string DeleteAll()
+        public void DeleteAll()
         {
-            string result = "Patient is not create";
-
             _context.Patient.RemoveRange(_context.Patient);
             _context.SaveChanges();
-
-            result = $"Сделано! Все Пациенты удалены из базы";
-
-            return result;
         }        
 
-        public string Edite(Patient oldPatient, int iD, string lastName, string name)
+        public void Edite(Patient oldPatient, int iD, string lastName, string name)
         {
-            string result = "Patient is not create";
-
             Patient patient = _context.Patient.FirstOrDefault(position => position.ID_Patient == oldPatient.ID_Patient);
             if (patient != null)
             {
@@ -137,11 +113,7 @@ namespace DataBaseGenerator.Core
                 patient.LastName = lastName;
                 patient.FirstName = name;
                 _context.SaveChanges();
-
-                result = $"Done!!! Patient data {patient.LastName} changed";
             }
-
-            return result;
         }
     }
 }

@@ -495,7 +495,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                 UpdateText = "WorkList added";
             }
-
             catch (Exception e)
             {
                 UpdateText = "WorkList not added";
@@ -523,8 +522,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     PatientCount = SetPatientCount
                 };
 
-                var deletePatient = _patientService.DeleteFirst();
-
+                _patientService.DeleteFirst();
                 RefreshPatients();
 
                 UpdateText = "First Patient is Delete";
@@ -557,8 +555,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     PatientCount = SetPatientCount
                 };
 
-                var deletePatient = _patientService.DeleteAll();
-
+                _patientService.DeleteAll();
                 RefreshPatients();
 
                 UpdateText = "Patient Table Deletion completed";
@@ -596,8 +593,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     WorkListCount = SetWorkListCount
                 };
 
-                var deleteWorkList = _worklistService.DeleteFirst();
-
+                _worklistService.DeleteFirst();
                 RefreshWorkList();
 
                 UpdateText = "First in WorkList Delete";
@@ -635,8 +631,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     WorkListCount = SetWorkListCount
                 };
 
-                var deletePatient = _worklistService.DeleteAll();
-
+                _worklistService.DeleteAll();
                 RefreshWorkList();
 
                 UpdateText = "WorkList Table Deletion completed";
