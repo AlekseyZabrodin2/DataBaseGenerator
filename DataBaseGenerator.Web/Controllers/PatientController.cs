@@ -8,6 +8,7 @@ namespace DataBaseGenerator.Web.Controllers
     {
         private readonly IPatientService _patientService;
 
+
         public PatientController(IPatientService patientService)
         {
             _patientService = patientService;
