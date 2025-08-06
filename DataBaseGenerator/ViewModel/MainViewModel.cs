@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -18,6 +20,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
     public partial class MainViewModel : ObservableObject
     {
         private readonly BaseGenerateContext _context;
+        private readonly IHttpClientFactory _httpClient;
         private readonly PatientService _patientService;
         private readonly WorklistService _worklistService;
         private string _updateText;
@@ -42,9 +45,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private List<WorkList> _allWorkLists = new List<WorkList>();
 
 
-        public MainViewModel(BaseGenerateContext context)
+        public MainViewModel(BaseGenerateContext context, IHttpClientFactory clientFactory)
         {
             _context = context;
+            _httpClient = clientFactory;
 
             var defaultAeTitle = new RandomModalityRule("DX");
             ModalityRules = new ObservableCollection<RandomModalityRule>
@@ -57,10 +61,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             Gender = new List<string> { "Man", "Female", "Other" };
 
-            _patientService = new PatientService(_context);
-            _worklistService = new WorklistService(_context);
+            _patientService = new PatientService(_httpClient);
+            _worklistService = new WorklistService(_httpClient);
 
-            Initialize();
+            _ = InitializeAsync();
         }
 
 
@@ -292,10 +296,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
 
 
-        private void Initialize()
+        private async Task InitializeAsync()
         {
-            _allPatients = _patientService.GetAll();
-            _allWorkLists = _worklistService.GetAll();
+            AllPatients = await _patientService.GetAllAsync();
+            AllWorkLists = await _worklistService.GetAllAsync();
         }
 
 
@@ -310,9 +314,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         
         [RelayCommand]
-        public void RefreshPatients()
+        public async Task RefreshPatientsAsync()
         {
-            AllPatients = _patientService.GetAll();
+            AllPatients = await _patientService.GetAllAsync();
             MainWindow.AllPatientView.ItemsSource = null;
             MainWindow.AllPatientView.Items.Clear();
             MainWindow.AllPatientView.ItemsSource = AllPatients;
@@ -322,9 +326,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
 
         [RelayCommand]
-        public void RefreshWorkList()
+        public async Task RefreshWorkListAsync()
         {
-            AllWorkLists = _worklistService.GetAll();
+            AllWorkLists = await _worklistService.GetAllAsync();
             MainWindow.AllWorkListView.ItemsSource = null;
             MainWindow.AllWorkListView.Items.Clear();
             MainWindow.AllWorkListView.ItemsSource = AllWorkLists;
@@ -334,7 +338,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
 
         [RelayCommand]
-        public void AddPatient()
+        public async Task AddPatientAsync()
         {
             try
             {
@@ -369,9 +373,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     return;
                 }
 
-                _patientService.Generate(newPatient);
+                await _patientService.GenerateAsync(newPatient);
 
-                RefreshPatients();
+                await RefreshPatientsAsync();
                 LolMessageForPatientCount(SetPatientCount);
 
                 UpdateText = "Пациент успешно добавлен";
@@ -465,11 +469,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
 
         [RelayCommand]
-        public void AddWorkList()
+        public async Task AddWorkListAsync()
         {
             try
             {
-                var newWorkList = new WorkListGeneratorParameters(
+                var newWorkList = new WorkListGeneratorDto(
                     new OrderIdWorklistRule(),
                     new RandomCreateDateRule(),
                     new RandomCreateTimeRule(),
@@ -489,9 +493,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     WorkListCount = SetWorkListCount
                 };
 
-                _worklistService.Generate(newWorkList);
+                await _worklistService.GenerateAsync(newWorkList);
 
-                RefreshWorkList();
+                await RefreshWorkListAsync();
 
                 UpdateText = "WorkList added";
             }
@@ -503,7 +507,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
 
         [RelayCommand]
-        public void DeleteFirstPatient()
+        public async Task DeleteFirstPatientAsync()
         {
             try
             {
@@ -522,8 +526,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     PatientCount = SetPatientCount
                 };
 
-                _patientService.DeleteFirst();
-                RefreshPatients();
+                await _patientService.DeleteFirstAsync();
+                await RefreshPatientsAsync();
 
                 UpdateText = "First Patient is Delete";
             }
@@ -536,7 +540,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
 
         [RelayCommand]
-        public void DeleteAllPatient()
+        public async Task DeleteAllPatientAsync()
         {
             try
             {
@@ -555,8 +559,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     PatientCount = SetPatientCount
                 };
 
-                _patientService.DeleteAll();
-                RefreshPatients();
+                await _patientService.DeleteAllAsync();
+                await RefreshPatientsAsync();
 
                 UpdateText = "Patient Table Deletion completed";
             }
@@ -569,7 +573,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
 
         [RelayCommand]
-        public void DeleteFirstWorkList()
+        public async Task DeleteFirstWorkListAsync()
         {
             try
             {
@@ -593,8 +597,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     WorkListCount = SetWorkListCount
                 };
 
-                _worklistService.DeleteFirst();
-                RefreshWorkList();
+                await _worklistService.DeleteFirstAsync();
+                await RefreshWorkListAsync();
 
                 UpdateText = "First in WorkList Delete";
             }
@@ -607,7 +611,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
 
         [RelayCommand]
-        public void DeleteAllWorkList()
+        public async Task DeleteAllWorkListAsync()
         {
             try
             {
@@ -631,8 +635,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     WorkListCount = SetWorkListCount
                 };
 
-                _worklistService.DeleteAll();
-                RefreshWorkList();
+                await _worklistService.DeleteAllAsync();
+                await RefreshWorkListAsync();
 
                 UpdateText = "WorkList Table Deletion completed";
             }
@@ -644,15 +648,15 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
 
         [RelayCommand]
-        public void DeleteAllTables()
+        public async Task DeleteAllTablesAsync()
         {
             try
             {
-                DeleteAllPatient();
-                RefreshPatients();
+                await DeleteAllPatientAsync();
+                await RefreshPatientsAsync();
 
-                DeleteAllWorkList();
-                RefreshWorkList();
+                await DeleteAllWorkListAsync();
+                await RefreshWorkListAsync();
 
                 ShakeWindow(Application.Current.MainWindow);
                 ShowDeleteAllTablesEasterEgg();
@@ -790,7 +794,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         
 
         [RelayCommand]
-        public void AddOnePatient()
+        public async Task AddOnePatientAsync()
         {
             var messageToUpdateText = string.Empty;
 
@@ -813,9 +817,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     PatientCount = SetPatientCount
                 };
 
-                _patientService.AddOne(newPatient);
+                await _patientService.AddOneAsync(newPatient);
 
-                RefreshPatients();
+                await RefreshPatientsAsync();
                 CleareFields();
 
                 if (_random.Next(0, 100) < 30)
