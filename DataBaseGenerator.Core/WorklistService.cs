@@ -1,96 +1,60 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using DataBaseGenerator.Core.Data;
-using Microsoft.EntityFrameworkCore;
+﻿using System.Collections.Generic;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace DataBaseGenerator.Core
 {
-    public class WorklistService : IWorklistService
+    public class WorklistService
     {
-        private readonly BaseGenerateContext _context;
-        private WorkList _newWorkList;
-        private DbContextOptions<BaseGenerateContext> _options = new DbContextOptionsBuilder<BaseGenerateContext>()
-            .UseMySql("server = localhost; database = medxregistry; user = root; password = root; port = 3306"
-            , new MySqlServerVersion(new Version(8, 0, 28))).Options;
+        private readonly HttpClient _httpClient;
 
 
-        public WorklistService(BaseGenerateContext context)
+        public WorklistService(IHttpClientFactory clientFactory)
         {
-            _context = context;
+            _httpClient = clientFactory.CreateClient("DBGeneratorApi");
         }
 
 
-        public List<WorkList> GetAll()
+        public async Task<List<WorkList>> GetAllAsync()
         {
-            return _context.WorkList.ToList();
+            var response = await _httpClient.GetAsync("worklist/all");
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<List<WorkList>>(content);
         }
 
-        public void Generate(WorkListGeneratorParameters inputParameters)
+        public async Task GenerateAsync(WorkListGeneratorDto inputParameters)
         {
-            for (var workListIndex = 0; workListIndex < inputParameters.WorkListCount; workListIndex++)
-            {
-                using var context = new BaseGenerateContext(_options);
-                Create(workListIndex, inputParameters, context);
-            }
+            var json = JsonConvert.SerializeObject(inputParameters);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("worklist/generate", content);
+            response.EnsureSuccessStatusCode();
+
+            //var content = await response.Content.ReadAsStringAsync();
+            //return JsonConvert.DeserializeObject<List<WorkList>>(content);
         }
 
-        public void Create(int workListIndex, WorkListGeneratorParameters inputParameters, BaseGenerateContext context)
+        public async Task DeleteFirstAsync()
         {
-            _newWorkList = GenerateWorkList(workListIndex, inputParameters);
+            var response = await _httpClient.DeleteAsync("worklist/deleteFirst");
+            response.EnsureSuccessStatusCode();
 
-            bool checkIsExist = context.WorkList.Any(
-                     workList => workList.ID_WorkList == inputParameters.ID_WorkList.Generate(workListIndex) &&
-                                 workList.CreateDate == inputParameters.CreateDate.Generate() &&
-                                 workList.CreateTime == inputParameters.CreateTime.Generate() &&
-                                 workList.ID_Patient == inputParameters.ID_Patient.Generate(workListIndex) &&
-                                 workList.State == inputParameters.State.Generate() &&
-                                 workList.SOPInstanceUID == inputParameters.SOPInstanceUID.Generate() &&
-                                 workList.Modality == inputParameters.Modality.Generate() &&
-                                 workList.StationAeTitle == inputParameters.StationAeTitle.Generate() &&
-                                 workList.ProcedureStepStartDateTime == inputParameters.ProcedureStepStartDateTime.Generate() &&
-                                 workList.PerformingPhysiciansName == inputParameters.PerformingPhysiciansName.Generate() &&
-                                 workList.StudyDescription == inputParameters.StudyDescription.Generate() &&
-                                 workList.ReferringPhysiciansName == inputParameters.ReferringPhysiciansName.Generate() &&
-                                 workList.RequestingPhysician == inputParameters.RequestingPhysician.Generate());
-
-            if (checkIsExist)
-                return;
-
-            context.WorkList.Add(_newWorkList);
-            context.SaveChanges();
+            //var content = await response.Content.ReadAsStringAsync();
+            //return JsonConvert.DeserializeObject<List<WorkList>>(content);
         }
 
-        private WorkList GenerateWorkList(int workListIndex, WorkListGeneratorParameters inputParameters)
+        public async Task DeleteAllAsync()
         {
-            return new WorkList()
-            {
-                ID_WorkList = inputParameters.ID_WorkList.Generate(workListIndex),
-                CreateDate = inputParameters.CreateDate.Generate(),
-                CreateTime = inputParameters.CreateTime.Generate(),
-                ID_Patient = inputParameters.ID_Patient.Generate(workListIndex),
-                State = inputParameters.State.Generate(),
-                SOPInstanceUID = inputParameters.SOPInstanceUID.Generate(),
-                Modality = inputParameters.Modality.Generate(),
-                StationAeTitle = inputParameters.StationAeTitle.Generate(),
-                ProcedureStepStartDateTime = inputParameters.ProcedureStepStartDateTime.Generate(),
-                PerformingPhysiciansName = inputParameters.PerformingPhysiciansName.Generate(),
-                StudyDescription = inputParameters.StudyDescription.Generate(),
-                ReferringPhysiciansName = inputParameters.ReferringPhysiciansName.Generate(),
-                RequestingPhysician = inputParameters.RequestingPhysician.Generate()
-            };
-        }
+            var response = await _httpClient.DeleteAsync("worklist/deleteAll");
+            response.EnsureSuccessStatusCode();
 
-        public void DeleteFirst()
-        {
-            _context.WorkList.Remove(_context.WorkList.First());
-            _context.SaveChanges();
-        }
-
-        public void DeleteAll()
-        {
-            _context.WorkList.RemoveRange(_context.WorkList);
-            _context.SaveChanges();
+            //var content = await response.Content.ReadAsStringAsync();
+            //return JsonConvert.DeserializeObject<List<WorkList>>(content);
         }
     }
 }

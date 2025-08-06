@@ -1,119 +1,70 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 using DataBaseGenerator.Core.Data;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace DataBaseGenerator.Core
 {
-    public class PatientService : IPatientService
+    public class PatientService
     {
-        private readonly BaseGenerateContext _context;
-        private Patient _patient;
+        private readonly HttpClient _httpClient;
 
 
-        public PatientService(BaseGenerateContext context)
+        public PatientService(IHttpClientFactory clientFactory)
         {
-            _context = context;
+            _httpClient = clientFactory.CreateClient("DBGeneratorApi");
         }
 
 
-        public List<Patient> GetAll()
+        public async Task<List<Patient>> GetAllAsync()
         {
-            return _context.Patient.ToList();
+            var response = await _httpClient.GetAsync("patient/all");
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<List<Patient>>(content);
         }
 
-        public void Generate(PatientGeneratorParameters inputParameters)
+        public async Task GenerateAsync(PatientGeneratorParameters inputParameters)
         {
-            for (var patientindex = 0; patientindex < inputParameters.PatientCount; patientindex++)
-            {
-                Create(patientindex, inputParameters);
-            }
+            var json = JsonConvert.SerializeObject(inputParameters);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("patient/generate", content);
+            response.EnsureSuccessStatusCode();
+        }  
+
+        public async Task AddOneAsync(PatientInputParameters inputParameters)
+        {
+            var json = JsonConvert.SerializeObject(inputParameters);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("patient/addOne", content);
+            response.EnsureSuccessStatusCode();
         }        
 
-        public void Create(int patientIndex, PatientGeneratorParameters patientGeneratorParameters)
+        public async Task DeleteFirstAsync()
         {
-            bool checkIsExist = _context.Patient.Any(element => element.ID_Patient == patientGeneratorParameters.ID_Patient.Generate(patientIndex));
-
-            if (checkIsExist)
-                return;
-
-            _patient = GeneratePatients(patientIndex, patientGeneratorParameters);
-            _context.Patient.Add(_patient);
-            _context.SaveChanges();
+            var response = await _httpClient.DeleteAsync("patient/deleteFirst");
+            response.EnsureSuccessStatusCode();
         }
 
-        private Patient GeneratePatients(int patientIndex, PatientGeneratorParameters patientGeneratorParameters)
+        public async Task DeleteAllAsync()
         {
-            return new Patient
-            {
-                ID_Patient = patientGeneratorParameters.ID_Patient.Generate(patientIndex),
-                LastName = patientGeneratorParameters.LastName.Generate(),
-                FirstName = patientGeneratorParameters.FirstName.Generate(),
-                MiddleName = patientGeneratorParameters.MiddleName.Generate(),
-                PatientID = patientGeneratorParameters.PatientID.Generate(patientIndex),
-                BirthDate = patientGeneratorParameters.BirthDate.Generate(),
-                Sex = patientGeneratorParameters.Sex.Generate(),
-                Address = patientGeneratorParameters.Address.Generate(),
-                AddInfo = patientGeneratorParameters.AddInfo.Generate(),
-                Occupation = patientGeneratorParameters.Occupation.Generate()
-            };
+            var response = await _httpClient.DeleteAsync("patient/deleteAll");
+            response.EnsureSuccessStatusCode();
         }
 
-        public void AddOne(PatientInputParameters inputParameters)
+        public async Task EditeAsync(Patient oldPatient, int iD, string lastName, string name)
         {
-            CreateOne(inputParameters);
-        }
-
-        public void CreateOne(PatientInputParameters patientGeneratorParameters)
-        {
-            bool checkIsExist = _context.Patient.Any(element => element.PatientID == patientGeneratorParameters.PatientID);
-
-            if (checkIsExist)
-                return;
-
-            _patient = CreateOnePatient(patientGeneratorParameters);
-            _context.Patient.Add(_patient);
-            _context.SaveChanges();
-        }
-
-        private Patient CreateOnePatient(PatientInputParameters patientGeneratorParameters)
-        {
-            return new Patient
-            {
-                ID_Patient = patientGeneratorParameters.ID_Patient,
-                LastName = patientGeneratorParameters.LastName,
-                FirstName = patientGeneratorParameters.FirstName,
-                MiddleName = patientGeneratorParameters.MiddleName,
-                PatientID = patientGeneratorParameters.PatientID,
-                BirthDate = patientGeneratorParameters.BirthDate,
-                Sex = patientGeneratorParameters.Sex,
-                Address = patientGeneratorParameters.Address,
-                AddInfo = patientGeneratorParameters.AddInfo,
-                Occupation = patientGeneratorParameters.Occupation
-            };
-        }
-
-        public void DeleteFirst()
-        {
-            _context.Patient.Remove(_context.Patient.First());
-            _context.SaveChanges();
-        }
-
-        public void DeleteAll()
-        {
-            _context.Patient.RemoveRange(_context.Patient);
-            _context.SaveChanges();
-        }        
-
-        public void Edite(Patient oldPatient, int iD, string lastName, string name)
-        {
-            Patient patient = _context.Patient.FirstOrDefault(position => position.ID_Patient == oldPatient.ID_Patient);
-            if (patient != null)
-            {
-                patient.ID_Patient = iD;
-                patient.LastName = lastName;
-                patient.FirstName = name;
-                _context.SaveChanges();
-            }
+            var inputParameters = $"{oldPatient}, {iD}, {lastName} {name}";
+            var json = JsonConvert.SerializeObject(inputParameters);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("patient/edite", content);
         }
     }
 }
