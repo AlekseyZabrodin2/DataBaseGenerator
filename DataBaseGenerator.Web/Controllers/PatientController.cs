@@ -1,40 +1,44 @@
-﻿using DataBaseGenerator.Core;
-using DataBaseGenerator.Web.ViewModels;
+﻿using DataBaseGenerator.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace DataBaseGenerator.Web.Controllers
 {
     public class PatientController : Controller
     {
-        private readonly IPatientService _patientService;
+        private readonly HttpClient _httpClient;
+        private readonly List<PatientViewModel> _patientViewModels = new();
 
-
-        public PatientController(IPatientService patientService)
+        public PatientController(IHttpClientFactory clientFactory)
         {
-            _patientService = patientService;
+            _httpClient = clientFactory.CreateClient("DBGeneratorApi");
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var patient = _patientService.GetAll();
-
-            if (!patient.Any())
-                ViewBag.Message = "Пациенты в базе отсутствуют.";
-
-            var viewmodel = patient.Select(p => new PatientViewModel
+            try
             {
-                Id = p.ID_Patient,
-                LastName = p.LastName,
-                FirstName = p.FirstName,
-                MiddleName = p.MiddleName,
-                BirthDate = p.BirthDate,
-                Sex = p.Sex,
-                Address = p.Address,
-                AddInfo = p.AddInfo,
-                Occupation = p.Occupation
-            });
+                var response = await _httpClient.GetAsync("patient/all");
 
-            return View(viewmodel);
+                if (!response.IsSuccessStatusCode)
+                {
+                    ViewBag.Message = $"Проблемы с подключением к БД. - [{response.StatusCode}]";
+                    return View(_patientViewModels);
+                }
+
+                var content = await response.Content.ReadAsStringAsync();
+                var patients = JsonConvert.DeserializeObject<List<PatientViewModel>>(content);
+
+                if (!patients.Any())
+                    ViewBag.Message = "Пациенты в базе отсутствуют.";
+
+                return View(patients);
+            }
+            catch (HttpRequestException ex)
+            {
+                ViewBag.Message = $"Ошибка подключения к серверу: {ex.Message}";
+                return View(_patientViewModels);
+            }
         }
 
     }

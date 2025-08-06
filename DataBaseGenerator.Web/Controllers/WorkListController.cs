@@ -1,45 +1,46 @@
-﻿using DataBaseGenerator.Core;
+﻿using System.Threading.Tasks;
+using DataBaseGenerator.Web.Services;
 using DataBaseGenerator.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace DataBaseGenerator.Web.Controllers
 {
     public class WorkListController : Controller
     {
-        private readonly IWorklistService _worklistService;
+        private readonly HttpClient _httpClient;
+        private readonly List<WorklistViewModel> _worklistViewModels = new();
 
-
-        public WorkListController(IWorklistService worklistService)
+        public WorkListController(IHttpClientFactory clientFactory)
         {
-            _worklistService = worklistService;
+            _httpClient = clientFactory.CreateClient("DBGeneratorApi");
         }
 
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var worklist = _worklistService.GetAll();
-
-            if (!worklist.Any())
-                ViewBag.Message = "Рабочий список пуст";
-
-            var viewmodel = worklist.Select(wl => new WorklistViewModel
+            try
             {
-                ID_WorkList = wl.ID_WorkList,
-                CreateDate = wl.CreateDate,
-                CreateTime = wl.CreateTime,
-                ID_Patient = wl.ID_Patient,
-                State = wl.State,
-                SOPInstanceUID = wl.SOPInstanceUID,
-                Modality = wl.Modality,
-                StationAeTitle = wl.StationAeTitle,
-                ProcedureStepStartDateTime = wl.ProcedureStepStartDateTime,
-                PerformingPhysiciansName = wl.PerformingPhysiciansName,
-                StudyDescription = wl.StudyDescription,
-                ReferringPhysiciansName = wl.ReferringPhysiciansName,
-                RequestingPhysician = wl.RequestingPhysician
-            });
+                var response = await _httpClient.GetAsync("worklist/all");
+                if (!response.IsSuccessStatusCode)
+                {
+                    ViewBag.Message = $"Проблемы с подключением к БД. - [{response.StatusCode}]";
+                    return View(_worklistViewModels);
+                }
 
-            return View(viewmodel);
+                var content = await response.Content.ReadAsStringAsync();
+                var worklist = JsonConvert.DeserializeObject<List<WorklistViewModel>>(content) ?? new();
+
+                if (!worklist.Any())
+                    ViewBag.Message = "Рабочий список пуст";                
+
+                return View(worklist);
+            }
+            catch (HttpRequestException ex)
+            {
+                ViewBag.Message = $"Ошибка подключения к серверу: {ex.Message}";
+                return View(_worklistViewModels);
+            }            
         }
     }
 }

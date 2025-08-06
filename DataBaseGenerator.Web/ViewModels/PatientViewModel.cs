@@ -4,6 +4,8 @@
     {
         public int Id { get; set; }
 
+        public string PatientID { get; set; }
+
         public string LastName { get; set; }
 
         public string FirstName { get; set; }
