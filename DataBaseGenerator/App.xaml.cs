@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Windows;
 using DataBaseGenerator.Core;
 using DataBaseGenerator.Core.Data;
@@ -55,14 +56,21 @@ namespace DataBaseGenerator.UI.Wpf
                         context.Configuration.GetConnectionString("DefaultConnection"),
                         new MySqlServerVersion(new Version(8, 0, 28))));
 
-                    services.AddScoped<IPatientService, PatientService>();
-                    services.AddScoped<IWorklistService, WorklistService>();
+                    services.AddScoped<PatientService>();
+                    services.AddScoped<WorklistService>();
 
                     services.AddSingleton(this);
                     services.AddSingleton<MainViewModel>();
                     services.AddTransient<DialogMessageWindow>();
                     services.AddTransient<MainWindow>();
                     services.AddTransient<SpecificationWindow>();
+
+                    services.AddHttpClient("DBGeneratorApi", client =>
+                    {
+                        client.BaseAddress = new Uri("http://localhost:5289/api/");
+                        client.DefaultRequestHeaders.Accept.Clear();
+                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    });
                 });
 
             _host = hostBuilder.Build();
@@ -98,7 +106,6 @@ namespace DataBaseGenerator.UI.Wpf
                 }
             }
         }
-
 
         protected override void OnStartup(StartupEventArgs e)
         {
