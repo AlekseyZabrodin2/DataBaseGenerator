@@ -10,7 +10,7 @@ namespace DataBaseGenerator.Core
     public class PatientInputParameters
     {
         public PatientInputParameters(
-            int iDPatient,
+            int iD_Patient,
             string lastName,
             string firstName,
             string middleName,
@@ -22,7 +22,7 @@ namespace DataBaseGenerator.Core
             string occupation
             )
         {
-            ID_Patient = iDPatient ;
+            ID_Patient = iD_Patient ;
             LastName = lastName ?? throw new ArgumentNullException(nameof(lastName));
             FirstName = firstName ?? throw new ArgumentNullException(nameof(firstName));
             MiddleName = middleName ?? throw new ArgumentNullException(nameof(middleName));
