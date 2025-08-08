@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NLog;
 
 namespace DataBaseGenerator.UI.Wpf
 {
@@ -20,6 +21,7 @@ namespace DataBaseGenerator.UI.Wpf
     /// </summary>
     public partial class App : Application
     {
+        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
         private readonly IHost _host; 
         private readonly BaseGenerateContext _context;
         const string _exeName = "DataBaseGenerator.Web.exe";
@@ -75,6 +77,12 @@ namespace DataBaseGenerator.UI.Wpf
 
             _host = hostBuilder.Build();
 
+            EnsureSingleWebHostProcessRunning();
+        }
+
+        private void EnsureSingleWebHostProcessRunning()
+        {
+            StopWebHost();
             StartWebHost();
         }
 
@@ -94,14 +102,17 @@ namespace DataBaseGenerator.UI.Wpf
                             UseShellExecute = false,
                             CreateNoWindow = true
                         });
+                        _logger.Info("WebHost started");
                     }
                     else
                     {
-                        MessageBox.Show($"Не найден файл: {fullPath}", "Ошибка запуска веб-хоста");
+                        _logger.Warn($"Не найден файл: {fullPath}, Ошибка запуска веб-хоста");
+                        MessageBox.Show($"Не найден файл: {fullPath}, Ошибка запуска веб-хоста");
                     }
                 }
                 catch (Exception ex)
                 {
+                    _logger.Error(ex, "Ошибка запуска веб-сервера");
                     MessageBox.Show($"Ошибка запуска веб-сервера: {ex.Message}");
                 }
             }
@@ -115,12 +126,14 @@ namespace DataBaseGenerator.UI.Wpf
 
                 var mainWindow = new MainWindow();
                 mainWindow.Show();
+                _logger.Info("Main window is started");
 
                 mainWindow.Closed += (_, _) => Shutdown();
             }
             catch(Exception ex)
             {
-                MessageBox.Show("Check your connection settings !!!");                
+                _logger.Fatal(ex, "Check your connection settings !");
+                MessageBox.Show($"Check your connection settings !!! \r\n {ex.Message}");                
                 base.Shutdown();
             }
         }
@@ -139,10 +152,17 @@ namespace DataBaseGenerator.UI.Wpf
             var processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(_exeName));
             foreach (var process in processes)
             {
-                process.Kill();
+                try
+                {
+                    process.Kill();
+                    process.WaitForExit();
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Can`t stop process {processId}", process.Id);
+                }
+                _logger.Info("WebHost stoped");
             }
         }
-
-
     }
 }

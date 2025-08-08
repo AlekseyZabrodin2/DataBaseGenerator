@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 using DataBaseGenerator.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using NLog;
 
 namespace DataBaseGenerator.Core
 {
     public class PatientService
     {
+        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
         private readonly HttpClient _httpClient;
 
 
@@ -22,6 +24,8 @@ namespace DataBaseGenerator.Core
 
         public async Task<List<Patient>> GetAllAsync()
         {
+            _logger.Trace("Get All patients");
+
             var response = await _httpClient.GetAsync("patient/all");
             response.EnsureSuccessStatusCode();
 
@@ -31,6 +35,8 @@ namespace DataBaseGenerator.Core
 
         public async Task GenerateAsync(PatientGeneratorParameters inputParameters)
         {
+            _logger.Trace("Generate patients");
+
             var json = JsonConvert.SerializeObject(inputParameters);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -40,6 +46,8 @@ namespace DataBaseGenerator.Core
 
         public async Task AddOneAsync(PatientInputParameters inputParameters)
         {
+            _logger.Trace("Add One patient");
+
             var json = JsonConvert.SerializeObject(inputParameters);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -49,12 +57,16 @@ namespace DataBaseGenerator.Core
 
         public async Task DeleteFirstAsync()
         {
+            _logger.Trace("Delete First patient");
+
             var response = await _httpClient.DeleteAsync("patient/deleteFirst");
             response.EnsureSuccessStatusCode();
         }
 
         public async Task DeleteAllAsync()
         {
+            _logger.Trace("Delete All patients");
+
             var response = await _httpClient.DeleteAsync("patient/deleteAll");
             response.EnsureSuccessStatusCode();
         }

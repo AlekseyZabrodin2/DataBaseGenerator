@@ -1,12 +1,14 @@
-﻿using System.Threading.Tasks;
-using DataBaseGenerator.Core;
+﻿using DataBaseGenerator.Core;
 using DataBaseGenerator.Core.Data;
 using Microsoft.EntityFrameworkCore;
+using NLog;
+using ILogger = NLog.ILogger;
 
 namespace DataBaseGenerator.Web.Services
 {
     public class PatientService : IPatientService
     {
+        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
         private readonly BaseGenerateContext _context;
         private Patient _patient;
         private DbContextOptions<BaseGenerateContext> _options = new DbContextOptionsBuilder<BaseGenerateContext>()
@@ -22,7 +24,10 @@ namespace DataBaseGenerator.Web.Services
 
         public async Task<List<Patient>> GetAllAsync()
         {
-            return await _context.Patient.ToListAsync();
+            var patients = await _context.Patient.ToListAsync();
+            _logger.Info($"Loaded {patients.Count} patients");
+
+            return patients;
         }
 
         public async Task GenerateAsync(PatientGeneratorDto inputParameters)
@@ -31,6 +36,7 @@ namespace DataBaseGenerator.Web.Services
             {
                await CreateAsync(patientindex, inputParameters);
             }
+            _logger.Info($"Created {inputParameters.PatientCount} patients");
         }
 
         public async Task CreateAsync(int patientIndex, PatientGeneratorDto patientGeneratorParameters)
@@ -65,6 +71,7 @@ namespace DataBaseGenerator.Web.Services
         public async Task AddOneAsync(PatientInputParameters inputParameters)
         {
             await CreateOne(inputParameters);
+            _logger.Info($"Add patient");
         }
 
         public async Task CreateOne(PatientInputParameters patientGeneratorParameters)
@@ -100,12 +107,14 @@ namespace DataBaseGenerator.Web.Services
         {
             _context.Patient.Remove(_context.Patient.First());
             await _context.SaveChangesAsync();
+            _logger.Info("Delete first patient");
         }
 
         public async Task DeleteAllAsync()
         {
             _context.Patient.RemoveRange(_context.Patient);
             await _context.SaveChangesAsync();
+            _logger.Info("Delete all patients");
         }
 
         public async Task EditeAsync(Patient oldPatient, int iD, string lastName, string name)
@@ -118,6 +127,7 @@ namespace DataBaseGenerator.Web.Services
                 patient.FirstName = name;
                 await _context.SaveChangesAsync();
             }
+            _logger.Info("Edite patient");
         }
     }
 }

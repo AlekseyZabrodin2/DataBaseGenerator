@@ -1,11 +1,14 @@
 ﻿using DataBaseGenerator.Core;
 using DataBaseGenerator.Core.Data;
 using Microsoft.EntityFrameworkCore;
+using NLog;
+using ILogger = NLog.ILogger;
 
 namespace DataBaseGenerator.Web.Services
 {
     public class WorklistService : IWorklistService
     {
+        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
         private readonly BaseGenerateContext _context;
         private WorkList _newWorkList;
         private DbContextOptions<BaseGenerateContext> _options = new DbContextOptionsBuilder<BaseGenerateContext>()
@@ -21,7 +24,10 @@ namespace DataBaseGenerator.Web.Services
 
         public async Task<List<WorkList>> GetAllAsync()
         {
-            return await _context.WorkList.ToListAsync();
+            var workList = await _context.WorkList.ToListAsync();
+            _logger.Info($"Loaded {workList.Count} workList");
+
+            return workList;
         }
 
         public async Task GenerateAsync(WorkListGeneratorDto inputParameters)
@@ -31,6 +37,7 @@ namespace DataBaseGenerator.Web.Services
                 using var context = new BaseGenerateContext(_options);
                 await CreateAsync(workListIndex, inputParameters, context);
             }
+            _logger.Info($"Created {inputParameters.WorkListCount} WorkLists");
         }
 
         public async Task CreateAsync(int workListIndex, WorkListGeneratorDto inputParameters, BaseGenerateContext context)
@@ -83,12 +90,16 @@ namespace DataBaseGenerator.Web.Services
         {
             _context.WorkList.Remove(_context.WorkList.First());
             await _context.SaveChangesAsync();
+
+            _logger.Info("Delete First WorkList");
         }
 
         public async Task DeleteAllAsync()
         {
             _context.WorkList.RemoveRange(_context.WorkList);
             await _context.SaveChangesAsync();
+
+            _logger.Info("Delete All WorkLists");
         }
     }
 }
