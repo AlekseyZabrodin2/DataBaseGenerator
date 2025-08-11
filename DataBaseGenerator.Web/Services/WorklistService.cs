@@ -10,10 +10,6 @@ namespace DataBaseGenerator.Web.Services
     {
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
         private readonly BaseGenerateContext _context;
-        private WorkList _newWorkList;
-        private DbContextOptions<BaseGenerateContext> _options = new DbContextOptionsBuilder<BaseGenerateContext>()
-            .UseMySql("server = localhost; database = medxregistry; user = root; password = root; port = 3306"
-            , new MySqlServerVersion(new Version(8, 0, 28))).Options;
 
 
         public WorklistService(BaseGenerateContext context)
@@ -21,49 +17,76 @@ namespace DataBaseGenerator.Web.Services
             _context = context;
         }
 
+        private void LogAllExceptions(Exception ex, string message)
+        {
+            int level = 0;
+            var current = ex;
+            while (current != null)
+            {
+                _logger.Error(current, $"{message} (Level {level})");
+                current = current.InnerException;
+                level++;
+            }
+        }
 
         public async Task<List<WorkList>> GetAllAsync()
         {
-            var workList = await _context.WorkList.ToListAsync();
-            _logger.Info($"Loaded {workList.Count} workList");
+            try
+            {
+                var workList = await _context.WorkList.ToListAsync();
+                _logger.Info($"Loaded {workList.Count} workList");
 
-            return workList;
+                return workList;
+            }
+            catch (Exception ex)
+            {
+                LogAllExceptions(ex, "Can`t get all workLists");
+                return new List<WorkList>();
+            }
+            
         }
 
         public async Task GenerateAsync(WorkListGeneratorDto inputParameters)
         {
-            for (var workListIndex = 0; workListIndex < inputParameters.WorkListCount; workListIndex++)
+            try
             {
-                using var context = new BaseGenerateContext(_options);
-                await CreateAsync(workListIndex, inputParameters, context);
+                for (var workListIndex = 0; workListIndex < inputParameters.WorkListCount; workListIndex++)
+                {
+                    await CreateAsync(workListIndex, inputParameters);
+                }
+                _logger.Info($"Created {inputParameters.WorkListCount} WorkLists");
             }
-            _logger.Info($"Created {inputParameters.WorkListCount} WorkLists");
+            catch (Exception ex)
+            {
+                LogAllExceptions(ex, "WorkList not generated");
+            }
+            
         }
 
-        public async Task CreateAsync(int workListIndex, WorkListGeneratorDto inputParameters, BaseGenerateContext context)
+        public async Task CreateAsync(int workListIndex, WorkListGeneratorDto inputParameters)
         {
-            _newWorkList = GenerateWorkList(workListIndex, inputParameters);
+            var newWorkList = GenerateWorkList(workListIndex, inputParameters);
 
-            bool checkIsExist = context.WorkList.Any(
-                     workList => workList.ID_WorkList == inputParameters.ID_WorkList.Generate(workListIndex) &&
-                                 workList.CreateDate == inputParameters.CreateDate.Generate() &&
-                                 workList.CreateTime == inputParameters.CreateTime.Generate() &&
-                                 workList.ID_Patient == inputParameters.ID_Patient.Generate(workListIndex) &&
-                                 workList.State == inputParameters.State.Generate() &&
-                                 workList.SOPInstanceUID == inputParameters.SOPInstanceUID.Generate() &&
-                                 workList.Modality == inputParameters.Modality.Generate() &&
-                                 workList.StationAeTitle == inputParameters.StationAeTitle.Generate() &&
-                                 workList.ProcedureStepStartDateTime == inputParameters.ProcedureStepStartDateTime.Generate() &&
-                                 workList.PerformingPhysiciansName == inputParameters.PerformingPhysiciansName.Generate() &&
-                                 workList.StudyDescription == inputParameters.StudyDescription.Generate() &&
-                                 workList.ReferringPhysiciansName == inputParameters.ReferringPhysiciansName.Generate() &&
-                                 workList.RequestingPhysician == inputParameters.RequestingPhysician.Generate());
+            bool checkIsExist = _context.WorkList.Any(
+                     workList => workList.ID_WorkList == newWorkList.ID_WorkList &&
+                                 workList.CreateDate == newWorkList.CreateDate &&
+                                 workList.CreateTime == newWorkList.CreateTime &&
+                                 workList.ID_Patient == newWorkList.ID_Patient &&
+                                 workList.State == newWorkList.State &&
+                                 workList.SOPInstanceUID == newWorkList.SOPInstanceUID &&
+                                 workList.Modality == newWorkList.Modality &&
+                                 workList.StationAeTitle == newWorkList.StationAeTitle &&
+                                 workList.ProcedureStepStartDateTime == newWorkList.ProcedureStepStartDateTime &&
+                                 workList.PerformingPhysiciansName == newWorkList.PerformingPhysiciansName &&
+                                 workList.StudyDescription == newWorkList.StudyDescription &&
+                                 workList.ReferringPhysiciansName == newWorkList.ReferringPhysiciansName &&
+                                 workList.RequestingPhysician == newWorkList.RequestingPhysician);
 
             if (checkIsExist)
                 return;
 
-            context.WorkList.Add(_newWorkList);
-            await context.SaveChangesAsync();
+            _context.WorkList.Add(newWorkList);
+            await _context.SaveChangesAsync();
         }
 
         private WorkList GenerateWorkList(int workListIndex, WorkListGeneratorDto inputParameters)
@@ -88,18 +111,33 @@ namespace DataBaseGenerator.Web.Services
 
         public async Task DeleteFirstAsync()
         {
-            _context.WorkList.Remove(_context.WorkList.First());
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.WorkList.Remove(_context.WorkList.First());
+                await _context.SaveChangesAsync();
 
-            _logger.Info("Delete First WorkList");
+                _logger.Info("Delete First WorkList");
+            }
+            catch (Exception ex)
+            {
+                LogAllExceptions(ex, "First workList not deleted");
+            }
+            
         }
 
         public async Task DeleteAllAsync()
         {
-            _context.WorkList.RemoveRange(_context.WorkList);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.WorkList.RemoveRange(_context.WorkList);
+                await _context.SaveChangesAsync();
 
-            _logger.Info("Delete All WorkLists");
+                _logger.Info("Delete All WorkLists");
+            }
+            catch (Exception ex)
+            {
+                LogAllExceptions(ex, "WorkList table not deleted");
+            }
         }
     }
 }

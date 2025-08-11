@@ -11,9 +11,6 @@ namespace DataBaseGenerator.Web.Services
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
         private readonly BaseGenerateContext _context;
         private Patient _patient;
-        private DbContextOptions<BaseGenerateContext> _options = new DbContextOptionsBuilder<BaseGenerateContext>()
-            .UseMySql("server = localhost; database = medxregistry; user = root; password = root; port = 3306"
-            , new MySqlServerVersion(new Version(8, 0, 28))).Options;
 
 
         public PatientService(BaseGenerateContext context)
@@ -22,31 +19,59 @@ namespace DataBaseGenerator.Web.Services
         }
 
 
+        private void LogAllExceptions(Exception ex, string message)
+        {
+            int level = 0;
+            var current = ex;
+            while (current != null)
+            {
+                _logger.Error(current, $"{message} (Level {level})");
+                current = current.InnerException;
+                level++;
+            }
+        }
+
         public async Task<List<Patient>> GetAllAsync()
         {
-            var patients = await _context.Patient.ToListAsync();
-            _logger.Info($"Loaded {patients.Count} patients");
+            try
+            {
+                var patients = await _context.Patient.ToListAsync();
+                _logger.Info($"Loaded {patients.Count} patients");
 
-            return patients;
+                return patients;
+            }
+            catch (Exception ex)
+            {
+                LogAllExceptions(ex, "Can`t get all patients");
+                return new List<Patient>();
+            }            
         }
 
         public async Task GenerateAsync(PatientGeneratorDto inputParameters)
         {
-            for (var patientindex = 0; patientindex < inputParameters.PatientCount; patientindex++)
+            try
             {
-               await CreateAsync(patientindex, inputParameters);
+                for (var patientindex = 0; patientindex < inputParameters.PatientCount; patientindex++)
+                {
+                    await CreateAsync(patientindex, inputParameters);
+                }
+                _logger.Info($"Created {inputParameters.PatientCount} patients");
             }
-            _logger.Info($"Created {inputParameters.PatientCount} patients");
+            catch (Exception ex)
+            {
+                LogAllExceptions(ex, "Patient not generated");
+            }
         }
 
         public async Task CreateAsync(int patientIndex, PatientGeneratorDto patientGeneratorParameters)
         {
-            bool checkIsExist = _context.Patient.Any(element => element.ID_Patient == patientGeneratorParameters.ID_Patient.Generate(patientIndex));
+            _patient = GeneratePatients(patientIndex, patientGeneratorParameters);
+
+            bool checkIsExist = _context.Patient.Any(element => element.ID_Patient == _patient.ID_Patient);
 
             if (checkIsExist)
                 return;
-
-            _patient = GeneratePatients(patientIndex, patientGeneratorParameters);
+            
             _context.Patient.Add(_patient);
             await _context.SaveChangesAsync();
         }
@@ -70,8 +95,15 @@ namespace DataBaseGenerator.Web.Services
 
         public async Task AddOneAsync(PatientInputParameters inputParameters)
         {
-            await CreateOne(inputParameters);
-            _logger.Info($"Add patient");
+            try
+            {
+                await CreateOne(inputParameters);
+                _logger.Info($"Add patient");
+            }
+            catch (Exception ex)
+            {
+                LogAllExceptions(ex, "One patient not generated");
+            }            
         }
 
         public async Task CreateOne(PatientInputParameters patientGeneratorParameters)
@@ -105,16 +137,30 @@ namespace DataBaseGenerator.Web.Services
 
         public async Task DeleteFirstAsync()
         {
-            _context.Patient.Remove(_context.Patient.First());
-            await _context.SaveChangesAsync();
-            _logger.Info("Delete first patient");
+            try
+            {
+                _context.Patient.Remove(_context.Patient.First());
+                await _context.SaveChangesAsync();
+                _logger.Info("Delete first patient");
+            }
+            catch (Exception ex)
+            {
+                LogAllExceptions(ex, "First patient not deleted");
+            }
         }
 
         public async Task DeleteAllAsync()
         {
-            _context.Patient.RemoveRange(_context.Patient);
-            await _context.SaveChangesAsync();
-            _logger.Info("Delete all patients");
+            try
+            {
+                _context.Patient.RemoveRange(_context.Patient);
+                await _context.SaveChangesAsync();
+                _logger.Info("Delete all patients");
+            }
+            catch (Exception ex)
+            {
+                LogAllExceptions(ex, "Patient table not deleted");
+            }
         }
 
         public async Task EditeAsync(Patient oldPatient, int iD, string lastName, string name)

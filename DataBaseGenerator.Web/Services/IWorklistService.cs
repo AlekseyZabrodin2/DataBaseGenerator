@@ -8,7 +8,7 @@ namespace DataBaseGenerator.Web.Services
     {
         Task<List<WorkList>> GetAllAsync();
         Task GenerateAsync(WorkListGeneratorDto inputParameters);
-        Task CreateAsync(int workListIndex, WorkListGeneratorDto inputParameters, BaseGenerateContext context);
+        Task CreateAsync(int workListIndex, WorkListGeneratorDto inputParameters);
         Task DeleteFirstAsync();
         Task DeleteAllAsync();
     }
