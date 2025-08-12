@@ -309,7 +309,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         private void InitializeDirectories()
         {
-            ExePath = Assembly.GetExecutingAssembly().Location;
+            ExePath = Process.GetCurrentProcess().MainModule.FileName;
             _logger.Trace("ExePath - {0}", ExePath);
 
             ExeDirectory = Path.GetDirectoryName(ExePath) ?? string.Empty;

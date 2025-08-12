@@ -180,7 +180,7 @@ namespace DataBaseGenerator.UI.Wpf
 
         private string GetExeDirectory()
         {
-            var exeDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var exeDir = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
             _logger.Trace("exeDir - {0}", exeDir);
 
             return exeDir;
