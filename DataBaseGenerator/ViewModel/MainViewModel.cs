@@ -23,14 +23,20 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
     public partial class MainViewModel : ObservableObject
     {
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+        private static readonly Random _random = new Random();
         private readonly BaseGenerateContext _context;
         private readonly IHttpClientFactory _httpClient;
         private readonly PatientService _patientService;
         private readonly WorklistService _worklistService;
+        private RandomModalityRule _modality;
+        private DialogMessageWindow _dialogMessage = new DialogMessageWindow();
+        private MediaPlayer _mediaPlayer = new MediaPlayer();
+        private SpecificationWindow _specificationWindow = new SpecificationWindow();
+        private List<Patient> _allPatients = new List<Patient>();
+        private List<WorkList> _allWorkLists = new List<WorkList>();
         private string _updateText;
         private int _setPatientCount;
         private int _setWorkListCount;
-        private RandomModalityRule _modality;
         private string _aeTitle;
         private string _gender;
         private string _addIdPatient;
@@ -41,12 +47,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private string _addWorkPlase;
         private string _addInfo;
         private string _medInsurNumber;
-        private DialogMessageWindow _dialogMessage = new DialogMessageWindow();
-        private MediaPlayer _mediaPlayer = new MediaPlayer();
-        private SpecificationWindow _specificationWindow = new SpecificationWindow();
-        private static readonly Random _random = new Random();
-        private List<Patient> _allPatients = new List<Patient>();
-        private List<WorkList> _allWorkLists = new List<WorkList>();
         private string _resourceAudioDir = "Resources\\NoNo.mp3";
         private string _godFatherAudioDir = "Resources\\GodFatherAudio.mp3";
         private string _dialogMessageDir = "Resources\\333.jpg";
