@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Windows;
 using DataBaseGenerator.Core;
 using DataBaseGenerator.Core.Data;
@@ -25,8 +26,8 @@ namespace DataBaseGenerator.UI.Wpf
         private readonly IHost _host; 
         private readonly BaseGenerateContext _context;
         const string _exeName = "DataBaseGenerator.Web.exe";
-        const string _webHostPath = "..\\..\\..\\WebHost\\DataBaseGenerator.Web.exe";
-        //const string _webHostPath = "C:\\Program Files (x86)\\DBGeneratorBroken\\WebHost\\DataBaseGenerator.Web.exe";
+        const string _webHostPath = "WebHost\\DataBaseGenerator.Web.exe";
+        private string _exeToRun;
 
 
         public static T GetService<T>()
@@ -93,12 +94,23 @@ namespace DataBaseGenerator.UI.Wpf
             {
                 try
                 {
-                    var fullPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, _webHostPath);
-                    if (File.Exists(fullPath))
+                    var exeDir = GetExeDirectory();
+                    var pathNearExe = GetPathNearExe(exeDir);
+                    var pathFromDebug = GetPathFromDebug(exeDir);
+
+                    if (File.Exists(pathNearExe))
+                    {
+                        _exeToRun = pathNearExe;
+                    }
+                    else if (File.Exists(pathFromDebug))
+                    {
+                        _exeToRun= pathFromDebug;
+                    }
+                    if (_exeToRun != null)
                     {
                         Process.Start(new ProcessStartInfo
                         {
-                            FileName = fullPath,
+                            FileName = _exeToRun,
                             UseShellExecute = false,
                             CreateNoWindow = true
                         });
@@ -106,8 +118,9 @@ namespace DataBaseGenerator.UI.Wpf
                     }
                     else
                     {
-                        _logger.Warn($"Не найден файл: {fullPath}, Ошибка запуска веб-хоста");
-                        MessageBox.Show($"Не найден файл: {fullPath}, Ошибка запуска веб-хоста");
+                        string allPaths = $"{pathNearExe} и {pathFromDebug}";
+                        _logger.Warn($"Не найден файл: {allPaths}, Ошибка запуска веб-хоста");
+                        MessageBox.Show($"Не найден файл: {allPaths}, Ошибка запуска веб-хоста");
                     }
                 }
                 catch (Exception ex)
@@ -164,5 +177,30 @@ namespace DataBaseGenerator.UI.Wpf
                 _logger.Info("WebHost stoped");
             }
         }
+
+        private string GetExeDirectory()
+        {
+            var exeDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            _logger.Trace("exeDir - {0}", exeDir);
+
+            return exeDir;
+        }
+
+        private string GetPathNearExe(string exeDir)
+        {
+            var pathNearExe = Path.Combine(exeDir, _webHostPath);
+            _logger.Trace("pathNearExe - {0}", pathNearExe);
+
+            return pathNearExe;
+        }
+
+        private string GetPathFromDebug(string exeDir)
+        {
+            var pathFromDebug = Path.GetFullPath(Path.Combine(exeDir, @"..\..\..", _webHostPath));
+            _logger.Trace("pathFromDebug - {0}", pathFromDebug);
+
+            return pathFromDebug;
+        }
+
     }
 }

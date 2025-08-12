@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -14,11 +16,13 @@ using DataBaseGenerator.Core.Data;
 using DataBaseGenerator.Core.GeneratorRules.Patient;
 using DataBaseGenerator.Core.GeneratorRules.WorkList;
 using DataBaseGenerator.UI.Wpf.View;
+using NLog;
 
 namespace DataBaseGenerator.UI.Wpf.ViewModel
 {
     public partial class MainViewModel : ObservableObject
     {
+        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
         private readonly BaseGenerateContext _context;
         private readonly IHttpClientFactory _httpClient;
         private readonly PatientService _patientService;
@@ -43,6 +47,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private static readonly Random _random = new Random();
         private List<Patient> _allPatients = new List<Patient>();
         private List<WorkList> _allWorkLists = new List<WorkList>();
+        private string _resourceAudioDir = "Resources\\NoNo.mp3";
+        private string _godFatherAudioDir = "Resources\\GodFatherAudio.mp3";
+        private string _dialogMessageDir = "Resources\\333.jpg";
+        private string _specificationWindowDir = "Resources\\Specification.jpg";
+        private string _iconDir = "Resources\\DBGenerator.ico";
 
 
         public MainViewModel(BaseGenerateContext context, IHttpClientFactory clientFactory)
@@ -64,32 +73,34 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             _patientService = new PatientService(_httpClient);
             _worklistService = new WorklistService(_httpClient);
 
+            InitializeDirectories();
             _ = InitializeAsync();
         }
 
 
+        [ObservableProperty]
+        private string _exePath;
 
         [ObservableProperty]
-        private string _pathToResourceAudio = "D:\\Develop\\DataBaseGenerator\\DataBaseGenerator.Core\\Resources\\NoNo.mp3";
-        //private string _pathToResourceAudio = "C:\\Program Files (x86)\\DBGeneratorBroken\\Resources\\NoNo.mp3";
+        private string _exeDirectory;
 
         [ObservableProperty]
-        private string _pathToGodFatherAudio = "D:\\Develop\\DataBaseGenerator\\DataBaseGenerator.Core\\Resources\\GodFatherAudio.mp3";
-        //private string _pathToGodFatherAudio = "C:\\Program Files (x86)\\DBGeneratorBroken\\Resources\\GodFatherAudio.mp3";
+        private string _currentDirectory;
 
         [ObservableProperty]
-        private string _pathToResourceForDialogMessage = "D:\\Develop\\DataBaseGenerator\\DataBaseGenerator.Core\\Resources\\333.jpg";
-        //private string _pathToResourceForDialogMessage = "C:\\Program Files (x86)\\DBGeneratorBroken\\Resources\\333.jpg";
+        private string _pathToResourceAudio;
 
         [ObservableProperty]
-        private string _pathToResourceForSpecificationWindow = "D:\\Develop\\DataBaseGenerator\\DataBaseGenerator.Core\\Resources\\Specification.jpg";
-        //private string _pathToResourceForSpecificationWindow = "C:\\Program Files (x86)\\DBGeneratorBroken\\Resources\\Specification.jpg";
+        private string _pathToGodFatherAudio;
 
         [ObservableProperty]
-        private string _pathToIcon = "D:\\Develop\\DataBaseGenerator\\DataBaseGenerator.Core\\Resources\\DBGenerator.ico";
-        //private string _pathToIcon = "C:\\Program Files (x86)\\DBGeneratorBroken\\Resources\\DBGenerator.ico";
+        private string _pathToResourceForDialogMessage;
 
+        [ObservableProperty]
+        private string _pathToResourceForSpecificationWindow;
 
+        [ObservableProperty]
+        private string _pathToIcon;
 
         public string UpdateText
         {
@@ -294,7 +305,31 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             set => SetProperty(ref _allWorkLists, value);
         }
 
+        
 
+        private void InitializeDirectories()
+        {
+            ExePath = Assembly.GetExecutingAssembly().Location;
+            _logger.Trace("ExePath - {0}", ExePath);
+
+            ExeDirectory = Path.GetDirectoryName(ExePath) ?? string.Empty;
+            _logger.Trace("Exe directory - {0}", ExeDirectory);
+
+            PathToResourceAudio = Path.Combine(ExeDirectory, _resourceAudioDir);
+            _logger.Trace("PathToResourceAudio - {0}", PathToResourceAudio);
+
+            PathToGodFatherAudio = Path.Combine(ExeDirectory, _godFatherAudioDir);
+            _logger.Trace("PathToGodFatherAudio - {0}", PathToGodFatherAudio);
+
+            PathToResourceForDialogMessage = Path.Combine(ExeDirectory, _dialogMessageDir);
+            _logger.Trace("PathToResourceForDialogMessage - {0}", PathToResourceForDialogMessage);
+
+            PathToResourceForSpecificationWindow = Path.Combine(ExeDirectory, _specificationWindowDir);
+            _logger.Trace("PathToResourceForSpecificationWindow - {0}", PathToResourceForSpecificationWindow);
+
+            PathToIcon = Path.Combine(ExeDirectory, _iconDir);
+            _logger.Trace("PathToIcon - {0}", PathToIcon);
+        }
 
         private async Task InitializeAsync()
         {
