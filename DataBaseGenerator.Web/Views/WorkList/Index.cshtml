@@ -1,0 +1,46 @@
+﻿@model IEnumerable<DataBaseGenerator.Web.ViewModels.WorklistViewModel>
+
+<h2>Рабочий список пациентов</h2>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">Рабочий список пуст.</p>
+}
+else
+{
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>ID пациента</th>
+                <th>Модальность</th>
+                <th>AE_Title</th>
+                <th>Состояние</th>
+                <th>Описание</th>
+                <th>Дата добавления</th>
+                <th>Время добавления</th>
+                <th>Дата процедуры</th>
+                <th>Исполнит. врач</th>
+                <th>Направ. врач</th>
+                <th>Запрос. врач</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var workList in Model)
+            {
+                <tr>
+                    <td>@workList.ID_WorkList</td>
+                    <td>@workList.Modality</td>
+                    <td>@workList.StationAeTitle</td>
+                    <td>@workList.State</td>
+                    <td>@workList.StudyDescription</td>
+                    <td>@workList.CreateDate</td>
+                    <td>@workList.CreateTime</td>
+                    <td>@workList.ProcedureStepStartDateTime</td>
+                    <td>@workList.PerformingPhysiciansName</td>
+                    <td>@workList.ReferringPhysiciansName</td>
+                    <td>@workList.RequestingPhysician</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

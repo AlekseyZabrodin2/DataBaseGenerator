@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.Unicode;
-using System.Threading.Tasks;
-using DataBaseGenerator.Core;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace DataBaseGenerator.Core.Data
 {
@@ -17,31 +8,13 @@ namespace DataBaseGenerator.Core.Data
 
         public DbSet<WorkList> WorkList { get; set; }
 
-        
-        public BaseGenerateContext()
+
+        public BaseGenerateContext(DbContextOptions<BaseGenerateContext> options)
+            : base(options)
         {
             Database.EnsureCreated();
         }
 
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-           
-            var builder = new ConfigurationBuilder();
-
-            builder.SetBasePath(Directory.GetCurrentDirectory());
-
-            builder.AddJsonFile(@"Data\appsettings.json", optional: true, reloadOnChange: true);
-
-            var config = builder.Build();
-
-            string connectingString = config.GetConnectionString(@"DefaultConnection");
-
-            
-            var options = optionsBuilder.UseMySql(connectingString, new MySqlServerVersion(new Version(8, 0, 28)));
-        }
-
-       
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
