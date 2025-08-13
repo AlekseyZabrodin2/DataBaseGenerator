@@ -693,9 +693,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 await DeleteAllWorkListAsync();
                 await RefreshWorkListAsync();
 
-                ShakeWindow(Application.Current.MainWindow);
-                ShowDeleteAllTablesEasterEgg();
-
                 UpdateText = "All Tables Deletion completed";
             }
             catch (Exception ex)
@@ -703,47 +700,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 UpdateText = "Tables is not Deleted";
             }
         }
-
-        public void ShakeWindow(Window window, int times = 15, int amplitude = 15, int delay = 20)
-        {
-            var originalLeft = window.Left;
-            var originalTop = window.Top;
-
-            var random = new Random();
-
-            for (int i = 0; i < times; i++)
-            {
-                window.Left = originalLeft + random.Next(-amplitude, amplitude);
-                window.Top = originalTop + random.Next(-amplitude, amplitude);
-
-                Thread.Sleep(delay);
-            }
-
-            window.Left = originalLeft;
-            window.Top = originalTop;
-        }
-
-        private readonly List<string> _deleteAllTableQuotes = new()
-        {
-            "Ты удалил всё. Красиво. Жестоко. Необратимо.",
-            "Это была база... была.",
-            "Пациенты? Какие пациенты? Их больше нет.",
-            "Никто не выжил. Даже логирование.",
-            "Поздравляю. Теперь у тебя идеальная чистота и ни одного бага.",
-            "Реинкарнация системы началась. Удачи, Neo."
-        };
-
-        public void ShowDeleteAllTablesEasterEgg()
-        {
-            var message = _deleteAllTableQuotes[_random.Next(_deleteAllTableQuotes.Count)];
-
-            MessageBox.Show(
-                message,
-                "💥 База уничтожена",
-                MessageBoxButton.OK,
-                MessageBoxImage.Warning);
-        }
-
 
         /// <summary>
         /// Dialog Window Commands
@@ -835,8 +791,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             try
             {
-                messageToUpdateText = PlayIntroAndShowMessage();
-
                 var newPatient = new PatientInputParameters(
                     1,
                     AddFamily,
@@ -885,27 +839,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     ? messageToUpdateText
                     : "Пациент не добавлен";
             }
-        }
-
-        private string PlayIntroAndShowMessage()
-        {
-            _mediaPlayer.Open(new Uri(PathToGodFatherAudio));
-            _mediaPlayer.Play();
-
-            var result = MessageBox.Show(
-                "  Ты просишь меня добавить пациента, \n\rно делаешь это без должного уважения !\n\nТы по-прежнему хочешь продолжить?",
-                "Don Father",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
-
-            _mediaPlayer.Stop();
-
-            if (result == MessageBoxResult.No)
-            {
-                return "Уважение восстановлено. Операция отменена.";
-            }
-
-            return string.Empty;
         }
 
         private void CleareFields()

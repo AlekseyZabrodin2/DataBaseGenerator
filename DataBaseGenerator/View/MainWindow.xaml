@@ -8,7 +8,7 @@
     xmlns:viewmodels="clr-namespace:DataBaseGenerator.UI.Wpf.ViewModel"
     Title="DataBase Generator"
     Width="1100"
-    Height="757"
+    Height="723"
     d:DataContext="{d:DesignInstance viewmodels:MainViewModel}"
     Icon="{Binding PathToIcon}"
     WindowStartupLocation="CenterScreen"
@@ -62,7 +62,7 @@
             <Border>
                 <StackPanel>
                     <Menu x:Name="ContextMenu">
-                        <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Файл">
+                        <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="File">
                             <MenuItem Header="Новый (Ctrl + N)" />
                             <MenuItem Header="Открыть (Ctrl + Open)" />
                             <MenuItem Header="Сохранить (Ctrl + S)" />
@@ -70,7 +70,7 @@
                             <MenuItem Header="Печать (Ctrl + P)" />
                             <MenuItem Command="{Binding HotkeyExitFromProgramCommand}" Header="Выход (Alt + X)" />
                         </MenuItem>
-                        <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Вид">
+                        <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="View">
                             <MenuItem Header="Поверх всех окон" />
                             <MenuItem Header="Вкладки во весь Экран" />
                             <MenuItem Header="Масштаб текста">
@@ -80,13 +80,13 @@
                             </MenuItem>
                             <MenuItem Header="Свернуть все окна" />
                         </MenuItem>
-                        <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Опции">
+                        <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Options">
                             <MenuItem Header="Настройки..." />
                             <MenuItem Header="Импортировать" />
                             <MenuItem Header="Экспортировать" />
                             <MenuItem Header="Удалить программу" />
                         </MenuItem>
-                        <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Инструменты">
+                        <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Tools">
                             <MenuItem Header="MD5">
                                 <MenuItem Header="Сгенерировать" />
                                 <MenuItem Header="Не генерировать" />
@@ -96,14 +96,14 @@
                                 <MenuItem Command="{Binding ToolMessageCommand}" Header="Не нажимать" />
                             </MenuItem>
                         </MenuItem>
-                        <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Плагины">
+                        <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Plugins">
                             <MenuItem Header="Плагин мастерства" />
                             <MenuItem Header="Просто плагин" />
                             <MenuItem Header="Бла-Бла плагин" />
                             <MenuItem Header="Управление плагинами" />
                             <MenuItem Command="{Binding OpenWebPageCommand}" Header="Открыть папку плагинов" />
                         </MenuItem>
-                        <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Справка">
+                        <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Help">
                             <MenuItem Command="{Binding OpenSpecificationWindowCommand}" Header="Вызвать справку" />
                             <MenuItem Command="{Binding AboutProgramCommand}" Header="О программе...  (Ctrl+O)" />
                         </MenuItem>
@@ -133,91 +133,67 @@
                     <TextBlock
                         Margin="5,5,0,0"
                         FontWeight="DemiBold"
-                        Text="ИД паzиента *" />
+                        Text="Patient ID *" />
                     <TextBox Margin="5" Text="{Binding AddIdPatient, Mode=TwoWay}" />
 
                     <TextBlock
                         Margin="5,5,0,0"
                         FontWeight="DemiBold"
-                        Text="Фамилия: *" />
+                        Text="Surname: *" />
                     <TextBox Margin="5" Text="{Binding AddFamily, Mode=TwoWay}" />
 
                     <TextBlock
                         Margin="5,5,0,0"
                         FontWeight="DemiBold"
-                        Text="Отчество: *" />
-                    <TextBox
-                        Margin="5"
-                        IsTabStop="False"
-                        Text="{Binding AddName, Mode=TwoWay}" />
+                        Text="Name: *" />
+                    <TextBox Margin="5" Text="{Binding AddName, Mode=TwoWay}" />
 
                     <TextBlock
                         Margin="5,5,0,0"
                         FontWeight="DemiBold"
-                        Text="Имя: *" />
-                    <TextBox
-                        Margin="5"
-                        FontWeight="Bold"
-                        Text="{Binding AddMiddleName, Mode=TwoWay}"
-                        ToolTip="Ну что смотришь, вводи давай !" />
+                        Text="Middle name: *" />
+                    <TextBox Margin="5" Text="{Binding AddMiddleName, Mode=TwoWay}" />
 
                     <TextBlock
                         Margin="5,5,0,0"
                         FontWeight="DemiBold"
-                        Text="Дата рождения:" />
+                        Text="Birthdate:" />
                     <mah:DateTimePicker
                         Margin="5"
                         Culture="ru"
-                        Cursor="Hand"
                         SelectedDateFormat="Short"
                         SelectedDateTime="{Binding PatientBirthDate, Mode=TwoWay}"
-                        SelectedTimeFormat="Long"
-                        ToolTip="{Binding BirthDateToolTip}" />
+                        SelectedTimeFormat="Long" />
 
                     <TextBlock
                         Margin="5,5,0,0"
                         FontWeight="DemiBold"
-                        Text="Пол:" />
+                        Text="Gender:" />
                     <ComboBox
                         Margin="5"
-                        Cursor="AppStarting"
                         ItemsSource="{Binding Gender}"
                         SelectedItem="{Binding SelecedGender}" />
 
                     <TextBlock
                         Margin="5,5,0,0"
-                        FontStyle="Italic"
                         FontWeight="DemiBold"
-                        Text="Адрес:" />
+                        Text="Address:" />
                     <TextBox Margin="5" Text="{Binding AddAdress, Mode=TwoWay}" />
 
                     <TextBlock
                         Margin="5,5,0,0"
                         FontWeight="DemiBold"
-                        Text="Место работы" />
-                    <TextBox
-                        Margin="5"
-                        Cursor="None"
-                        Text="{Binding AddWorkPlase, Mode=TwoWay}" />
+                        Text="Place of work" />
+                    <TextBox Margin="5" Text="{Binding AddWorkPlase, Mode=TwoWay}" />
 
                     <TextBlock
                         Margin="5,5,0,0"
                         FontWeight="DemiBold"
-                        Text="Номер мед.страхования: *" />
+                        Text="Additional information:" />
                     <TextBox
+                        Height="90"
                         Margin="5"
-                        Cursor="Pen"
-                        Text="{Binding MedicalInsuranceNumber}" />
-
-                    <TextBlock
-                        Margin="5,5,0,0"
-                        FontWeight="DemiBold"
-                        Text="Дополнительная информация:" />
-                    <TextBox
-                        Height="67"
-                        Margin="5"
-                        Text="{Binding AddInfo, Mode=TwoWay}"
-                        ToolTip="Ну давай вводи уже, чуть-чуть осталось, СОБЕРИСЬ !!!" />
+                        Text="{Binding AddInfo, Mode=TwoWay}" />
 
                 </StackPanel>
             </Border>
@@ -229,8 +205,7 @@
                 Margin="25,10,0,0"
                 HorizontalAlignment="Left"
                 Command="{Binding AddOnePatientCommand}"
-                Content="Добавить"
-                Cursor="No" />
+                Content="Add" />
             <Button
                 Grid.Row="1"
                 Width="70"
@@ -238,7 +213,7 @@
                 Margin="0,10,25,0"
                 HorizontalAlignment="Right"
                 Command="{Binding CancelAddPatientCommand}"
-                Content="Отмена" />
+                Content="Cancel" />
         </Grid>
 
 
@@ -300,6 +275,7 @@
                 Name="PatientCount"
                 Width="100"
                 Height="50"
+                Margin="0,0,50,0"
                 HorizontalAlignment="Right"
                 HorizontalContentAlignment="Center"
                 VerticalContentAlignment="Center"
@@ -320,7 +296,7 @@
                 Width="120"
                 Height="50"
                 HorizontalAlignment="Left"
-                Command="{Binding DeleteFirstPatientCommand}"
+                Command="{Binding AddPatientCommand}"
                 Content="Add Patient" />
 
         </Grid>
@@ -353,8 +329,8 @@
                 Width="120"
                 Height="50"
                 HorizontalAlignment="Left"
-                Command="{Binding AddPatientCommand}"
-                Content="Delet First" />
+                Command="{Binding DeleteFirstPatientCommand}"
+                Content="Delete First" />
 
         </Grid>
 
@@ -370,7 +346,7 @@
                 Height="50"
                 HorizontalAlignment="Right"
                 Command="{Binding DeleteAllPatientCommand}"
-                Content="Delet All" />
+                Content="Delete All" />
 
         </Grid>
 
@@ -446,12 +422,11 @@
                 Name="WorkListCount"
                 Width="100"
                 Height="50"
+                Margin="0,0,40,0"
                 HorizontalAlignment="Right"
                 HorizontalContentAlignment="Center"
                 VerticalContentAlignment="Center"
                 Background="{DynamicResource MahApps.Brushes.Button.Border}"
-                FontFamily="Century Gothic"
-                FontSize="14"
                 FontWeight="Bold"
                 Text="{Binding SetWorkListCount, UpdateSourceTrigger=PropertyChanged}" />
 
@@ -465,6 +440,7 @@
 
             <TextBlock
                 Name="Modality"
+                Margin="50,0,0,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
                 FontSize="15"
@@ -475,6 +451,7 @@
                 Name="ModalityBox"
                 Width="100"
                 Height="50"
+                Margin="0,0,30,0"
                 HorizontalAlignment="Right"
                 HorizontalContentAlignment="Center"
                 VerticalContentAlignment="Center"
@@ -490,15 +467,14 @@
             Grid.Row="4"
             Grid.Column="3"
             Margin="5">
-
             <TextBlock
                 Name="AeTitle"
+                Margin="45,0,0,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
                 FontSize="15"
                 FontWeight="Bold"
                 Text="AE Title" />
-
             <TextBox
                 Name="AeTitleBox"
                 Width="150"
@@ -508,10 +484,9 @@
                 VerticalContentAlignment="Center"
                 Background="{DynamicResource MahApps.Brushes.Button.Border}"
                 FontWeight="Bold"
-                Text="{Binding SetAeTitle, UpdateSourceTrigger=PropertyChanged}"
-                ToolTip="Ну и что ты сюда навел(а) мышку?" />
-
+                Text="{Binding SetAeTitle, UpdateSourceTrigger=PropertyChanged}" />
         </Grid>
+
 
         <Grid
             Name="ButtonAddWorkList"
@@ -558,7 +533,7 @@
                 Width="120"
                 Height="50"
                 HorizontalAlignment="Left"
-                Command="{Binding DeleteAllWorkListCommand}"
+                Command="{Binding DeleteFirstWorkListCommand}"
                 Content="Delete First WL" />
 
         </Grid>
@@ -574,8 +549,8 @@
                 Width="120"
                 Height="50"
                 HorizontalAlignment="Right"
-                Command="{Binding DeleteFirstWorkListCommand}"
-                Content="Delte All WL" />
+                Command="{Binding DeleteAllWorkListCommand}"
+                Content="Delete All WL" />
 
         </Grid>
 
@@ -590,6 +565,7 @@
 
             <TextBox
                 Name="UpdateText"
+                Height="50"
                 Margin="5"
                 HorizontalContentAlignment="Center"
                 VerticalContentAlignment="Center"
@@ -609,11 +585,10 @@
             <Button
                 Name="Connect"
                 Width="150"
-                Height="40"
+                Height="50"
                 HorizontalAlignment="Center"
                 Command="{Binding ConnectDBCommand}"
-                Content="Connect"
-                FontSize="8" />
+                Content="Connect" />
 
         </Grid>
 
@@ -629,7 +604,7 @@
                 Height="50"
                 HorizontalAlignment="Center"
                 Command="{Binding DeleteAllTablesCommand}"
-                Content="Удалить все таблицы" />
+                Content="Delete all tables" />
 
         </Grid>
 

@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace DataBaseGenerator.Test
 {
     [TestClass]
-    public class UnitTest1
+    public class UnitTest
     {
         private readonly string _modality;
         private readonly string _aeTitle;
