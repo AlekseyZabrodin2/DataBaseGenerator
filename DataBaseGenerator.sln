@@ -1,15 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.11.35327.3
+VisualStudioVersion = 17.14.36301.6
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataBaseGenerator.UI.Wpf", "DataBaseGenerator\DataBaseGenerator.UI.Wpf.csproj", "{38FCB766-26B5-4EC1-BAB8-FE30619ADBC0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataBaseGenerator.UI.Wpf", "DataBaseGenerator\DataBaseGenerator.UI.Wpf.csproj", "{38FCB766-26B5-4EC1-BAB8-FE30619ADBC0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataBaseGenerator.Core", "DataBaseGenerator.Core\DataBaseGenerator.Core.csproj", "{02B49DBC-8436-4A25-B423-BD3C04E9E6F1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataBaseGenerator.Core", "DataBaseGenerator.Core\DataBaseGenerator.Core.csproj", "{02B49DBC-8436-4A25-B423-BD3C04E9E6F1}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI", "UI", "{96B82F32-6B63-48AA-B787-08430ADA6CD4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataBaseGenerator.Test", "DataBaseGenerator.Test\DataBaseGenerator.Test.csproj", "{BA7E70DD-E31D-4332-962B-CFF7D8488A6C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataBaseGenerator.Test", "DataBaseGenerator.Test\DataBaseGenerator.Test.csproj", "{BA7E70DD-E31D-4332-962B-CFF7D8488A6C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataBaseGenerator.Web", "DataBaseGenerator.Web\DataBaseGenerator.Web.csproj", "{844C4E9B-98B6-4FFE-B707-004058F01E1D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,12 +29,13 @@ Global
 		{BA7E70DD-E31D-4332-962B-CFF7D8488A6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA7E70DD-E31D-4332-962B-CFF7D8488A6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA7E70DD-E31D-4332-962B-CFF7D8488A6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{844C4E9B-98B6-4FFE-B707-004058F01E1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{844C4E9B-98B6-4FFE-B707-004058F01E1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{844C4E9B-98B6-4FFE-B707-004058F01E1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{844C4E9B-98B6-4FFE-B707-004058F01E1D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{38FCB766-26B5-4EC1-BAB8-FE30619ADBC0} = {96B82F32-6B63-48AA-B787-08430ADA6CD4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {79C1682E-69D9-4673-AABD-6DDA934BFA69}

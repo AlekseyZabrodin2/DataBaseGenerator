@@ -10,7 +10,7 @@ namespace DataBaseGenerator.Core.GeneratorRules.WorkList
     {
         public string Generate()
         {
-            return null;
+            return string.Empty;
         }
     }
 }
