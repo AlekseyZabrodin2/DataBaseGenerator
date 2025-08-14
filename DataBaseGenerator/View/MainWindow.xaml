@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:DataBaseGenerator.UI.Wpf.ViewModel"
     Title="DataBase Generator"
-    Width="1100"
+    Width="1040"
     Height="723"
     d:DataContext="{d:DesignInstance viewmodels:MainViewModel}"
     Icon="{Binding PathToIcon}"
@@ -275,7 +275,7 @@
                 Name="PatientCount"
                 Width="100"
                 Height="50"
-                Margin="0,0,40,0"
+                Margin="0,0,30,0"
                 HorizontalAlignment="Right"
                 HorizontalContentAlignment="Center"
                 VerticalContentAlignment="Center"
@@ -298,14 +298,6 @@
                 HorizontalAlignment="Left"
                 Command="{Binding AddPatientCommand}"
                 Content="Add Patient" />
-
-        </Grid>
-
-        <Grid
-            Name="ButtonUpdatePatient"
-            Grid.Row="2"
-            Grid.Column="2"
-            Margin="5">
 
             <Button
                 Name="UpdatePatient"
@@ -422,7 +414,7 @@
                 Name="WorkListCount"
                 Width="100"
                 Height="50"
-                Margin="0,0,40,0"
+                Margin="0,0,30,0"
                 HorizontalAlignment="Right"
                 HorizontalContentAlignment="Center"
                 VerticalContentAlignment="Center"
@@ -440,7 +432,7 @@
 
             <TextBlock
                 Name="Modality"
-                Margin="50,0,0,0"
+                Margin="40,0,0,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
                 FontSize="15"
@@ -469,7 +461,7 @@
             Margin="5">
             <TextBlock
                 Name="AeTitle"
-                Margin="45,0,0,0"
+                Margin="30,0,0,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
                 FontSize="15"
@@ -480,8 +472,9 @@
                 Width="150"
                 Height="50"
                 HorizontalAlignment="Right"
-                HorizontalContentAlignment="Center"
+                HorizontalContentAlignment="Left"
                 VerticalContentAlignment="Center"
+                mah:TextBoxHelper.Watermark="Enter title:"
                 Background="{DynamicResource MahApps.Brushes.Button.Border}"
                 FontWeight="Bold"
                 Text="{Binding SetAeTitle, UpdateSourceTrigger=PropertyChanged}" />
@@ -491,31 +484,23 @@
         <Grid
             Name="ButtonAddWorkList"
             Grid.Row="5"
-            Grid.Column="1"
+            Grid.Column="2"
             Margin="5">
 
             <Button
                 Name="AddWorkList"
                 Width="120"
                 Height="50"
-                HorizontalAlignment="Center"
+                HorizontalAlignment="Left"
                 Command="{Binding AddWorkListCommand}"
                 Content="Add WorkList" />
-
-        </Grid>
-
-        <Grid
-            Name="ButtonUpdateWorkList"
-            Grid.Row="5"
-            Grid.Column="2"
-            Margin="5">
 
             <Button
                 Name="UpdateWorkList"
                 Grid.Column="0"
                 Width="120"
                 Height="50"
-                HorizontalAlignment="Center"
+                HorizontalAlignment="Right"
                 Command="{Binding RefreshWorkListCommand}"
                 Content="Update WorkList" />
 
