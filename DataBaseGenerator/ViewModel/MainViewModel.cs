@@ -4,8 +4,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
-using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
@@ -809,16 +807,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 await _patientService.AddOneAsync(newPatient);
 
                 await RefreshPatientsAsync();
-                CleareFields();
-
-                if (_random.Next(0, 100) < 30)
-                {
-                    MessageBox.Show(
-                        "Unhandled Exception: DeveloperWasLazyException",
-                        "Warning",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-                }
+                CleareFields();                
 
                 UpdateText = !string.IsNullOrEmpty(messageToUpdateText)
                     ? messageToUpdateText
