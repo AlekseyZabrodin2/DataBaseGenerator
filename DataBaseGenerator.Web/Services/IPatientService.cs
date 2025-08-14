@@ -12,5 +12,6 @@ namespace DataBaseGenerator.Web.Services
         Task DeleteFirstAsync();
         Task DeleteAllAsync();
         Task EditeAsync(Patient oldPatient, int iD, string lastName, string name);
+        Task<bool> ConnectingEchoAsync();
     }
 }

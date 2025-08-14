@@ -78,5 +78,13 @@ namespace DataBaseGenerator.Core
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync("patient/edite", content);
         }
+
+        public async Task<bool> ConnectingEchoAsync()
+        {
+            _logger.Trace("Connecting Echo");
+
+            var response = await _httpClient.GetAsync("patient/echo");
+            return response.IsSuccessStatusCode;
+        }
     }
 }

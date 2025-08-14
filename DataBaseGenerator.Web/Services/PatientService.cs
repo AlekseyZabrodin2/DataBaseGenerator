@@ -1,4 +1,5 @@
-﻿using DataBaseGenerator.Core;
+﻿using System.Threading.Tasks;
+using DataBaseGenerator.Core;
 using DataBaseGenerator.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using NLog;
@@ -174,6 +175,28 @@ namespace DataBaseGenerator.Web.Services
                 await _context.SaveChangesAsync();
             }
             _logger.Info("Edite patient");
+        }
+
+        public async Task<bool> ConnectingEchoAsync()
+        {
+            try
+            {
+                if (await _context.Database.CanConnectAsync())
+                {
+                    _logger.Info("Соединение с БД установлено");
+                    return true;
+                }
+                else
+                {
+                    _logger.Warn("Не удалось подключиться к БД");
+                    return false;
+                }                
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Ошибка при проверке соединения с БД");
+                return false;
+            }            
         }
     }
 }

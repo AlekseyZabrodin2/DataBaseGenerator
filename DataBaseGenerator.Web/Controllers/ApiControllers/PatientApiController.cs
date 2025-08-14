@@ -36,28 +36,35 @@ namespace DataBaseGenerator.Web.Controllers.ApiControllers
         public async Task<IActionResult> AddOneAsync([FromBody] PatientInputParameters inputParameters)
         {
             await _patientService.AddOneAsync(inputParameters);
-            return Ok("WorkList added");
+            return Ok("One patient added");
         }
 
         [HttpDelete("deleteFirst")]
         public async Task<IActionResult> DeleteFirstAsync()
         {
             await _patientService.DeleteFirstAsync();
-            return Ok("WorkList added");
+            return Ok("First patient deleted");
         }
 
         [HttpDelete("deleteAll")]
         public async Task<IActionResult> DeleteAll()
         {
             await _patientService.DeleteAllAsync();
-            return Ok("WorkList added");
+            return Ok("All patient deleted");
         }
 
         [HttpPut("edite")]
         public async Task<IActionResult> EditeAsync(Patient oldPatient, int iD, string lastName, string name)
         {
             await _patientService.EditeAsync(oldPatient, iD, lastName, name);
-            return Ok("WorkList added");
+            return Ok("Patient edited");
+        }
+
+        [HttpGet("echo")]
+        public async Task<IActionResult> ConnectingEchoAsync()
+        {
+            await _patientService.ConnectingEchoAsync();
+            return Ok("Echo success");
         }
     }
 }

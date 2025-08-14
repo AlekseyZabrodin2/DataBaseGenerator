@@ -337,12 +337,23 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
 
         [RelayCommand]
-        public void ConnectDB()
+        public async Task ConnectDB()
         {
-            MessageBox.Show("Ну да конечно, хахахах !!!");
-            MessageBox.Show("Попробуй еще раз !!!");
-            MessageBox.Show("Не останавливайся, ты уже так далеко зашел !!!");
-            MessageBox.Show("У тебя все получится ;) !!!");
+            var connectingState = await _patientService.ConnectingEchoAsync();
+            if (connectingState)
+            {
+                MessageBox.Show("Соединение с БД установлено",
+                    "Information",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            else
+            {
+                MessageBox.Show("Не удалось подключиться к БД",
+                    "Warning",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
         }
 
         
