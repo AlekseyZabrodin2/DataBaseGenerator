@@ -7,8 +7,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:DataBaseGenerator.UI.Wpf.ViewModel"
     Title="DataBase Generator"
-    Width="1040"
-    Height="723"
+    Width="1139"
+    Height="753"
     d:DataContext="{d:DesignInstance viewmodels:MainViewModel}"
     Icon="{Binding PathToIcon}"
     WindowStartupLocation="CenterScreen"
@@ -191,7 +191,7 @@
                         FontWeight="DemiBold"
                         Text="Additional information:" />
                     <TextBox
-                        Height="90"
+                        Height="120"
                         Margin="5"
                         Text="{Binding AddInfo, Mode=TwoWay}" />
 
@@ -202,7 +202,7 @@
                 Grid.Row="1"
                 Width="70"
                 Height="50"
-                Margin="25,10,0,0"
+                Margin="50,10,0,0"
                 HorizontalAlignment="Left"
                 Command="{Binding AddOnePatientCommand}"
                 Content="Add" />
@@ -210,7 +210,7 @@
                 Grid.Row="1"
                 Width="70"
                 Height="50"
-                Margin="0,10,25,0"
+                Margin="0,10,50,0"
                 HorizontalAlignment="Right"
                 Command="{Binding CancelAddPatientCommand}"
                 Content="Cancel" />
@@ -225,37 +225,31 @@
             Margin="5"
             Background="{DynamicResource MahApps.Brushes.Accent}">
 
-            <ListView
+            <DataGrid
                 Name="ViewAllPatient"
                 Margin="5"
+                AutoGenerateColumns="False"
+                CanUserAddRows="False"
+                CanUserDeleteRows="False"
+                IsReadOnly="False"
                 ItemsSource="{Binding AllPatients}"
-                SelectedItem="{Binding SelectedPatient, Mode=TwoWay}">
+                SelectedItem="{Binding SelectedPatient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
 
-                <ListView.View>
-                    <GridView>
-
-                        <GridViewColumn DisplayMemberBinding="{Binding PatientID}" Header="ID пациента" />
-
-                        <GridViewColumn DisplayMemberBinding="{Binding LastName}" Header="Фамилия" />
-
-                        <GridViewColumn DisplayMemberBinding="{Binding FirstName}" Header="Имя" />
-
-                        <GridViewColumn DisplayMemberBinding="{Binding MiddleName}" Header="Отчество" />
-
-                        <GridViewColumn DisplayMemberBinding="{Binding BirthDate}" Header="Дата Рождения" />
-
-                        <GridViewColumn DisplayMemberBinding="{Binding Sex}" Header="Пол" />
-
-                        <GridViewColumn DisplayMemberBinding="{Binding Address}" Header="Адрес" />
-
-                        <GridViewColumn DisplayMemberBinding="{Binding AddInfo}" Header="Доп. информация" />
-
-                        <GridViewColumn DisplayMemberBinding="{Binding Occupation}" Header="Место работы" />
-
-                    </GridView>
-                </ListView.View>
-            </ListView>
-
+                <DataGrid.Columns>
+                    <DataGridTextColumn
+                        Binding="{Binding PatientID}"
+                        Header="ID"
+                        IsReadOnly="True" />
+                    <DataGridTextColumn Binding="{Binding LastName}" Header="Фамилия" />
+                    <DataGridTextColumn Binding="{Binding FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Имя" />
+                    <DataGridTextColumn Binding="{Binding MiddleName}" Header="Отчество" />
+                    <DataGridTextColumn Binding="{Binding BirthDate}" Header="Дата Рождения" />
+                    <DataGridTextColumn Binding="{Binding Sex}" Header="Пол" />
+                    <DataGridTextColumn Binding="{Binding Address}" Header="Адрес" />
+                    <DataGridTextColumn Binding="{Binding AddInfo}" Header="Доп. информация" />
+                    <DataGridTextColumn Binding="{Binding Occupation}" Header="Место работы" />
+                </DataGrid.Columns>
+            </DataGrid>
         </Grid>
 
         <Grid
@@ -266,6 +260,7 @@
 
             <TextBlock
                 Name="PatCount"
+                Margin="5"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
                 FontSize="15"
@@ -294,53 +289,68 @@
 
             <Button
                 Name="AddPatient"
-                Width="120"
+                Width="80"
                 Height="50"
                 HorizontalAlignment="Left"
-                Command="{Binding AddPatientCommand}"
-                Content="Add Patient" />
+                Command="{Binding AddPatientCommand}">
+                <TextBlock
+                    Margin="5,0"
+                    FontSize="10"
+                    Text="ADD PATIENT"
+                    TextAlignment="Center"
+                    TextWrapping="Wrap" />
+            </Button>
+
+            <Button
+                Name="SavePatient"
+                Width="80"
+                Height="50"
+                HorizontalAlignment="Center"
+                Command="{Binding SavePatientsCommand}">
+                <TextBlock
+                    Margin="5,0"
+                    FontSize="10"
+                    Text="SAVE PATIENT"
+                    TextAlignment="Center"
+                    TextWrapping="Wrap" />
+            </Button>
 
             <Button
                 Name="UpdatePatient"
-                Width="120"
+                Width="80"
                 Height="50"
                 HorizontalAlignment="Right"
-                Command="{Binding RefreshPatientsCommand}"
-                Content="Update Patient" />
-
+                Command="{Binding RefreshPatientsCommand}">
+                <TextBlock
+                    FontSize="10"
+                    Text="UPDATE PATIENT"
+                    TextAlignment="Center"
+                    TextWrapping="Wrap" />
+            </Button>
         </Grid>
-
 
         <Grid
             Name="ButtonDeleteFirstPatient"
             Grid.Row="2"
-            Grid.Column="3"
-            Margin="5">
+            Grid.Column="3">
 
             <Button
                 Name="DeleteFirstPatient"
                 Width="120"
                 Height="50"
+                Margin="20,0,0,0"
                 HorizontalAlignment="Left"
                 Command="{Binding DeleteFirstPatientCommand}"
                 Content="Delete First" />
-
-        </Grid>
-
-        <Grid
-            Name="ButtonDeleteAllPatient"
-            Grid.Row="2"
-            Grid.Column="3"
-            Margin="5">
 
             <Button
                 Name="DeleteAllPatient"
                 Width="120"
                 Height="50"
+                Margin="0,0,10,0"
                 HorizontalAlignment="Right"
                 Command="{Binding DeleteAllPatientCommand}"
                 Content="Delete All" />
-
         </Grid>
 
 
@@ -394,7 +404,6 @@
                     </GridView>
                 </ListView.View>
             </ListView>
-
         </Grid>
 
         <Grid
@@ -405,6 +414,7 @@
 
             <TextBlock
                 Name="WlCount"
+                Margin="5"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
                 FontSize="15"
@@ -422,7 +432,6 @@
                 Background="{DynamicResource MahApps.Brushes.Button.Border}"
                 FontWeight="Bold"
                 Text="{Binding SetWorkListCount, UpdateSourceTrigger=PropertyChanged}" />
-
         </Grid>
 
         <Grid
@@ -452,14 +461,14 @@
                 FontWeight="Bold"
                 ItemsSource="{Binding ModalityRules}"
                 SelectedItem="{Binding SelectModality, Mode=TwoWay}" />
-
         </Grid>
 
         <Grid
             Name="TextBoxAeTitle"
             Grid.Row="4"
             Grid.Column="3"
-            Margin="5">
+            Margin="5,0,10,0">
+
             <TextBlock
                 Name="AeTitle"
                 Margin="30,0,0,0"
@@ -473,7 +482,7 @@
                 Width="150"
                 Height="50"
                 HorizontalAlignment="Right"
-                HorizontalContentAlignment="Left"
+                HorizontalContentAlignment="Center"
                 VerticalContentAlignment="Center"
                 mah:TextBoxHelper.Watermark="Enter title:"
                 Background="{DynamicResource MahApps.Brushes.Button.Border}"
@@ -485,13 +494,14 @@
         <Grid
             Name="ButtonAddWorkList"
             Grid.Row="5"
-            Grid.Column="2"
+            Grid.Column="1"
             Margin="5">
 
             <Button
                 Name="AddWorkList"
                 Width="120"
                 Height="50"
+                Margin="5,0,0,0"
                 HorizontalAlignment="Left"
                 Command="{Binding AddWorkListCommand}"
                 Content="Add WorkList" />
@@ -501,10 +511,10 @@
                 Grid.Column="0"
                 Width="120"
                 Height="50"
+                Margin="0,0,10,0"
                 HorizontalAlignment="Right"
                 Command="{Binding RefreshWorkListCommand}"
                 Content="Update WorkList" />
-
         </Grid>
 
 
@@ -512,23 +522,16 @@
             Name="ButtonDeleteFirstWorkList"
             Grid.Row="5"
             Grid.Column="3"
-            Margin="5">
+            Margin="5,0,10,0">
 
             <Button
                 Name="DeleteFirstWorkList"
                 Width="120"
                 Height="50"
+                Margin="15,0,0,0"
                 HorizontalAlignment="Left"
                 Command="{Binding DeleteFirstWorkListCommand}"
                 Content="Delete First WL" />
-
-        </Grid>
-
-        <Grid
-            Name="ButtonDeleteAllWorkList"
-            Grid.Row="5"
-            Grid.Column="3"
-            Margin="5">
 
             <Button
                 Name="DeleteAllWorkList"
@@ -537,7 +540,6 @@
                 HorizontalAlignment="Right"
                 Command="{Binding DeleteAllWorkListCommand}"
                 Content="Delete All WL" />
-
         </Grid>
 
 
@@ -565,7 +567,7 @@
         <Grid
             Name="ButtonConnect"
             Grid.Row="7"
-            Grid.Column="1"
+            Grid.Column="2"
             Margin="5">
 
             <Button

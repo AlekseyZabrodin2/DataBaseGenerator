@@ -11,7 +11,7 @@ namespace DataBaseGenerator.UI.Wpf.View
 
         //Create ListView для возможности обновлять таблицу
 
-        public static ListView AllPatientView;
+        public static DataGrid AllPatientView;
         public static ListView AllWorkListView;
 
         public MainViewModel ViewModel { get; }
