@@ -228,7 +228,8 @@
             <ListView
                 Name="ViewAllPatient"
                 Margin="5"
-                ItemsSource="{Binding AllPatients}">
+                ItemsSource="{Binding AllPatients}"
+                SelectedItem="{Binding SelectedPatient, Mode=TwoWay}">
 
                 <ListView.View>
                     <GridView>
