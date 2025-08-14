@@ -1,4 +1,5 @@
-﻿using DataBaseGenerator.Core;
+﻿using System.Collections.ObjectModel;
+using DataBaseGenerator.Core;
 
 namespace DataBaseGenerator.Web.Services
 {
@@ -11,7 +12,7 @@ namespace DataBaseGenerator.Web.Services
         Task CreateOne(PatientInputParameters patientGeneratorParameters);
         Task DeleteFirstAsync();
         Task DeleteAllAsync();
-        Task EditeAsync(Patient oldPatient, int iD, string lastName, string name);
+        Task EditeAsync(ObservableCollection<Patient> patients);
         Task<bool> ConnectingEchoAsync();
     }
 }

@@ -1,4 +1,5 @@
-﻿using DataBaseGenerator.Core;
+﻿using System.Collections.ObjectModel;
+using DataBaseGenerator.Core;
 using DataBaseGenerator.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -53,11 +54,11 @@ namespace DataBaseGenerator.Web.Controllers.ApiControllers
             return Ok("All patient deleted");
         }
 
-        [HttpPut("edite")]
-        public async Task<IActionResult> EditeAsync(Patient oldPatient, int iD, string lastName, string name)
+        [HttpPost("edite")]
+        public async Task<IActionResult> EditeAsync(ObservableCollection<Patient> patients)
         {
-            await _patientService.EditeAsync(oldPatient, iD, lastName, name);
-            return Ok("Patient edited");
+            await _patientService.EditeAsync(patients);
+            return Ok("Patients Collection edited");
         }
 
         [HttpGet("echo")]

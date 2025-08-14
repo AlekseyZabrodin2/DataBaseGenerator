@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -22,7 +23,7 @@ namespace DataBaseGenerator.Core
         }
 
 
-        public async Task<List<Patient>> GetAllAsync()
+        public async Task<ObservableCollection<Patient>> GetAllAsync()
         {
             _logger.Trace("Get All patients");
 
@@ -30,7 +31,7 @@ namespace DataBaseGenerator.Core
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<List<Patient>>(content);
+            return JsonConvert.DeserializeObject<ObservableCollection<Patient>>(content);
         }
 
         public async Task GenerateAsync(PatientGeneratorParameters inputParameters)
@@ -71,12 +72,13 @@ namespace DataBaseGenerator.Core
             response.EnsureSuccessStatusCode();
         }
 
-        public async Task EditeAsync(Patient oldPatient, int iD, string lastName, string name)
+        public async Task EditeAsync(ObservableCollection<Patient> patientCollection)
         {
-            var inputParameters = $"{oldPatient}, {iD}, {lastName} {name}";
-            var json = JsonConvert.SerializeObject(inputParameters);
+            var json = JsonConvert.SerializeObject(patientCollection);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
+
             var response = await _httpClient.PostAsync("patient/edite", content);
+            response.EnsureSuccessStatusCode();
         }
 
         public async Task<bool> ConnectingEchoAsync()
