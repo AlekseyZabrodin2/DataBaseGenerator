@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
@@ -30,7 +31,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private DialogMessageWindow _dialogMessage = new DialogMessageWindow();
         private MediaPlayer _mediaPlayer = new MediaPlayer();
         private SpecificationWindow _specificationWindow = new SpecificationWindow();
-        private List<Patient> _allPatients = new List<Patient>();
+        //private List<Patient> _allPatients = new List<Patient>();
         private List<WorkList> _allWorkLists = new List<WorkList>();
         private string _updateText;
         private int _setPatientCount;
@@ -261,11 +262,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             set => SetProperty(ref _birthDateToolTip, value);
         }
 
-        public List<Patient> AllPatients
-        {
-            get => _allPatients;
-            set => SetProperty(ref _allPatients, value);
-        }
+        [ObservableProperty]
+        public partial ObservableCollection<Patient> AllPatients { get; set; }
 
         public List<WorkList> AllWorkLists
         {
@@ -299,6 +297,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             InitializeDirectories();
             _ = InitializeAsync();
+
+            AllPatients = new();
         }
 
 
@@ -333,47 +333,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             AllWorkLists = await _worklistService.GetAllAsync();
         }
 
-        [RelayCommand]
-        public async Task ConnectDB()
-        {
-            var connectingState = await _patientService.ConnectingEchoAsync();
-            if (connectingState)
-            {
-                MessageBox.Show("Соединение с БД установлено",
-                    "Information",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
-            }
-            else
-            {
-                MessageBox.Show("Не удалось подключиться к БД",
-                    "Warning",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
-            }
-        }
-        
-        [RelayCommand]
-        public async Task RefreshPatientsAsync()
-        {
-            AllPatients = await _patientService.GetAllAsync();
-            MainWindow.AllPatientView.ItemsSource = null;
-            MainWindow.AllPatientView.Items.Clear();
-            MainWindow.AllPatientView.ItemsSource = AllPatients;
-            MainWindow.AllPatientView.Items.Refresh();
-            UpdateText = "Patient table is update";
-        }
-
-        [RelayCommand]
-        public async Task RefreshWorkListAsync()
-        {
-            AllWorkLists = await _worklistService.GetAllAsync();
-            MainWindow.AllWorkListView.ItemsSource = null;
-            MainWindow.AllWorkListView.Items.Clear();
-            MainWindow.AllWorkListView.ItemsSource = AllWorkLists;
-            MainWindow.AllWorkListView.Items.Refresh();
-            UpdateText = "WorkList table is update";
-        }
 
         [RelayCommand]
         public async Task AddPatientAsync()
@@ -425,40 +384,36 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
         [RelayCommand]
-        public async Task AddWorkListAsync()
+        public async Task SavePatientsAsync()
         {
             try
             {
-                var newWorkList = new WorkListGeneratorDto(
-                    new OrderIdWorklistRule(),
-                    new RandomCreateDateRule(),
-                    new RandomCreateTimeRule(),
-                    new RandomCompleteDateRule(),
-                    new RandomCompleteTimeRule(),
-                    new OrderIdPatientWlRule(),
-                    new RandomStateRule(),
-                    new RandomSOPInstanceUIDRule(),
-                    SelectModality,
-                    new RandomStationAeTitleRule(_aeTitle),
-                    new RandomProcedureStepStartDateTimeRule(),
-                    new RandomPerformingPhysiciansNameRule(),
-                    new RandomStudyDescriptionRule(),
-                    new RandomReferringPhysiciansNameRule(),
-                    new RandomRequestingPhysicianRule())
+                var updatePatients = new ObservableCollection<Patient>();
+                foreach (var patient in AllPatients)
                 {
-                    WorkListCount = SetWorkListCount
-                };
+                    updatePatients.Add(patient);
+                }
 
-                await _worklistService.GenerateAsync(newWorkList);
-
-                await RefreshWorkListAsync();
-
-                UpdateText = "WorkList added";
+                await _patientService.EditeAsync(updatePatients);
+                _logger.Info("All changes saved to database");
+                UpdateText = "All changes saved to database";
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                UpdateText = "WorkList not added";
+                _logger.Error(ex, "Error saving changes");
+                MessageBox.Show("Ошибка при сохранении изменений");
             }
+        }
+
+        [RelayCommand]
+        public async Task RefreshPatientsAsync()
+        {
+            AllPatients = await _patientService.GetAllAsync();
+            MainWindow.AllPatientView.ItemsSource = null;
+            MainWindow.AllPatientView.Items.Clear();
+            MainWindow.AllPatientView.ItemsSource = AllPatients;
+            MainWindow.AllPatientView.Items.Refresh();
+            UpdateText = "Patient table is update";
         }
 
         [RelayCommand]
@@ -521,6 +476,54 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 UpdateText = "Patient Table is not Deleted";
             }
+        }
+
+        [RelayCommand]
+        public async Task AddWorkListAsync()
+        {
+            try
+            {
+                var newWorkList = new WorkListGeneratorDto(
+                    new OrderIdWorklistRule(),
+                    new RandomCreateDateRule(),
+                    new RandomCreateTimeRule(),
+                    new RandomCompleteDateRule(),
+                    new RandomCompleteTimeRule(),
+                    new OrderIdPatientWlRule(),
+                    new RandomStateRule(),
+                    new RandomSOPInstanceUIDRule(),
+                    SelectModality,
+                    new RandomStationAeTitleRule(_aeTitle),
+                    new RandomProcedureStepStartDateTimeRule(),
+                    new RandomPerformingPhysiciansNameRule(),
+                    new RandomStudyDescriptionRule(),
+                    new RandomReferringPhysiciansNameRule(),
+                    new RandomRequestingPhysicianRule())
+                {
+                    WorkListCount = SetWorkListCount
+                };
+
+                await _worklistService.GenerateAsync(newWorkList);
+
+                await RefreshWorkListAsync();
+
+                UpdateText = "WorkList added";
+            }
+            catch (Exception e)
+            {
+                UpdateText = "WorkList not added";
+            }
+        }
+
+        [RelayCommand]
+        public async Task RefreshWorkListAsync()
+        {
+            AllWorkLists = await _worklistService.GetAllAsync();
+            MainWindow.AllWorkListView.ItemsSource = null;
+            MainWindow.AllWorkListView.Items.Clear();
+            MainWindow.AllWorkListView.ItemsSource = AllWorkLists;
+            MainWindow.AllWorkListView.Items.Refresh();
+            UpdateText = "WorkList table is update";
         }
 
         [RelayCommand]
@@ -592,6 +595,26 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             catch (Exception ex)
             {
                 UpdateText = "WorkList is not Deleted";
+            }
+        }
+
+        [RelayCommand]
+        public async Task ConnectDB()
+        {
+            var connectingState = await _patientService.ConnectingEchoAsync();
+            if (connectingState)
+            {
+                MessageBox.Show("Соединение с БД установлено",
+                    "Information",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            else
+            {
+                MessageBox.Show("Не удалось подключиться к БД",
+                    "Warning",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
             }
         }
 
