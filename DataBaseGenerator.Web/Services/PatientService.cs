@@ -1,4 +1,6 @@
-﻿using DataBaseGenerator.Core;
+﻿using System.Collections.ObjectModel;
+using System.Threading.Tasks;
+using DataBaseGenerator.Core;
 using DataBaseGenerator.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using NLog;
@@ -163,17 +165,37 @@ namespace DataBaseGenerator.Web.Services
             }
         }
 
-        public async Task EditeAsync(Patient oldPatient, int iD, string lastName, string name)
+        public async Task EditeAsync(ObservableCollection<Patient> patients)
         {
-            Patient patient = _context.Patient.FirstOrDefault(position => position.ID_Patient == oldPatient.ID_Patient);
-            if (patient != null)
+            foreach (var patient in patients)
             {
-                patient.ID_Patient = iD;
-                patient.LastName = lastName;
-                patient.FirstName = name;
-                await _context.SaveChangesAsync();
+                _context.Patient.Update(patient);
+            }            
+
+            await _context.SaveChangesAsync();
+            _logger.Info("Edite patients collection");
+        }
+
+        public async Task<bool> ConnectingEchoAsync()
+        {
+            try
+            {
+                if (await _context.Database.CanConnectAsync())
+                {
+                    _logger.Info("Соединение с БД установлено");
+                    return true;
+                }
+                else
+                {
+                    _logger.Warn("Не удалось подключиться к БД");
+                    return false;
+                }                
             }
-            _logger.Info("Edite patient");
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Ошибка при проверке соединения с БД");
+                return false;
+            }            
         }
     }
 }

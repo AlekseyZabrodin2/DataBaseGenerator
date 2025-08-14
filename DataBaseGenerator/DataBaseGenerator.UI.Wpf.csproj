@@ -6,12 +6,13 @@
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Sources\DBGenerator.ico</ApplicationIcon>
     <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+	<LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="MahApps.Metro" Version="2.4.10" />
-    <PackageReference Include="MahApps.Metro.IconPacks" Version="5.1.0" />
+    <PackageReference Include="MahApps.Metro.IconPacks" Version="6.1.0" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.3.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.3">
@@ -22,9 +23,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.7" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.7" />
-    <PackageReference Include="NLog" Version="6.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.8" />
+    <PackageReference Include="NLog" Version="6.0.3" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.3" />
   </ItemGroup>
 

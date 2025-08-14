@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
@@ -30,7 +31,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private DialogMessageWindow _dialogMessage = new DialogMessageWindow();
         private MediaPlayer _mediaPlayer = new MediaPlayer();
         private SpecificationWindow _specificationWindow = new SpecificationWindow();
-        private List<Patient> _allPatients = new List<Patient>();
+        //private List<Patient> _allPatients = new List<Patient>();
         private List<WorkList> _allWorkLists = new List<WorkList>();
         private string _updateText;
         private int _setPatientCount;
@@ -50,30 +51,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private string _dialogMessageDir = "Resources\\333.jpg";
         private string _specificationWindowDir = "Resources\\Specification.jpg";
         private string _iconDir = "Resources\\DBGenerator.ico";
-
-
-        public MainViewModel(BaseGenerateContext context, IHttpClientFactory clientFactory)
-        {
-            _context = context;
-            _httpClient = clientFactory;
-
-            var defaultAeTitle = new RandomModalityRule("DX");
-            ModalityRules = new ObservableCollection<RandomModalityRule>
-            {
-                defaultAeTitle,
-                new RandomModalityRule("MG")
-            };
-
-            SelectModality = defaultAeTitle;
-
-            Gender = new List<string> { "Man", "Female", "Other" };
-
-            _patientService = new PatientService(_httpClient);
-            _worklistService = new WorklistService(_httpClient);
-
-            InitializeDirectories();
-            _ = InitializeAsync();
-        }
 
 
         [ObservableProperty]
@@ -112,7 +89,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
         }
 
-
         public int SetPatientCount
         {
             get
@@ -126,7 +102,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
         }
 
-
         public int SetWorkListCount
         {
             get
@@ -139,7 +114,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 SetProperty(ref _setWorkListCount, value);
             }
         }
-
 
         public ObservableCollection<RandomModalityRule> ModalityRules { get; }
 
@@ -156,7 +130,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
         }
 
-
         public string SetAeTitle
         {
             get
@@ -169,7 +142,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 SetProperty(ref _aeTitle, value);
             }
         }
-
 
         public string AddIdPatient
         {
@@ -206,7 +178,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 SetProperty(ref _addMiddleName, value);
             }
         }
-
 
         public List<string> Gender { get; }
 
@@ -291,11 +262,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             set => SetProperty(ref _birthDateToolTip, value);
         }
 
-        public List<Patient> AllPatients
-        {
-            get => _allPatients;
-            set => SetProperty(ref _allPatients, value);
-        }
+        [ObservableProperty]
+        public partial ObservableCollection<Patient> AllPatients { get; set; }
 
         public List<WorkList> AllWorkLists
         {
@@ -303,7 +271,37 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             set => SetProperty(ref _allWorkLists, value);
         }
 
-        
+        [ObservableProperty]
+        public partial Patient SelectedPatient {  get; set; }
+
+
+
+        public MainViewModel(BaseGenerateContext context, IHttpClientFactory clientFactory)
+        {
+            _context = context;
+            _httpClient = clientFactory;
+
+            var defaultAeTitle = new RandomModalityRule("DX");
+            ModalityRules = new ObservableCollection<RandomModalityRule>
+            {
+                defaultAeTitle,
+                new RandomModalityRule("MG")
+            };
+
+            SelectModality = defaultAeTitle;
+
+            Gender = new List<string> { "Man", "Female", "Other" };
+
+            _patientService = new PatientService(_httpClient);
+            _worklistService = new WorklistService(_httpClient);
+
+            InitializeDirectories();
+            _ = InitializeAsync();
+
+            AllPatients = new();
+        }
+
+
 
         private void InitializeDirectories()
         {
@@ -333,40 +331,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             AllPatients = await _patientService.GetAllAsync();
             AllWorkLists = await _worklistService.GetAllAsync();
-        }
-
-
-        [RelayCommand]
-        public void ConnectDB()
-        {
-            MessageBox.Show("Ну да конечно, хахахах !!!");
-            MessageBox.Show("Попробуй еще раз !!!");
-            MessageBox.Show("Не останавливайся, ты уже так далеко зашел !!!");
-            MessageBox.Show("У тебя все получится ;) !!!");
-        }
-
-        
-        [RelayCommand]
-        public async Task RefreshPatientsAsync()
-        {
-            AllPatients = await _patientService.GetAllAsync();
-            MainWindow.AllPatientView.ItemsSource = null;
-            MainWindow.AllPatientView.Items.Clear();
-            MainWindow.AllPatientView.ItemsSource = AllPatients;
-            MainWindow.AllPatientView.Items.Refresh();
-            UpdateText = "Patient table is update";
-        }
-
-
-        [RelayCommand]
-        public async Task RefreshWorkListAsync()
-        {
-            AllWorkLists = await _worklistService.GetAllAsync();
-            MainWindow.AllWorkListView.ItemsSource = null;
-            MainWindow.AllWorkListView.Items.Clear();
-            MainWindow.AllWorkListView.ItemsSource = AllWorkLists;
-            MainWindow.AllWorkListView.Items.Refresh();
-            UpdateText = "WorkList table is update";
         }
 
 
@@ -416,6 +380,396 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             catch (Exception ex)
             {
                 UpdateText = "Пациент не добавлен";
+            }
+        }
+
+        [RelayCommand]
+        public async Task SavePatientsAsync()
+        {
+            try
+            {
+                var updatePatients = new ObservableCollection<Patient>();
+                foreach (var patient in AllPatients)
+                {
+                    updatePatients.Add(patient);
+                }
+
+                await _patientService.EditeAsync(updatePatients);
+                _logger.Info("All changes saved to database");
+                UpdateText = "All changes saved to database";
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error saving changes");
+                MessageBox.Show("Ошибка при сохранении изменений");
+            }
+        }
+
+        [RelayCommand]
+        public async Task RefreshPatientsAsync()
+        {
+            AllPatients = await _patientService.GetAllAsync();
+            MainWindow.AllPatientView.ItemsSource = null;
+            MainWindow.AllPatientView.Items.Clear();
+            MainWindow.AllPatientView.ItemsSource = AllPatients;
+            MainWindow.AllPatientView.Items.Refresh();
+            UpdateText = "Patient table is update";
+        }
+
+        [RelayCommand]
+        public async Task DeleteFirstPatientAsync()
+        {
+            try
+            {
+                var patient = new PatientGeneratorParameters(
+                   new OrderIdPatientRule(),
+                   new RandomLastNameRule(),
+                   new RandomFirstNameRule(),
+                   new RandomMiddleNameRule(),
+                   new OrderPatientIdRule(),
+                   new RandomBirthDateRule(new DateTime()),
+                   new RandomSexRule(),
+                   new RandomAddressRule(),
+                   new RandomAddInfoRule(),
+                   new RandomOccupationRule())
+                {
+                    PatientCount = SetPatientCount
+                };
+
+                await _patientService.DeleteFirstAsync();
+                await RefreshPatientsAsync();
+
+                UpdateText = "First Patient is Delete";
+            }
+            catch (Exception ex)
+            {
+                UpdateText = "Patient is not Deleted";
+            }
+        }
+
+        [RelayCommand]
+        public async Task DeleteAllPatientAsync()
+        {
+            try
+            {
+                var patient = new PatientGeneratorParameters(
+                   new OrderIdPatientRule(),
+                   new RandomLastNameRule(),
+                   new RandomFirstNameRule(),
+                   new RandomMiddleNameRule(),
+                   new OrderPatientIdRule(),
+                   new RandomBirthDateRule(new DateTime()),
+                   new RandomSexRule(),
+                   new RandomAddressRule(),
+                   new RandomAddInfoRule(),
+                   new RandomOccupationRule())
+                {
+                    PatientCount = SetPatientCount
+                };
+
+                await _patientService.DeleteAllAsync();
+                await RefreshPatientsAsync();
+
+                UpdateText = "Patient Table Deletion completed";
+            }
+            catch (Exception ex)
+            {
+                UpdateText = "Patient Table is not Deleted";
+            }
+        }
+
+        [RelayCommand]
+        public async Task AddWorkListAsync()
+        {
+            try
+            {
+                var newWorkList = new WorkListGeneratorDto(
+                    new OrderIdWorklistRule(),
+                    new RandomCreateDateRule(),
+                    new RandomCreateTimeRule(),
+                    new RandomCompleteDateRule(),
+                    new RandomCompleteTimeRule(),
+                    new OrderIdPatientWlRule(),
+                    new RandomStateRule(),
+                    new RandomSOPInstanceUIDRule(),
+                    SelectModality,
+                    new RandomStationAeTitleRule(_aeTitle),
+                    new RandomProcedureStepStartDateTimeRule(),
+                    new RandomPerformingPhysiciansNameRule(),
+                    new RandomStudyDescriptionRule(),
+                    new RandomReferringPhysiciansNameRule(),
+                    new RandomRequestingPhysicianRule())
+                {
+                    WorkListCount = SetWorkListCount
+                };
+
+                await _worklistService.GenerateAsync(newWorkList);
+
+                await RefreshWorkListAsync();
+
+                UpdateText = "WorkList added";
+            }
+            catch (Exception e)
+            {
+                UpdateText = "WorkList not added";
+            }
+        }
+
+        [RelayCommand]
+        public async Task RefreshWorkListAsync()
+        {
+            AllWorkLists = await _worklistService.GetAllAsync();
+            MainWindow.AllWorkListView.ItemsSource = null;
+            MainWindow.AllWorkListView.Items.Clear();
+            MainWindow.AllWorkListView.ItemsSource = AllWorkLists;
+            MainWindow.AllWorkListView.Items.Refresh();
+            UpdateText = "WorkList table is update";
+        }
+
+        [RelayCommand]
+        public async Task DeleteFirstWorkListAsync()
+        {
+            try
+            {
+                var workList = new WorkListGeneratorParameters(
+                    new OrderIdWorklistRule(),
+                    new RandomCreateDateRule(),
+                    new RandomCreateTimeRule(),
+                    new RandomCompleteDateRule(),
+                    new RandomCompleteTimeRule(),
+                    new OrderIdPatientWlRule(),
+                    new RandomStateRule(),
+                    new RandomSOPInstanceUIDRule(),
+                    SelectModality,
+                    new RandomStationAeTitleRule(_aeTitle),
+                    new RandomProcedureStepStartDateTimeRule(),
+                    new RandomPerformingPhysiciansNameRule(),
+                    new RandomStudyDescriptionRule(),
+                    new RandomReferringPhysiciansNameRule(),
+                    new RandomRequestingPhysicianRule())
+                {
+                    WorkListCount = SetWorkListCount
+                };
+
+                await _worklistService.DeleteFirstAsync();
+                await RefreshWorkListAsync();
+
+                UpdateText = "First in WorkList Delete";
+            }
+            catch (Exception ex)
+            {
+                UpdateText = "WorkList is not Deleted";
+            }
+        }
+
+        [RelayCommand]
+        public async Task DeleteAllWorkListAsync()
+        {
+            try
+            {
+                var workList = new WorkListGeneratorParameters(
+                    new OrderIdWorklistRule(),
+                    new RandomCreateDateRule(),
+                    new RandomCreateTimeRule(),
+                    new RandomCompleteDateRule(),
+                    new RandomCompleteTimeRule(),
+                    new OrderIdPatientWlRule(),
+                    new RandomStateRule(),
+                    new RandomSOPInstanceUIDRule(),
+                    SelectModality,
+                    new RandomStationAeTitleRule(_aeTitle),
+                    new RandomProcedureStepStartDateTimeRule(),
+                    new RandomPerformingPhysiciansNameRule(),
+                    new RandomStudyDescriptionRule(),
+                    new RandomReferringPhysiciansNameRule(),
+                    new RandomRequestingPhysicianRule())
+                {
+                    WorkListCount = SetWorkListCount
+                };
+
+                await _worklistService.DeleteAllAsync();
+                await RefreshWorkListAsync();
+
+                UpdateText = "WorkList Table Deletion completed";
+            }
+            catch (Exception ex)
+            {
+                UpdateText = "WorkList is not Deleted";
+            }
+        }
+
+        [RelayCommand]
+        public async Task ConnectDB()
+        {
+            var connectingState = await _patientService.ConnectingEchoAsync();
+            if (connectingState)
+            {
+                MessageBox.Show("Соединение с БД установлено",
+                    "Information",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            else
+            {
+                MessageBox.Show("Не удалось подключиться к БД",
+                    "Warning",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
+        }
+
+        [RelayCommand]
+        public async Task DeleteAllTablesAsync()
+        {
+            try
+            {
+                await DeleteAllPatientAsync();
+                await RefreshPatientsAsync();
+
+                await DeleteAllWorkListAsync();
+                await RefreshWorkListAsync();
+
+                UpdateText = "All Tables Deletion completed";
+            }
+            catch (Exception ex)
+            {
+                UpdateText = "Tables is not Deleted";
+            }
+        }
+
+        [RelayCommand]
+        public void AboutProgram()
+        {
+            _dialogMessage.DataContext = this;
+            _dialogMessage.ShowDialog();
+        }
+
+        [RelayCommand]
+        public void ClosingDialogWindow()
+        {
+            _mediaPlayer.Open(new Uri(PathToResourceAudio));
+            _mediaPlayer.Play();
+            _dialogMessage.Close();
+        }
+
+        [RelayCommand]
+        public void HotkeyForDialogWindow()
+        {
+            MessageBox.Show("Отличная попытка ДРУЖИЩЕ", "ага )))", MessageBoxButton.OK, MessageBoxImage.Stop);
+        }
+
+        [RelayCommand]
+        public void HotkeyExitFromProgram()
+        {
+            Application.Current.Shutdown();
+        }
+
+        [RelayCommand]
+        public void OpenSpecificationWindow()
+        {
+            _specificationWindow.DataContext = this;
+            _specificationWindow.Show();
+        }
+
+        [RelayCommand]
+        public void CloseSpecificationWindow()
+        {
+            _specificationWindow.Close();
+        }
+
+        [RelayCommand]
+        public void ToolMessage()
+        {
+            MessageBox.Show("Ну я же просил !!!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+
+        [RelayCommand]
+        public void CancelAddPatient()
+        {
+            AddIdPatient = string.Empty;
+
+            AddFamily = string.Empty;
+
+            AddName = string.Empty;
+
+            AddMiddleName = string.Empty;
+
+            AddAdress = string.Empty;
+
+            AddWorkPlase = string.Empty;
+
+            AddInfo = string.Empty;
+
+            SelecedGender = null;
+
+            MedicalInsuranceNumber = string.Empty;
+
+            UpdateText = "Как скажете, отменяю !";
+        }        
+
+        [RelayCommand]
+        public async Task AddOnePatientAsync()
+        {
+            var messageToUpdateText = string.Empty;
+
+            try
+            {
+                var newPatient = new PatientInputParameters(
+                    1,
+                    AddFamily,
+                    AddName,
+                    AddMiddleName,
+                    AddIdPatient,
+                    PatientBirthDate,
+                    SelecedGender,
+                    AddAdress,
+                    AddInfo,
+                    AddWorkPlase)
+                {
+                    PatientCount = SetPatientCount
+                };
+
+                await _patientService.AddOneAsync(newPatient);
+
+                await RefreshPatientsAsync();
+                CleareFields();                
+
+                UpdateText = !string.IsNullOrEmpty(messageToUpdateText)
+                    ? messageToUpdateText
+                    : "Patient added";
+            }
+            catch (Exception e)
+            {
+                if (string.IsNullOrEmpty(AddFamily) || string.IsNullOrEmpty(AddName) || string.IsNullOrEmpty(AddMiddleName))
+                {
+                    UpdateText = "Создан пациент-призрак. Поздравляю!";
+                    CleareFields();
+
+                    return;
+                }
+
+                CleareFields();
+                UpdateText = !string.IsNullOrEmpty(messageToUpdateText)
+                    ? messageToUpdateText
+                    : "Пациент не добавлен";
+            }
+        }
+
+        [RelayCommand]
+        public void OpenWebPage()
+        {
+            var url = "http://localhost:5289"; // или любой нужный маршрут
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true // важно для Windows — откроет в браузере
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Не удалось открыть веб-страницу: " + ex.Message);
             }
         }
 
@@ -500,336 +854,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
         }
 
-
-        [RelayCommand]
-        public async Task AddWorkListAsync()
-        {
-            try
-            {
-                var newWorkList = new WorkListGeneratorDto(
-                    new OrderIdWorklistRule(),
-                    new RandomCreateDateRule(),
-                    new RandomCreateTimeRule(),
-                    new RandomCompleteDateRule(),
-                    new RandomCompleteTimeRule(),
-                    new OrderIdPatientWlRule(),
-                    new RandomStateRule(),
-                    new RandomSOPInstanceUIDRule(),
-                    SelectModality,
-                    new RandomStationAeTitleRule(_aeTitle),
-                    new RandomProcedureStepStartDateTimeRule(),
-                    new RandomPerformingPhysiciansNameRule(),
-                    new RandomStudyDescriptionRule(),
-                    new RandomReferringPhysiciansNameRule(),
-                    new RandomRequestingPhysicianRule())
-                {
-                    WorkListCount = SetWorkListCount
-                };
-
-                await _worklistService.GenerateAsync(newWorkList);
-
-                await RefreshWorkListAsync();
-
-                UpdateText = "WorkList added";
-            }
-            catch (Exception e)
-            {
-                UpdateText = "WorkList not added";
-            }
-        }
-
-
-        [RelayCommand]
-        public async Task DeleteFirstPatientAsync()
-        {
-            try
-            {
-                var patient = new PatientGeneratorParameters(
-                   new OrderIdPatientRule(),
-                   new RandomLastNameRule(),
-                   new RandomFirstNameRule(),
-                   new RandomMiddleNameRule(),
-                   new OrderPatientIdRule(),
-                   new RandomBirthDateRule(new DateTime()),
-                   new RandomSexRule(),
-                   new RandomAddressRule(),
-                   new RandomAddInfoRule(),
-                   new RandomOccupationRule())
-                {
-                    PatientCount = SetPatientCount
-                };
-
-                await _patientService.DeleteFirstAsync();
-                await RefreshPatientsAsync();
-
-                UpdateText = "First Patient is Delete";
-            }
-            catch (Exception ex)
-            {
-                UpdateText = "Patient is not Deleted";
-            }
-        }
-
-
-
-        [RelayCommand]
-        public async Task DeleteAllPatientAsync()
-        {
-            try
-            {
-                var patient = new PatientGeneratorParameters(
-                   new OrderIdPatientRule(),
-                   new RandomLastNameRule(),
-                   new RandomFirstNameRule(),
-                   new RandomMiddleNameRule(),
-                   new OrderPatientIdRule(),
-                   new RandomBirthDateRule(new DateTime()),
-                   new RandomSexRule(),
-                   new RandomAddressRule(),
-                   new RandomAddInfoRule(),
-                   new RandomOccupationRule())
-                {
-                    PatientCount = SetPatientCount
-                };
-
-                await _patientService.DeleteAllAsync();
-                await RefreshPatientsAsync();
-
-                UpdateText = "Patient Table Deletion completed";
-            }
-            catch (Exception ex)
-            {
-                UpdateText = "Patient Table is not Deleted";
-            }
-        }
-
-
-
-        [RelayCommand]
-        public async Task DeleteFirstWorkListAsync()
-        {
-            try
-            {
-                var workList = new WorkListGeneratorParameters(
-                    new OrderIdWorklistRule(),
-                    new RandomCreateDateRule(),
-                    new RandomCreateTimeRule(),
-                    new RandomCompleteDateRule(),
-                    new RandomCompleteTimeRule(),
-                    new OrderIdPatientWlRule(),
-                    new RandomStateRule(),
-                    new RandomSOPInstanceUIDRule(),
-                    SelectModality,
-                    new RandomStationAeTitleRule(_aeTitle),
-                    new RandomProcedureStepStartDateTimeRule(),
-                    new RandomPerformingPhysiciansNameRule(),
-                    new RandomStudyDescriptionRule(),
-                    new RandomReferringPhysiciansNameRule(),
-                    new RandomRequestingPhysicianRule())
-                {
-                    WorkListCount = SetWorkListCount
-                };
-
-                await _worklistService.DeleteFirstAsync();
-                await RefreshWorkListAsync();
-
-                UpdateText = "First in WorkList Delete";
-            }
-            catch (Exception ex)
-            {
-                UpdateText = "WorkList is not Deleted";
-            }
-        }
-
-
-
-        [RelayCommand]
-        public async Task DeleteAllWorkListAsync()
-        {
-            try
-            {
-                var workList = new WorkListGeneratorParameters(
-                    new OrderIdWorklistRule(),
-                    new RandomCreateDateRule(),
-                    new RandomCreateTimeRule(),
-                    new RandomCompleteDateRule(),
-                    new RandomCompleteTimeRule(),
-                    new OrderIdPatientWlRule(),
-                    new RandomStateRule(),
-                    new RandomSOPInstanceUIDRule(),
-                    SelectModality,
-                    new RandomStationAeTitleRule(_aeTitle),
-                    new RandomProcedureStepStartDateTimeRule(),
-                    new RandomPerformingPhysiciansNameRule(),
-                    new RandomStudyDescriptionRule(),
-                    new RandomReferringPhysiciansNameRule(),
-                    new RandomRequestingPhysicianRule())
-                {
-                    WorkListCount = SetWorkListCount
-                };
-
-                await _worklistService.DeleteAllAsync();
-                await RefreshWorkListAsync();
-
-                UpdateText = "WorkList Table Deletion completed";
-            }
-            catch (Exception ex)
-            {
-                UpdateText = "WorkList is not Deleted";
-            }
-        }
-
-
-        [RelayCommand]
-        public async Task DeleteAllTablesAsync()
-        {
-            try
-            {
-                await DeleteAllPatientAsync();
-                await RefreshPatientsAsync();
-
-                await DeleteAllWorkListAsync();
-                await RefreshWorkListAsync();
-
-                UpdateText = "All Tables Deletion completed";
-            }
-            catch (Exception ex)
-            {
-                UpdateText = "Tables is not Deleted";
-            }
-        }
-
-        /// <summary>
-        /// Dialog Window Commands
-        /// </summary>
-
-
-        [RelayCommand]
-        public void AboutProgram()
-        {
-            _dialogMessage.DataContext = this;
-            _dialogMessage.ShowDialog();
-        }
-
-
-        [RelayCommand]
-        public void ClosingDialogWindow()
-        {
-            _mediaPlayer.Open(new Uri(PathToResourceAudio));
-            _mediaPlayer.Play();
-            _dialogMessage.Close();
-        }
-
-
-        [RelayCommand]
-        public void HotkeyForDialogWindow()
-        {
-            MessageBox.Show("Отличная попытка ДРУЖИЩЕ", "ага )))", MessageBoxButton.OK, MessageBoxImage.Stop);
-        }
-
-
-        [RelayCommand]
-        public void HotkeyExitFromProgram()
-        {
-            Application.Current.Shutdown();
-        }
-
-
-        [RelayCommand]
-        public void OpenSpecificationWindow()
-        {
-            _specificationWindow.DataContext = this;
-            _specificationWindow.Show();
-        }
-
-
-        [RelayCommand]
-        public void CloseSpecificationWindow()
-        {
-            _specificationWindow.Close();
-        }
-
-
-        [RelayCommand]
-        public void ToolMessage()
-        {
-            MessageBox.Show("Ну я же просил !!!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-        }
-
-
-        [RelayCommand]
-        public void CancelAddPatient()
-        {
-            AddIdPatient = string.Empty;
-
-            AddFamily = string.Empty;
-
-            AddName = string.Empty;
-
-            AddMiddleName = string.Empty;
-
-            AddAdress = string.Empty;
-
-            AddWorkPlase = string.Empty;
-
-            AddInfo = string.Empty;
-
-            SelecedGender = null;
-
-            MedicalInsuranceNumber = string.Empty;
-
-            UpdateText = "Как скажете, отменяю !";
-        }
-        
-
-        [RelayCommand]
-        public async Task AddOnePatientAsync()
-        {
-            var messageToUpdateText = string.Empty;
-
-            try
-            {
-                var newPatient = new PatientInputParameters(
-                    1,
-                    AddFamily,
-                    AddName,
-                    AddMiddleName,
-                    AddIdPatient,
-                    PatientBirthDate,
-                    SelecedGender,
-                    AddAdress,
-                    AddInfo,
-                    AddWorkPlase)
-                {
-                    PatientCount = SetPatientCount
-                };
-
-                await _patientService.AddOneAsync(newPatient);
-
-                await RefreshPatientsAsync();
-                CleareFields();                
-
-                UpdateText = !string.IsNullOrEmpty(messageToUpdateText)
-                    ? messageToUpdateText
-                    : "Patient added";
-            }
-            catch (Exception e)
-            {
-                if (string.IsNullOrEmpty(AddFamily) || string.IsNullOrEmpty(AddName) || string.IsNullOrEmpty(AddMiddleName))
-                {
-                    UpdateText = "Создан пациент-призрак. Поздравляю!";
-                    CleareFields();
-
-                    return;
-                }
-
-                CleareFields();
-                UpdateText = !string.IsNullOrEmpty(messageToUpdateText)
-                    ? messageToUpdateText
-                    : "Пациент не добавлен";
-            }
-        }
-
         private void CleareFields()
         {
             AddIdPatient = string.Empty;
@@ -842,25 +866,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             AddInfo = string.Empty;
             MedicalInsuranceNumber = string.Empty;
         }
-
-        [RelayCommand]
-        public void OpenWebPage()
-        {
-            var url = "http://localhost:5289"; // или любой нужный маршрут
-            try
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = url,
-                    UseShellExecute = true // важно для Windows — откроет в браузере
-                });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Не удалось открыть веб-страницу: " + ex.Message);
-            }
-        }
-
 
     }
 }
