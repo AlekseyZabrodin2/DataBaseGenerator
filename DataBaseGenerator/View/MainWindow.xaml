@@ -8,7 +8,7 @@
     xmlns:viewmodels="clr-namespace:DataBaseGenerator.UI.Wpf.ViewModel"
     Title="DataBase Generator"
     Width="1139"
-    Height="753"
+    Height="850"
     d:DataContext="{d:DesignInstance viewmodels:MainViewModel}"
     Icon="{Binding PathToIcon}"
     WindowStartupLocation="CenterScreen"
@@ -24,16 +24,15 @@
     <Grid ShowGridLines="False">
 
         <Grid.Resources>
-
             <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="{x:Type Button}">
                 <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent}" />
             </Style>
-
         </Grid.Resources>
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
@@ -49,15 +48,12 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-
-
         <Grid
             Name="MenuPanel"
             Grid.Row="0"
             Grid.Column="0"
             Grid.ColumnSpan="4"
             Margin="5,5,5,0">
-
 
             <Border>
                 <StackPanel>
@@ -115,7 +111,7 @@
         <Grid
             Name="AddPatients"
             Grid.Row="1"
-            Grid.RowSpan="7"
+            Grid.RowSpan="9"
             Grid.Column="0"
             Margin="5,5,5,5">
 
@@ -191,7 +187,8 @@
                         FontWeight="DemiBold"
                         Text="Additional information:" />
                     <TextBox
-                        Height="120"
+                        Height="217"
+                        TextWrapping="Wrap"
                         Margin="5"
                         Text="{Binding AddInfo, Mode=TwoWay}" />
 
@@ -215,7 +212,6 @@
                 Command="{Binding CancelAddPatientCommand}"
                 Content="Cancel" />
         </Grid>
-
 
         <Grid
             Name="PatientTable"
@@ -253,8 +249,107 @@
         </Grid>
 
         <Grid
-            Name="TextBoxPatientCount"
             Grid.Row="2"
+            Grid.Column="1"
+            Grid.ColumnSpan="3">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0" Margin="5">
+                <StackPanel Orientation="Vertical">
+                    <CheckBox
+                        Margin="5"
+                        Content="Eng Names"
+                        FontSize="12"
+                        FontWeight="Bold"
+                        IsChecked="{Binding UseEngNames}" />
+                    <CheckBox
+                        Margin="5"
+                        Content="Rus Names"
+                        FontSize="12"
+                        FontWeight="Bold"
+                        IsChecked="{Binding UseRusNames}" />
+                    <CheckBox
+                        Margin="5"
+                        Content="China Names"
+                        FontSize="12"
+                        FontWeight="Bold"
+                        IsChecked="{Binding UseChinaNames}" />
+                </StackPanel>
+            </Grid>
+
+            <Grid Grid.Column="1" Margin="5">
+                <StackPanel Orientation="Vertical">
+                    <CheckBox
+                        Margin="5"
+                        Content="0 - 17 years"
+                        FontSize="12"
+                        FontWeight="Bold"
+                        IsChecked="{Binding UseAge0_17}" />
+                    <CheckBox
+                        Margin="5"
+                        Content="18 - 60 years"
+                        FontSize="12"
+                        FontWeight="Bold"
+                        IsChecked="{Binding UseAge18_60}" />
+                    <CheckBox
+                        Margin="5"
+                        Content="61 - 120 years"
+                        FontSize="12"
+                        FontWeight="Bold"
+                        IsChecked="{Binding UseAge61_120}" />
+                </StackPanel>
+            </Grid>
+
+            <Grid Grid.Column="2" Margin="5">
+                <StackPanel Orientation="Vertical">
+                    <CheckBox
+                        Margin="5"
+                        Content="Missing birthdate"
+                        FontSize="12"
+                        FontWeight="Bold"
+                        IsChecked="{Binding UseMissingBirthdate}" />
+                    <CheckBox
+                        Margin="5"
+                        Content="Future birthdate"
+                        FontSize="12"
+                        FontWeight="Bold"
+                        IsChecked="{Binding UseFutureBirthdate}" />
+                </StackPanel>
+            </Grid>
+
+            <Grid Grid.Column="3" Margin="5">
+                <StackPanel Orientation="Vertical">
+                    <CheckBox
+                        Margin="5"
+                        Content="Empty strings"
+                        FontSize="12"
+                        FontWeight="Bold"
+                        IsChecked="{Binding UseEmptyStrings}" />
+                    <CheckBox
+                        Margin="5"
+                        Content="Long values"
+                        FontSize="12"
+                        FontWeight="Bold"
+                        IsChecked="{Binding UseLongValues}" />
+                    <CheckBox
+                        Margin="5"
+                        Content="Special characters"
+                        FontSize="12"
+                        FontWeight="Bold"
+                        IsChecked="{Binding UseSpecialChars}" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <Grid
+            Name="TextBoxPatientCount"
+            Grid.Row="3"
             Grid.Column="1"
             Margin="5">
 
@@ -265,7 +360,7 @@
                 VerticalAlignment="Center"
                 FontSize="15"
                 FontWeight="Bold"
-                Text="PatiEnt Count" />
+                Text="Patient Count" />
 
             <TextBox
                 Name="PatientCount"
@@ -283,7 +378,7 @@
 
         <Grid
             Name="ButtonAddPatient"
-            Grid.Row="2"
+            Grid.Row="3"
             Grid.Column="2"
             Margin="5">
 
@@ -331,9 +426,8 @@
 
         <Grid
             Name="ButtonDeleteFirstPatient"
-            Grid.Row="2"
+            Grid.Row="3"
             Grid.Column="3">
-
             <Button
                 Name="DeleteFirstPatient"
                 Width="120"
@@ -353,10 +447,9 @@
                 Content="Delete All" />
         </Grid>
 
-
         <Grid
             Name="WorkListTable"
-            Grid.Row="3"
+            Grid.Row="4"
             Grid.Column="1"
             Grid.ColumnSpan="3"
             Margin="5"
@@ -408,7 +501,7 @@
 
         <Grid
             Name="TextBoxWorkListCount"
-            Grid.Row="4"
+            Grid.Row="5"
             Grid.Column="1"
             Margin="5">
 
@@ -436,7 +529,7 @@
 
         <Grid
             Name="TextBoxModality"
-            Grid.Row="4"
+            Grid.Row="5"
             Grid.Column="2"
             Margin="5">
 
@@ -465,7 +558,7 @@
 
         <Grid
             Name="TextBoxAeTitle"
-            Grid.Row="4"
+            Grid.Row="5"
             Grid.Column="3"
             Margin="5,0,10,0">
 
@@ -493,7 +586,7 @@
 
         <Grid
             Name="ButtonAddWorkList"
-            Grid.Row="5"
+            Grid.Row="6"
             Grid.Column="1"
             Margin="5">
 
@@ -520,7 +613,7 @@
 
         <Grid
             Name="ButtonDeleteFirstWorkList"
-            Grid.Row="5"
+            Grid.Row="6"
             Grid.Column="3"
             Margin="5,0,10,0">
 
@@ -545,7 +638,7 @@
 
         <Grid
             Name="ViewUpdateText"
-            Grid.Row="6"
+            Grid.Row="7"
             Grid.Column="1"
             Grid.ColumnSpan="3"
             Margin="5"
@@ -566,7 +659,7 @@
 
         <Grid
             Name="ButtonConnect"
-            Grid.Row="7"
+            Grid.Row="8"
             Grid.Column="2"
             Margin="5">
 
@@ -582,7 +675,7 @@
 
         <Grid
             Name="ButtonSelect"
-            Grid.Row="7"
+            Grid.Row="8"
             Grid.Column="3"
             Margin="5">
 
@@ -595,7 +688,5 @@
                 Content="Delete all tables" />
 
         </Grid>
-
-
     </Grid>
 </mah:MetroWindow>
