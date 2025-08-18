@@ -274,6 +274,39 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [ObservableProperty]
         public partial Patient SelectedPatient {  get; set; }
 
+        [ObservableProperty]
+        public partial bool UseEngNames { get; set; }
+
+        [ObservableProperty]
+        public partial bool UseRusNames { get; set; }
+
+        [ObservableProperty]
+        public partial bool UseChinaNames { get; set; }
+
+        [ObservableProperty]
+        public partial bool UseAge0_17 { get; set; }
+
+        [ObservableProperty]
+        public partial bool UseAge18_60 { get; set; }
+
+        [ObservableProperty]
+        public partial bool UseAge61_120 { get; set; }
+
+        [ObservableProperty]
+        public partial bool UseMissingBirthdate { get; set; }
+
+        [ObservableProperty]
+        public partial bool UseFutureBirthdate { get; set; }
+
+        [ObservableProperty]
+        public partial bool UseEmptyStrings { get; set; }
+
+        [ObservableProperty]
+        public partial bool UseLongValues { get; set; }
+
+        [ObservableProperty]
+        public partial bool UseSpecialChars { get; set; }
+
 
 
         public MainViewModel(BaseGenerateContext context, IHttpClientFactory clientFactory)
@@ -297,8 +330,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             InitializeDirectories();
             _ = InitializeAsync();
-
-            AllPatients = new();
         }
 
 
@@ -329,6 +360,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         private async Task InitializeAsync()
         {
+            AllPatients = new();
+
             AllPatients = await _patientService.GetAllAsync();
             AllWorkLists = await _worklistService.GetAllAsync();
         }
