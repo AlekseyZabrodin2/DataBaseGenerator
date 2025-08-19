@@ -188,9 +188,9 @@
                         Text="Additional information:" />
                     <TextBox
                         Height="217"
-                        TextWrapping="Wrap"
                         Margin="5"
-                        Text="{Binding AddInfo, Mode=TwoWay}" />
+                        Text="{Binding AddInfo, Mode=TwoWay}"
+                        TextWrapping="Wrap" />
 
                 </StackPanel>
             </Border>
@@ -283,43 +283,58 @@
                 </StackPanel>
             </Grid>
 
-            <Grid Grid.Column="1" Margin="5">
+            <Grid
+                Grid.Column="1"
+                Grid.ColumnSpan="2"
+                Margin="5">
                 <StackPanel Orientation="Vertical">
-                    <CheckBox
+                    <RadioButton
                         Margin="5"
-                        Content="0 - 17 years"
+                        Content="Random birthdate"
                         FontSize="12"
                         FontWeight="Bold"
-                        IsChecked="{Binding UseAge0_17}" />
-                    <CheckBox
+                        GroupName="BirthdateSection"
+                        IsChecked="{Binding UseRandomBirthdate}" />
+                    <RadioButton
                         Margin="5"
-                        Content="18 - 60 years"
+                        Content="Missing birthdate"
                         FontSize="12"
                         FontWeight="Bold"
-                        IsChecked="{Binding UseAge18_60}" />
-                    <CheckBox
+                        GroupName="BirthdateSection"
+                        IsChecked="{Binding UseMissingBirthdate}" />
+                    <RadioButton
                         Margin="5"
-                        Content="61 - 120 years"
+                        Content="Future birthdate"
                         FontSize="12"
                         FontWeight="Bold"
-                        IsChecked="{Binding UseAge61_120}" />
+                        GroupName="BirthdateSection"
+                        IsChecked="{Binding UseFutureBirthdate}" />
                 </StackPanel>
             </Grid>
 
             <Grid Grid.Column="2" Margin="5">
                 <StackPanel Orientation="Vertical">
-                    <CheckBox
+                    <RadioButton
                         Margin="5"
-                        Content="Missing birthdate"
+                        Content="0 - 17 years"
                         FontSize="12"
                         FontWeight="Bold"
-                        IsChecked="{Binding UseMissingBirthdate}" />
-                    <CheckBox
+                        GroupName="BirthdateSection"
+                        IsChecked="{Binding UseAge0_17}" />
+                    <RadioButton
                         Margin="5"
-                        Content="Future birthdate"
+                        Content="18 - 60 years"
                         FontSize="12"
                         FontWeight="Bold"
-                        IsChecked="{Binding UseFutureBirthdate}" />
+                        GroupName="BirthdateSection"
+                        IsChecked="{Binding UseAge18_60}" />
+                    <RadioButton
+                        Margin="5"
+                        Content="61 - 120 years"
+                        FontSize="12"
+                        FontWeight="Bold"
+                        GroupName="BirthdateSection"
+                        IsChecked="{Binding UseAge61_120}" />
                 </StackPanel>
             </Grid>
 
@@ -427,24 +442,49 @@
         <Grid
             Name="ButtonDeleteFirstPatient"
             Grid.Row="3"
-            Grid.Column="3">
+            Grid.Column="3"
+            Margin="5">
             <Button
                 Name="DeleteFirstPatient"
-                Width="120"
+                Width="80"
                 Height="50"
-                Margin="20,0,0,0"
                 HorizontalAlignment="Left"
-                Command="{Binding DeleteFirstPatientCommand}"
-                Content="Delete First" />
+                Command="{Binding CleanCheckboxesCommand}">
+                <TextBlock
+                    FontSize="10"
+                    Text="CLEAN CHECKBOX"
+                    TextAlignment="Center"
+                    TextWrapping="Wrap" />
+            </Button>
+
+            <Button
+                Name="CleanCheckbox"
+                Width="80"
+                Height="50"
+                HorizontalAlignment="Center"
+                Command="{Binding DeleteFirstPatientCommand}">
+                <TextBlock
+                    Margin="5,0"
+                    FontSize="10"
+                    Text="DELETE FIRST"
+                    TextAlignment="Center"
+                    TextWrapping="Wrap" />
+            </Button>
 
             <Button
                 Name="DeleteAllPatient"
-                Width="120"
+                Width="80"
                 Height="50"
-                Margin="0,0,10,0"
+                Margin="0,0,5,0"
                 HorizontalAlignment="Right"
-                Command="{Binding DeleteAllPatientCommand}"
-                Content="Delete All" />
+                Command="{Binding DeleteAllPatientCommand}">
+                <TextBlock
+                    Margin="10,0"
+                    FontSize="10"
+                    Text="DELETE ALL"
+                    TextAlignment="Center"
+                    TextWrapping="Wrap" />
+            </Button>
         </Grid>
 
         <Grid
