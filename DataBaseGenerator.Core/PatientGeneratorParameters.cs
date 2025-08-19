@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataBaseGenerator.Core
 {
@@ -15,7 +11,7 @@ namespace DataBaseGenerator.Core
             IGeneratorRule<string> firstName,
             IGeneratorRule<string> middleName,
             IGeneratorRule<string, int> patientId,
-            IGeneratorRule<DateTime> birthDate,
+            IGeneratorRule<DateTime?> birthDate,
             IGeneratorRule<string> sex,
             IGeneratorRule<string> address,
             IGeneratorRule<string> addInfo,
@@ -40,7 +36,31 @@ namespace DataBaseGenerator.Core
 
         public int PatientCount { get; set; }
 
-        public  IGeneratorRule<int, int> ID_Patient { get; }
+        public bool NamesRusGeneratorRule { get; set; }
+
+        public bool NamesEngGeneratorRule { get; set; }
+
+        public bool NamesChinaGeneratorRule { get; set; }
+
+        public bool RandomBirthdateGeneratorRule { get; set; }
+
+        public bool MissingBirthdateGeneratorRule { get; set; }
+
+        public bool FutureBirthdateGeneratorRule { get; set; }
+
+        public bool Age0_17_GeneratorRule { get; set; }
+
+        public bool Age18_60_GeneratorRule { get; set; }
+
+        public bool Age61_120_GeneratorRule { get; set; }
+
+        public bool EmptyStringsGeneratorRule { get; set; }
+
+        public bool LongValuesGeneratorRule { get; set; }
+
+        public bool SpecialCharsGeneratorRule { get; set; }
+
+        public IGeneratorRule<int, int> ID_Patient { get; }
 
         public IGeneratorRule<string> LastName { get; }
 
@@ -50,7 +70,7 @@ namespace DataBaseGenerator.Core
 
         public IGeneratorRule<string, int> PatientID { get; }
 
-        public IGeneratorRule<DateTime> BirthDate { get; }
+        public IGeneratorRule<DateTime?> BirthDate { get; }
 
         public IGeneratorRule<string> Sex { get; }
 

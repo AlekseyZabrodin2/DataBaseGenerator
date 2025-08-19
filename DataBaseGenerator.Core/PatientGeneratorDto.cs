@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using DataBaseGenerator.Core.GeneratorRules.Patient;
 
 namespace DataBaseGenerator.Core
@@ -36,6 +32,30 @@ namespace DataBaseGenerator.Core
 
 
         public int PatientCount { get; set; }
+
+        public bool NamesRusGeneratorRule { get; set; }
+
+        public bool NamesEngGeneratorRule { get; set; }
+
+        public bool NamesChinaGeneratorRule { get; set; }
+
+        public bool Age0_17_GeneratorRule { get; set; }
+
+        public bool Age18_60_GeneratorRule { get; set; }
+
+        public bool Age61_120_GeneratorRule { get; set; }
+
+        public bool RandomBirthdateGeneratorRule { get; set; }
+
+        public bool MissingBirthdateGeneratorRule { get; set; }
+
+        public bool FutureBirthdateGeneratorRule { get; set; }
+
+        public bool EmptyStringsGeneratorRule { get; set; }
+
+        public bool LongValuesGeneratorRule { get; set; }
+
+        public bool SpecialCharsGeneratorRule { get; set; }
 
         public OrderIdPatientRule ID_Patient { get; }
 
