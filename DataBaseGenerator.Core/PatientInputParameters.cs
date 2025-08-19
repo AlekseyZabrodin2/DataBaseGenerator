@@ -15,7 +15,7 @@ namespace DataBaseGenerator.Core
             string firstName,
             string middleName,
             string patientId,
-            DateTime birthDate,
+            DateTime? birthDate,
             string sex,
             string address,
             string addInfo,
@@ -46,7 +46,7 @@ namespace DataBaseGenerator.Core
 
         public string PatientID { get; set; }
 
-        public DateTime BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
 
         public string Sex { get; set; }
 

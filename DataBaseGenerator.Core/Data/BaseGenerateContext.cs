@@ -81,7 +81,7 @@ namespace DataBaseGenerator.Core.Data
 
             modelBuilder.Entity<Patient>().Property(patient => patient.PatientID).HasColumnType("varchar(64)").IsRequired();
 
-            modelBuilder.Entity<Patient>().Property(patient => patient.BirthDate).HasColumnType("date").IsRequired();
+            modelBuilder.Entity<Patient>().Property(patient => patient.BirthDate).HasColumnType("date").IsRequired(false);
 
             modelBuilder.Entity<Patient>().Property(patient => patient.Sex).HasColumnType("varchar(1)").IsRequired();
 
