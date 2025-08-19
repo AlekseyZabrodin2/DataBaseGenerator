@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataBaseGenerator.Core.GeneratorRules.Patient
 {
     public sealed class RandomMiddleNameRule : IGeneratorRule<string>
     {
+        private readonly Random _random = new();
+
         private static readonly IDictionary<int, string> _russianMiddlename = new Dictionary<int, string>
         {
             {0, "Дмитреевич"},
@@ -22,13 +21,70 @@ namespace DataBaseGenerator.Core.GeneratorRules.Patient
             {9, "Юрьевич"}
         };
 
-        public string Generate()
+        private static readonly IDictionary<int, string> _englishMiddleNames = new Dictionary<int, string>
         {
-            var random = new Random();
+            {0, "John"},
+            {1, "Michael"},
+            {2, "Rose"},
+            {3, "Grace"},
+            {4, "Lee"},
+            {5, "James"},
+            {6, "Edward"},
+            {7, "Elizabeth"},
+            {8, "Marie"},
+            {9, "Ann"}
+        };
 
-            var middleName = _russianMiddlename[random.Next(0, _russianMiddlename.Count)];
+        private static readonly IDictionary<int, string> _chineseMiddleNames = new Dictionary<int, string>
+        {
+            {0, "晓明"},
+            {1, "玉兰"},
+            {2, "志强"},
+            {3, "婷婷"},
+            {4, "建华"},
+            {5, "伟强"},
+            {6, "芳丽"},
+            {7, "国华"},
+            {8, "建国"},
+            {9, "美玲"}
+        };
 
-            return middleName;
+
+        public string Generate() => GenerateRussian();
+
+        public string GenerateRussian()
+        {
+            return _russianMiddlename[_random.Next(0, _russianMiddlename.Count)];
+        }
+
+        public string GenerateEnglish()
+        {
+            return _englishMiddleNames[_random.Next(0, _englishMiddleNames.Count)];
+        }
+
+        public string GenerateChinese()
+        {
+            return _chineseMiddleNames[_random.Next(0, _chineseMiddleNames.Count)];
+        }
+
+        public string GenerateMiddleNames(PatientGeneratorDto patientGenerator)
+        {
+            var generatorMiddleNames = new List<Func<string>>();
+
+            if (patientGenerator.NamesRusGeneratorRule)
+                generatorMiddleNames.Add(GenerateRussian);
+
+            if (patientGenerator.NamesEngGeneratorRule)
+                generatorMiddleNames.Add(GenerateEnglish);
+
+            if (patientGenerator.NamesChinaGeneratorRule)
+                generatorMiddleNames.Add(GenerateChinese);
+
+            if (generatorMiddleNames.Count == 0)
+                return Generate();
+
+            var middleName = generatorMiddleNames[_random.Next(generatorMiddleNames.Count)];
+            return middleName();
         }
 
         public override string ToString()
