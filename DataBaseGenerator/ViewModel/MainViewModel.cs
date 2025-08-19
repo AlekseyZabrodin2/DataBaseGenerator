@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
@@ -236,9 +235,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             set => SetProperty(ref _medInsurNumber, value);
         }
 
-        public DateTime _patientBirthDate = DateTime.Now;
+        public DateTime? _patientBirthDate = DateTime.Now;
 
-        public DateTime PatientBirthDate
+        public DateTime? PatientBirthDate
         {
             get => _patientBirthDate;
             set
@@ -248,7 +247,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                      ? "Привет из будущего, Вася !"
                      : string.Empty;
 
-                var age = DateTime.Now.Year - value.Year;
+                var age = DateTime.Now.Year - value?.Year;
                 BirthDateToolTip = age > 120
                     ? "Похоже, это участник съёмок Титаника"
                     : null;
@@ -291,6 +290,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         [ObservableProperty]
         public partial bool UseAge61_120 { get; set; }
+
+        [ObservableProperty]
+        public partial bool UseRandomBirthdate { get; set; }
 
         [ObservableProperty]
         public partial bool UseMissingBirthdate { get; set; }
@@ -361,6 +363,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private async Task InitializeAsync()
         {
             AllPatients = new();
+            UseRandomBirthdate = true;
 
             AllPatients = await _patientService.GetAllAsync();
             AllWorkLists = await _worklistService.GetAllAsync();
@@ -384,7 +387,22 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     new RandomAddInfoRule(),
                     new RandomOccupationRule())
                 {
-                    PatientCount = SetPatientCount
+                    PatientCount = SetPatientCount,
+
+                    NamesRusGeneratorRule = UseRusNames,
+                    NamesEngGeneratorRule = UseEngNames,
+                    NamesChinaGeneratorRule = UseChinaNames,
+
+                    RandomBirthdateGeneratorRule = UseRandomBirthdate,
+                    MissingBirthdateGeneratorRule = UseMissingBirthdate,
+                    FutureBirthdateGeneratorRule = UseFutureBirthdate,
+                    Age0_17_GeneratorRule = UseAge0_17,
+                    Age18_60_GeneratorRule = UseAge18_60,
+                    Age61_120_GeneratorRule = UseAge61_120,
+
+                    EmptyStringsGeneratorRule = UseEmptyStrings,
+                    LongValuesGeneratorRule = UseLongValues,
+                    SpecialCharsGeneratorRule = UseSpecialChars
                 };
 
                 if (SetPatientCount is 404 or 500 or 777)
@@ -447,6 +465,23 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             MainWindow.AllPatientView.ItemsSource = AllPatients;
             MainWindow.AllPatientView.Items.Refresh();
             UpdateText = "Patient table is update";
+        }
+
+        [RelayCommand]
+        public void CleanCheckboxes()
+        {
+            UseEngNames = false;
+            UseRusNames = false;
+            UseChinaNames = false;
+            UseAge0_17 = false;
+            UseAge18_60 = false;
+            UseAge61_120 = false;
+            UseRandomBirthdate = true;
+            UseMissingBirthdate = false;
+            UseFutureBirthdate = false;
+            UseEmptyStrings = false;
+            UseLongValues = false;
+            UseSpecialChars = false;
         }
 
         [RelayCommand]
