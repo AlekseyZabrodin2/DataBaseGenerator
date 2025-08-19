@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 using DataBaseGenerator.Core;
 using DataBaseGenerator.Core.Data;
 using Microsoft.EntityFrameworkCore;
@@ -83,11 +82,11 @@ namespace DataBaseGenerator.Web.Services
             return new Patient
             {
                 ID_Patient = patientGeneratorParameters.ID_Patient.Generate(patientIndex),
-                LastName = patientGeneratorParameters.LastName.Generate(),
-                FirstName = patientGeneratorParameters.FirstName.Generate(),
-                MiddleName = patientGeneratorParameters.MiddleName.Generate(),
+                LastName = patientGeneratorParameters.LastName.GenerateLastName(patientGeneratorParameters),
+                FirstName = patientGeneratorParameters.FirstName.GenerateFirstName(patientGeneratorParameters),
+                MiddleName = patientGeneratorParameters.MiddleName.GenerateMiddleNames(patientGeneratorParameters),
                 PatientID = patientGeneratorParameters.PatientID.Generate(patientIndex),
-                BirthDate = patientGeneratorParameters.BirthDate.Generate(),
+                BirthDate = patientGeneratorParameters.BirthDate.GenerateBirthdate(patientGeneratorParameters),
                 Sex = patientGeneratorParameters.Sex.Generate(),
                 Address = patientGeneratorParameters.Address.Generate(),
                 AddInfo = patientGeneratorParameters.AddInfo.Generate(),
