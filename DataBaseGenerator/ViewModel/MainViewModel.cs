@@ -431,6 +431,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             catch (Exception ex)
             {
                 UpdateText = "Пациент не добавлен";
+                _logger.Error(ex, "Error in patient generation");
+                MessageBox.Show($"{ex.Message}");
             }
         }
 
@@ -451,8 +453,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
             catch (Exception ex)
             {
+                UpdateText = "Error saving changes";
                 _logger.Error(ex, "Error saving changes");
-                MessageBox.Show("Ошибка при сохранении изменений");
+                MessageBox.Show($"{ex.Message}");
             }
         }
 
@@ -512,6 +515,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             catch (Exception ex)
             {
                 UpdateText = "Patient is not Deleted";
+                _logger.Error(ex, "Patient is not Deleted");
+                MessageBox.Show($"{ex.Message}");
             }
         }
 
@@ -543,6 +548,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             catch (Exception ex)
             {
                 UpdateText = "Patient Table is not Deleted";
+                _logger.Error(ex, "Patient Table is not Deleted");
+                MessageBox.Show($"{ex.Message}");
             }
         }
 
@@ -577,9 +584,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                 UpdateText = "WorkList added";
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 UpdateText = "WorkList not added";
+                _logger.Error(ex, "WorkList not added");
+                MessageBox.Show($"{ex.Message}");
             }
         }
 
@@ -627,6 +636,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             catch (Exception ex)
             {
                 UpdateText = "WorkList is not Deleted";
+                _logger.Error(ex, "WorkList is not Deleted");
+                MessageBox.Show($"{ex.Message}");
             }
         }
 
@@ -662,7 +673,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
             catch (Exception ex)
             {
-                UpdateText = "WorkList is not Deleted";
+                UpdateText = "WorkList Table is not Deleted";
+                _logger.Error(ex, "WorkList Table is not Deleted");
+                MessageBox.Show($"{ex.Message}");
             }
         }
 
