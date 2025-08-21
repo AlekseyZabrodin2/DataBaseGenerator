@@ -728,8 +728,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         public void ClosingDialogWindow()
         {
-            _mediaPlayer.Open(new Uri(PathToResourceAudio));
-            _mediaPlayer.Play();
+            //_mediaPlayer.Open(new Uri(PathToResourceAudio));
+            //_mediaPlayer.Play();
             _dialogMessage.Close();
         }
 
