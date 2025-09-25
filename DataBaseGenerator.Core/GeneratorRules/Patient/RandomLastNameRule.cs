@@ -206,10 +206,10 @@ namespace DataBaseGenerator.Core.GeneratorRules.Patient
                 generatorLastNames.Add(GenerateChinese);
 
             if (patientGenerator.EmptyStringsGeneratorRule)
-                generatorLastNames.Add(GenerateEmptyValues(patientGenerator).ToString);
+                generatorLastNames.Add(() => GenerateEmptyValues(patientGenerator));
 
             if (patientGenerator.LongValuesGeneratorRule)
-                generatorLastNames.Add(GenerateLongLastName(patientGenerator).ToString);
+                generatorLastNames.Add(() => GenerateLongLastName(patientGenerator));
 
             if (patientGenerator.SpecialCharsGeneratorRule)
                 generatorLastNames.Add(GenerateSpecialChars);
