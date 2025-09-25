@@ -97,7 +97,7 @@
                             <MenuItem Header="Просто плагин" />
                             <MenuItem Header="Бла-Бла плагин" />
                             <MenuItem Header="Управление плагинами" />
-                            <MenuItem Command="{Binding OpenWebPageCommand}" Header="Открыть папку плагинов" />
+                            <MenuItem Header="Открыть папку плагинов" />
                         </MenuItem>
                         <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Help">
                             <MenuItem Command="{Binding OpenSpecificationWindowCommand}" Header="Вызвать справку" />
@@ -700,17 +700,27 @@
         <Grid
             Name="ButtonConnect"
             Grid.Row="8"
-            Grid.Column="2"
+            Grid.Column="1"
             Margin="5">
 
             <Button
                 Name="Connect"
-                Width="150"
+                Width="120"
                 Height="50"
-                HorizontalAlignment="Center"
+                Margin="5,0,0,0"
+                HorizontalAlignment="Left"
                 Command="{Binding ConnectDBCommand}"
-                Content="Connect" />
+                Content="Connect" />        
 
+            <Button
+                Name="OpenWeb"
+                Width="120"
+                Height="50"
+                
+                Margin="0,0,10,0"
+                HorizontalAlignment="Right"
+                Command="{Binding OpenWebPageCommand}"
+                Content="Web version" />
         </Grid>
 
         <Grid
@@ -726,7 +736,6 @@
                 HorizontalAlignment="Center"
                 Command="{Binding DeleteAllTablesCommand}"
                 Content="Delete all tables" />
-
         </Grid>
     </Grid>
 </mah:MetroWindow>
