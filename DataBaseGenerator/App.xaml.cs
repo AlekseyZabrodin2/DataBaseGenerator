@@ -3,10 +3,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
-using System.Reflection;
 using System.Windows;
-using DataBaseGenerator.Core;
-using DataBaseGenerator.Core.Data;
+using DataBaseGenerator.Core.LiteDbGenerator.Contracts;
+using DataBaseGenerator.Core.LiteDbGenerator.Data;
+using DataBaseGenerator.Core.LiteDbGenerator.Services;
+using DataBaseGenerator.Core.MySqlGenerator;
+using DataBaseGenerator.Core.MySqlGenerator.Data;
 using DataBaseGenerator.UI.Wpf.View;
 using DataBaseGenerator.UI.Wpf.ViewModel;
 using Microsoft.EntityFrameworkCore;
@@ -62,8 +64,25 @@ namespace DataBaseGenerator.UI.Wpf
                     services.AddScoped<PatientService>();
                     services.AddScoped<WorklistService>();
 
+                    services.AddSingleton<IStudyStorageModule>(sp =>
+                    {
+                        var dataDirectory = "D:\\Develop\\UniExpert\\Build\\Debug\\Data";
+
+                        if (!Directory.Exists(dataDirectory))
+                        {
+                            dataDirectory = Path.Combine(AppContext.BaseDirectory, "LiteDataBase");
+                            Directory.CreateDirectory(dataDirectory);
+                        }                        
+
+                        var dbPath = Path.Combine(dataDirectory, "patients.db");
+                        return new LiteDbStudyStorageModule(dbPath);
+                    })
+                    .AddSingleton<IStudyApplicationService, StudyApplicationService>();
+
                     services.AddSingleton(this);
                     services.AddSingleton<MainViewModel>();
+                    services.AddSingleton<MySqlGeneratorViewModel>();
+                    services.AddSingleton<LiteDbGeneratorViewModel>();
                     services.AddTransient<DialogMessageWindow>();
                     services.AddTransient<MainWindow>();
                     services.AddTransient<SpecificationWindow>();
