@@ -1,5 +1,4 @@
-﻿using System.Windows.Controls;
-using DataBaseGenerator.UI.Wpf.ViewModel;
+﻿using DataBaseGenerator.UI.Wpf.ViewModel;
 
 namespace DataBaseGenerator.UI.Wpf.View
 {
@@ -8,11 +7,6 @@ namespace DataBaseGenerator.UI.Wpf.View
     /// </summary>
     public partial class MainWindow
     {
-
-        //Create ListView для возможности обновлять таблицу
-
-        public static DataGrid AllPatientView;
-        public static ListView AllWorkListView;
 
         public MainViewModel ViewModel { get; }
 
@@ -23,9 +17,6 @@ namespace DataBaseGenerator.UI.Wpf.View
             InitializeComponent();
 
             DataContext = ViewModel;
-
-            AllPatientView = ViewAllPatient;
-            AllWorkListView = ViewAllWorkList;
         }
     }
 }
