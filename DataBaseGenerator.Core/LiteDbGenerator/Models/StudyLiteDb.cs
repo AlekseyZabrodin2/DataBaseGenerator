@@ -1,0 +1,34 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace DataBaseGenerator.Core.LiteDbGenerator.Models
+{
+    public sealed class StudyLiteDb
+    {
+        public string? Id { get; set; }
+
+        public string StudyInstanceUid { get; set; } = default!;
+        public string StudyId { get; set; } = string.Empty;
+
+        // Internal patient identifier used by storage implementation
+        public string? PatientId { get; set; }
+
+        // Patient snapshot at study time
+        public string SnapshotLastName { get; set; } = string.Empty;
+        public string SnapshotFirstName { get; set; } = string.Empty;
+        public string SnapshotPatronymic { get; set; } = string.Empty;
+        public string SnapshotPatientId { get; set; } = string.Empty;
+        public DateTime? PatientBirthDate { get; set; }
+
+        public string AccessionNumber { get; set; } = string.Empty;
+        public string[] BodyParts { get; set; } = Array.Empty<string>();
+
+        public DateTime StudyDateTime { get; set; }
+        public double EffectiveDosemSv { get; set; }
+
+        public string Status { get; set; } = string.Empty;
+    }
+}
