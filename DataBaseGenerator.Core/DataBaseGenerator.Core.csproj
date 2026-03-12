@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="LiteDB" Version="5.0.21" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.13" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.3">
       <PrivateAssets>all</PrivateAssets>
@@ -23,19 +24,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Resources\333.jpg">
+    <None Update="MySqlGenerator\Resources\333.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\DBGenerator.ico">
+    <None Update="MySqlGenerator\Resources\DBGenerator.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\GodFatherAudio.mp3">
+    <None Update="MySqlGenerator\Resources\GodFatherAudio.mp3">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\NoNo.mp3">
+    <None Update="MySqlGenerator\Resources\NoNo.mp3">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Specification.jpg">
+    <None Update="MySqlGenerator\Resources\Specification.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
