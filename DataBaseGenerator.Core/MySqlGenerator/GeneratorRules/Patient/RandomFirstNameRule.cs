@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using DataBaseGenerator.Core.MySqlGenerator;
 
-namespace DataBaseGenerator.Core.GeneratorRules.Patient
+namespace DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Patient
 {
     public sealed class RandomFirstNameRule : IGeneratorRule<string>
     {
@@ -9,30 +10,64 @@ namespace DataBaseGenerator.Core.GeneratorRules.Patient
 
         private static readonly IDictionary<int, string> _russianName = new Dictionary<int, string>
         {
-            {0, "Андрей"},
+            {0, "Александр"},
             {1, "Борис"},
-            {2, "Виталик"},
-            {3, "Георгий"},
+            {2, "Владимир"},
+            {3, "Григорий"},
             {4, "Дмитрий"},
-            {5, "Егор"},
-            {6, "Сергей"},
-            {7, "Ярик"},
-            {8, "Павел"},
-            {9, "Марк"}
+            {5, "Евгений"},
+            {6, "Ждан"},
+            {7, "Захар"},
+            {8, "Иван"},
+            {9, "Кирилл"},
+            {10, "Леонид"},
+            {11, "Михаил"},
+            {12, "Николай"},
+            {13, "Олег"},
+            {14, "Павел"},
+            {15, "Роман"},
+            {16, "Сергей"},
+            {17, "Тимофей"},
+            {18, "Устин"},
+            {19, "Федор"},
+            {20, "Харитон"},
+            {21, "Цезарь"},
+            {22, "Чеслав"},
+            {23, "Шамиль"},
+            {24, "Щербак"},
+            {25, "Эдуард"},
+            {26, "Юрий"},
+            {27, "Ярослав"}
         };
 
         private static readonly IDictionary<int, string> _englishNames = new Dictionary<int, string>
         {
-            {0, "John"},
-            {1, "Michael"},
-            {2, "William"},
-            {3, "James"},
-            {4, "Robert"},
-            {5, "Emily"},
-            {6, "Sarah"},
-            {7, "Jessica"},
-            {8, "Ashley"},
-            {9, "Amanda"}
+            {0, "Alexander"},
+            {1, "Benjamin"},
+            {2, "Christopher"},
+            {3, "Daniel"},
+            {4, "Elizabeth"},
+            {5, "Faith"},
+            {6, "Gabriel"},
+            {7, "Hannah"},
+            {8, "Isabella"},
+            {9, "Jacob"},
+            {10, "Kevin"},
+            {11, "Laura"},
+            {12, "Michael"},
+            {13, "Nathan"},
+            {14, "Olivia"},
+            {15, "Patricia"},
+            {16, "Quentin"},
+            {17, "Robert"},
+            {18, "Sophia"},
+            {19, "Thomas"},
+            {20, "Ulysses"},
+            {21, "Victoria"},
+            {22, "William"},
+            {23, "Xander"},
+            {24, "Yvonne"},
+            {25, "Zachary"}
         };
 
         private static readonly IDictionary<int, string> _chineseNames = new Dictionary<int, string> 

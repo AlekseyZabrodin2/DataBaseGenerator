@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using DataBaseGenerator.Core.MySqlGenerator;
 
-namespace DataBaseGenerator.Core.GeneratorRules.Patient
+namespace DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Patient
 {
     public sealed class RandomLastNameRule : IGeneratorRule<string>
     {
@@ -9,30 +10,77 @@ namespace DataBaseGenerator.Core.GeneratorRules.Patient
 
         private static readonly IDictionary<int, string> _russianLastName = new Dictionary<int, string>
         {
-            {0, "Покровский"},
-            {1, "Лебединский"},
-            {2, "Дубов"},
-            {3, "Голицын"},
-            {4, "Селиверстов"},
-            {5, "Сибирцев"},
-            {6, "Дунаевский"},
-            {7, "Ржевский"},
-            {8, "Чацкий"},
-            {9, "Ростов"}
+            {0, "Андреев"},
+            {1, "Белов"},
+            {2, "Волков"},
+            {3, "Громов"},
+            {4, "Дроздов"},
+            {5, "Ершов"},
+            {6, "Жданов"},
+            {7, "Зверев"},
+            {8, "Ильин"},
+            {9, "Крылов"},
+            {10, "Лазарев"},
+            {11, "Морозов"},
+            {12, "Наумов"},
+            {13, "Озеров"},
+            {14, "Павлов"},
+            {15, "Рыбаков"},
+            {16, "Сергеев"},
+            {17, "Тарасов"},
+            {18, "Уваров"},
+            {19, "Фролов"},
+            {20, "Хохлов"},
+            {21, "Царев"},
+            {22, "Чистяков"},
+            {23, "Шубин"},
+            {24, "Щеглов"},
+            {25, "Эрдман"},
+            {26, "Юсупов"},
+            {27, "Яшин"}
         };
 
         private static readonly IDictionary<int, string> _englishLastNames = new Dictionary<int, string>
         {
-            {0, "Smith"},
-            {1, "Johnson"},
-            {2, "Williams"},
-            {3, "Brown"},
-            {4, "Jones"},
-            {5, "Miller"},
-            {6, "Davis"},
-            {7, "Garcia"},
-            {8, "Rodriguez"},
-            {9, "Wilson"}
+            {0, "Anderson"},
+            {1, "Brown"},
+            {2, "Clark"},
+            {3, "Davis"},
+            {4, "Evans"},
+            {5, "Foster"},
+            {6, "Garcia"},
+            {7, "Harris"},
+            {8, "Johnson"},
+            {9, "King"},
+            {10, "Lewis"},
+            {11, "Miller"},
+            {12, "Nelson"},
+            {13, "Parker"},
+            {14, "Roberts"},
+            {15, "Smith"},
+            {16, "Taylor"},
+            {17, "Walker"},
+            {18, "Young"},
+            {19, "Adams"},
+            {20, "Baker"},
+            {21, "Campbell"},
+            {22, "Edwards"},
+            {23, "Flores"},
+            {24, "Green"},
+            {25, "Hill"},
+            {26, "Jackson"},
+            {27, "Kelly"},
+            {28, "Long"},
+            {29, "Mitchell"},
+            {30, "Nguyen"},
+            {31, "Phillips"},
+            {32, "Rivera"},
+            {33, "Scott"},
+            {34, "Thomas"},
+            {35, "White"},
+            {36, "Xu"},
+            {37, "Yoshida"},
+            {38, "Zhang"}
         };
 
         private static readonly IDictionary<int, string> _chineseLastNames = new Dictionary<int, string>
