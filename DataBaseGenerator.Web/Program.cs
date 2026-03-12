@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using System.Net.Http.Headers;
-using DataBaseGenerator.Core.Data;
+using DataBaseGenerator.Core.MySqlGenerator.Data;
 using DataBaseGenerator.Web.Controllers.ApiControllers;
 using DataBaseGenerator.Web.Services;
 using Microsoft.EntityFrameworkCore;

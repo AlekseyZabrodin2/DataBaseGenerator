@@ -1,5 +1,5 @@
 ﻿using System.Collections.ObjectModel;
-using DataBaseGenerator.Core;
+using DataBaseGenerator.Core.MySqlGenerator;
 using DataBaseGenerator.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 

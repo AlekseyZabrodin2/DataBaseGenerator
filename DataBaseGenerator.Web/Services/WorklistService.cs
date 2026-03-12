@@ -1,5 +1,5 @@
-﻿using DataBaseGenerator.Core;
-using DataBaseGenerator.Core.Data;
+﻿using DataBaseGenerator.Core.MySqlGenerator;
+using DataBaseGenerator.Core.MySqlGenerator.Data;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 using ILogger = NLog.ILogger;

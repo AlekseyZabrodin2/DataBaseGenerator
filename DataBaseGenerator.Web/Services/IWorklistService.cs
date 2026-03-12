@@ -1,6 +1,4 @@
-﻿using DataBaseGenerator.Core;
-using DataBaseGenerator.Core.Data;
-using Microsoft.AspNetCore.Mvc;
+﻿using DataBaseGenerator.Core.MySqlGenerator;
 
 namespace DataBaseGenerator.Web.Services
 {
