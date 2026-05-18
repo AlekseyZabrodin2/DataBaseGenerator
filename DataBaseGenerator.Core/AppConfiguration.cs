@@ -13,24 +13,27 @@ namespace DataBaseGenerator.Core
         private static readonly string ConfigDirectory = Path.Combine(AppContext.BaseDirectory,
         "../../../AppData");
 
-        private static readonly string ConfigPath = Path.Combine(ConfigDirectory, "appsettings.json");
 
         public static IConfigurationRoot LoadConfiguration()
         {
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
+            var configPath = Path.Combine(ConfigDirectory, $"appsettings.{environment}.json");
+
+
             // Создаём папку, если её нет
             if (!Directory.Exists(ConfigDirectory))
                 Directory.CreateDirectory(ConfigDirectory);
 
             // Если файла нет — создаём из embedded ресурса или дефолта
-            if (!File.Exists(ConfigPath))
-                CreateDefaultConfig();
+            if (!File.Exists(configPath))
+                CreateDefaultConfig(configPath);
 
             return new ConfigurationBuilder()
-                .AddJsonFile(ConfigPath, optional: false, reloadOnChange: true)
+                .AddJsonFile(configPath, optional: false, reloadOnChange: true)
                 .Build();
         }
 
-        private static void CreateDefaultConfig()
+        private static void CreateDefaultConfig(string configPath)
         {
             var defaultConfig = @"{
                 ""ConnectionStrings"": {
@@ -41,7 +44,7 @@ namespace DataBaseGenerator.Core
                 ""ApiUrl"": ""http://localhost:5289/api/""
                 }
             }";
-            File.WriteAllText(ConfigPath, defaultConfig);
+            File.WriteAllText(configPath, defaultConfig);
         }
 
     }
