@@ -16,6 +16,7 @@ using DataBaseGenerator.Core.Data;
 using DataBaseGenerator.Core.GeneratorRules.Patient;
 using DataBaseGenerator.Core.GeneratorRules.WorkList;
 using DataBaseGenerator.UI.Wpf.View;
+using Microsoft.EntityFrameworkCore;
 using NLog;
 
 namespace DataBaseGenerator.UI.Wpf.ViewModel
@@ -351,30 +352,91 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         public async Task RefreshPatientsAsync()
         {
-            AllPatients = await _patientService.GetAllAsync();
-            MainWindow.AllPatientView.ItemsSource = null;
-            MainWindow.AllPatientView.Items.Clear();
-            MainWindow.AllPatientView.ItemsSource = AllPatients;
-            MainWindow.AllPatientView.Items.Refresh();
-            UpdateText = "Patient table is update";
+            _logger.Info(">>> RefreshPatientsAsync: START");
+
+            try
+            {
+                _logger.Info("RefreshPatientsAsync: Calling PatientService.GetAllAsync...");
+
+                AllPatients = await _patientService.GetAllAsync();
+
+                _logger.Info($"RefreshPatientsAsync: Retrieved {AllPatients?.Count ?? 0} patients");
+
+                if (MainWindow.AllPatientView != null)
+                {
+                    MainWindow.AllPatientView.ItemsSource = null;
+                    MainWindow.AllPatientView.Items.Clear();
+                    MainWindow.AllPatientView.ItemsSource = AllPatients;
+                    MainWindow.AllPatientView.Items.Refresh();
+                    _logger.Info("RefreshPatientsAsync: UI updated");
+                }
+                else
+                {
+                    _logger.Warn("RefreshPatientsAsync: MainWindow.AllPatientView is null");
+                }
+
+                UpdateText = "Patient table is update";
+                _logger.Info("RefreshPatientsAsync: SUCCESS");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "RefreshPatientsAsync: ERROR - {Message}", ex.Message);
+                UpdateText = $"Ошибка обновления: {ex.Message}";
+            }
+            finally
+            {
+                _logger.Info("<<< RefreshPatientsAsync: END");
+            }
         }
 
 
         [RelayCommand]
         public async Task RefreshWorkListAsync()
         {
-            AllWorkLists = await _worklistService.GetAllAsync();
-            MainWindow.AllWorkListView.ItemsSource = null;
-            MainWindow.AllWorkListView.Items.Clear();
-            MainWindow.AllWorkListView.ItemsSource = AllWorkLists;
-            MainWindow.AllWorkListView.Items.Refresh();
-            UpdateText = "WorkList table is update";
+            _logger.Info(">>> RefreshWorkListAsync: START");
+
+            try
+            {
+                _logger.Info("RefreshWorkListAsync: Calling WorklistService.GetAllAsync...");
+
+                AllWorkLists = await _worklistService.GetAllAsync();
+
+                _logger.Info($"RefreshWorkListAsync: Retrieved {AllWorkLists?.Count ?? 0} worklists");
+
+                if (MainWindow.AllWorkListView != null)
+                {
+                    MainWindow.AllWorkListView.ItemsSource = null;
+                    MainWindow.AllWorkListView.Items.Clear();
+                    MainWindow.AllWorkListView.ItemsSource = AllWorkLists;
+                    MainWindow.AllWorkListView.Items.Refresh();
+                    _logger.Info("RefreshWorkListAsync: UI updated");
+                }
+                else
+                {
+                    _logger.Warn("RefreshWorkListAsync: MainWindow.AllWorkListView is null");
+                }
+
+                UpdateText = "WorkList table is update";
+                _logger.Info("RefreshWorkListAsync: SUCCESS");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "RefreshWorkListAsync: ERROR - {Message}", ex.Message);
+                UpdateText = $"Ошибка обновления WorkList: {ex.Message}";
+            }
+            finally
+            {
+                _logger.Info("<<< RefreshWorkListAsync: END");
+            }
+
         }
 
 
         [RelayCommand]
         public async Task AddPatientAsync()
         {
+            _logger.Info(">>> AddPatientAsync: START");
+
             try
             {
                 var newPatient = new PatientGeneratorParameters(
@@ -408,16 +470,36 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     return;
                 }
 
+                _logger.Info("AddPatientAsync: Calling PatientService.GenerateAsync...");
+
                 await _patientService.GenerateAsync(newPatient);
+
+                _logger.Info("AddPatientAsync: GenerateAsync completed successfully");
 
                 await RefreshPatientsAsync();
                 LolMessageForPatientCount(SetPatientCount);
 
                 UpdateText = "Пациент успешно добавлен";
+                _logger.Info("AddPatientAsync: SUCCESS, UpdateText = {UpdateText}", UpdateText);
+            }
+            catch (DbUpdateException dbEx)
+            {
+                _logger.Error(dbEx, "AddPatientAsync: DB ERROR - {Message}", dbEx.InnerException?.Message ?? dbEx.Message);
+                UpdateText = $"Ошибка БД: {dbEx.InnerException?.Message ?? dbEx.Message}";
+            }
+            catch (HttpRequestException httpEx)
+            {
+                _logger.Error(httpEx, "AddPatientAsync: HTTP ERROR - {Message}", httpEx.Message);
+                UpdateText = $"Ошибка API: {httpEx.Message}";
             }
             catch (Exception ex)
             {
-                UpdateText = "Пациент не добавлен";
+                _logger.Error(ex, "AddPatientAsync: UNEXPECTED ERROR - {Message}", ex.Message);
+                UpdateText = $"Пациент не добавлен: {ex.Message}";
+            }
+            finally
+            {
+                _logger.Info("<<< AddPatientAsync: END");
             }
         }
 
@@ -506,6 +588,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         public async Task AddWorkListAsync()
         {
+            _logger.Info(">>> AddWorkListAsync: START");
+
             try
             {
                 var newWorkList = new WorkListGeneratorDto(
@@ -528,15 +612,25 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     WorkListCount = SetWorkListCount
                 };
 
+                _logger.Info("AddWorkListAsync: Calling WorklistService.GenerateAsync...");
+
                 await _worklistService.GenerateAsync(newWorkList);
+
+                _logger.Info("AddWorkListAsync: GenerateAsync completed");
 
                 await RefreshWorkListAsync();
 
                 UpdateText = "WorkList added";
+                _logger.Info("AddWorkListAsync: SUCCESS");
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
+                _logger.Error(ex, "AddWorkListAsync: ERROR - {Message}", ex.Message);
                 UpdateText = "WorkList not added";
+            }
+            finally
+            {
+                _logger.Info("<<< AddWorkListAsync: END");
             }
         }
 
@@ -544,6 +638,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         public async Task DeleteFirstPatientAsync()
         {
+            _logger.Info(">>> DeleteFirstPatientAsync: START");
+
             try
             {
                 var patient = new PatientGeneratorParameters(
@@ -561,14 +657,25 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     PatientCount = SetPatientCount
                 };
 
+                _logger.Info("DeleteFirstPatientAsync: Calling PatientService.DeleteFirstAsync...");
+
                 await _patientService.DeleteFirstAsync();
+
+                _logger.Info("DeleteFirstPatientAsync: DeleteFirstAsync completed");
+
                 await RefreshPatientsAsync();
 
                 UpdateText = "First Patient is Delete";
+                _logger.Info("DeleteFirstPatientAsync: SUCCESS");
             }
             catch (Exception ex)
             {
+                _logger.Error(ex, "DeleteFirstPatientAsync: ERROR - {Message}", ex.Message);
                 UpdateText = "Patient is not Deleted";
+            }
+            finally
+            {
+                _logger.Info("<<< DeleteFirstPatientAsync: END");
             }
         }
 
@@ -577,6 +684,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         public async Task DeleteAllPatientAsync()
         {
+            _logger.Info(">>> DeleteAllPatientAsync: START");
+
             try
             {
                 var patient = new PatientGeneratorParameters(
@@ -593,15 +702,30 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 {
                     PatientCount = SetPatientCount
                 };
+                _logger.Info("DeleteAllPatientAsync: Calling PatientService.DeleteAllAsync...");
 
                 await _patientService.DeleteAllAsync();
+
+                _logger.Info("DeleteAllPatientAsync: DeleteAllAsync completed");
+
                 await RefreshPatientsAsync();
 
                 UpdateText = "Patient Table Deletion completed";
+                _logger.Info("DeleteAllPatientAsync: SUCCESS");
+            }
+            catch (DbUpdateException dbEx)
+            {
+                _logger.Error(dbEx, "DeleteAllPatientAsync: DB ERROR - {Message}", dbEx.InnerException?.Message ?? dbEx.Message);
+                UpdateText = $"Ошибка БД при удалении: {dbEx.InnerException?.Message ?? dbEx.Message}";
             }
             catch (Exception ex)
             {
+                _logger.Error(ex, "DeleteAllPatientAsync: ERROR - {Message}", ex.Message);
                 UpdateText = "Patient Table is not Deleted";
+            }
+            finally
+            {
+                _logger.Info("<<< DeleteAllPatientAsync: END");
             }
         }
 
@@ -610,6 +734,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         public async Task DeleteFirstWorkListAsync()
         {
+            _logger.Info(">>> DeleteFirstWorkListAsync: START");
+
             try
             {
                 var workList = new WorkListGeneratorParameters(
@@ -632,14 +758,25 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     WorkListCount = SetWorkListCount
                 };
 
+                _logger.Info("DeleteFirstWorkListAsync: Calling WorklistService.DeleteFirstAsync...");
+
                 await _worklistService.DeleteFirstAsync();
+
+                _logger.Info("DeleteFirstWorkListAsync: DeleteFirstAsync completed");
+
                 await RefreshWorkListAsync();
 
                 UpdateText = "First in WorkList Delete";
+                _logger.Info("DeleteFirstWorkListAsync: SUCCESS");
             }
             catch (Exception ex)
             {
+                _logger.Error(ex, "DeleteFirstWorkListAsync: ERROR - {Message}", ex.Message);
                 UpdateText = "WorkList is not Deleted";
+            }
+            finally
+            {
+                _logger.Info("<<< DeleteFirstWorkListAsync: END");
             }
         }
 
@@ -648,6 +785,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         public async Task DeleteAllWorkListAsync()
         {
+            _logger.Info(">>> DeleteAllWorkListAsync: START");
+
             try
             {
                 var workList = new WorkListGeneratorParameters(
@@ -670,14 +809,30 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     WorkListCount = SetWorkListCount
                 };
 
+                _logger.Info("DeleteAllWorkListAsync: Calling WorklistService.DeleteAllAsync...");
+
                 await _worklistService.DeleteAllAsync();
+
+                _logger.Info("DeleteAllWorkListAsync: DeleteAllAsync completed");
+
                 await RefreshWorkListAsync();
 
                 UpdateText = "WorkList Table Deletion completed";
+                _logger.Info("DeleteAllWorkListAsync: SUCCESS");
+            }
+            catch (DbUpdateException dbEx)
+            {
+                _logger.Error(dbEx, "DeleteAllWorkListAsync: DB ERROR - {Message}", dbEx.InnerException?.Message ?? dbEx.Message);
+                UpdateText = $"Ошибка БД при удалении: {dbEx.InnerException?.Message ?? dbEx.Message}";
             }
             catch (Exception ex)
             {
+                _logger.Error(ex, "DeleteAllWorkListAsync: ERROR - {Message}", ex.Message);
                 UpdateText = "WorkList is not Deleted";
+            }
+            finally
+            {
+                _logger.Info("<<< DeleteAllWorkListAsync: END");
             }
         }
 
@@ -685,11 +840,15 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         public async Task DeleteAllTablesAsync()
         {
+            _logger.Info(">>> DeleteAllTablesAsync: START");
+
             try
             {
+                _logger.Info("DeleteAllTablesAsync: Deleting patients...");
                 await DeleteAllPatientAsync();
                 await RefreshPatientsAsync();
 
+                _logger.Info("DeleteAllTablesAsync: Deleting worklists...");
                 await DeleteAllWorkListAsync();
                 await RefreshWorkListAsync();
 
@@ -697,10 +856,16 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 ShowDeleteAllTablesEasterEgg();
 
                 UpdateText = "All Tables Deletion completed";
+                _logger.Info("DeleteAllTablesAsync: SUCCESS - All tables cleared");
             }
             catch (Exception ex)
             {
+                _logger.Error(ex, "DeleteAllTablesAsync: ERROR - {Message}", ex.Message);
                 UpdateText = "Tables is not Deleted";
+            }
+            finally
+            {
+                _logger.Info("<<< DeleteAllTablesAsync: END");
             }
         }
 
@@ -831,10 +996,15 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         public async Task AddOnePatientAsync()
         {
+            _logger.Info(">>> AddOnePatientAsync: START");
             var messageToUpdateText = string.Empty;
 
             try
             {
+                _logger.Info($"AddOnePatientAsync: Family={AddFamily}, " +
+                    $"Name={AddName}, MiddleName={AddMiddleName}, Id={AddIdPatient}, " +
+                    $"BirthDate={PatientBirthDate:yyyy-MM-dd}, Gender={SelecedGender}");
+
                 messageToUpdateText = PlayIntroAndShowMessage();
 
                 var newPatient = new PatientInputParameters(
@@ -852,7 +1022,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     PatientCount = SetPatientCount
                 };
 
+                _logger.Info("AddOnePatientAsync: Calling PatientService.AddOneAsync...");
+
                 await _patientService.AddOneAsync(newPatient);
+
+                _logger.Info("AddOnePatientAsync: AddOneAsync completed successfully");
 
                 await RefreshPatientsAsync();
                 CleareFields();
@@ -869,9 +1043,19 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 UpdateText = !string.IsNullOrEmpty(messageToUpdateText)
                     ? messageToUpdateText
                     : "Patient added";
-            }
-            catch (Exception e)
+
+                _logger.Info("AddOnePatientAsync: SUCCESS, UpdateText = {UpdateText}", UpdateText);
+            }            
+            catch (HttpRequestException httpEx)
             {
+                _logger.Error(httpEx, "AddOnePatientAsync: HTTP ERROR - {Message}", httpEx.Message);
+                CleareFields();
+                UpdateText = $"Ошибка API: {httpEx.Message}";
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "AddOnePatientAsync: UNEXPECTED ERROR - {Message}", ex.Message);
+
                 if (string.IsNullOrEmpty(AddFamily) || string.IsNullOrEmpty(AddName) || string.IsNullOrEmpty(AddMiddleName))
                 {
                     UpdateText = "Создан пациент-призрак. Поздравляю!";
@@ -884,6 +1068,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 UpdateText = !string.IsNullOrEmpty(messageToUpdateText)
                     ? messageToUpdateText
                     : "Пациент не добавлен";
+            }
+            finally
+            {
+                _logger.Info("<<< AddOnePatientAsync: END");
             }
         }
 
