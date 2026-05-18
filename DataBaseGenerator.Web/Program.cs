@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Net.Http.Headers;
+using DataBaseGenerator.Core;
 using DataBaseGenerator.Core.Data;
 using DataBaseGenerator.Web.Controllers.ApiControllers;
 using DataBaseGenerator.Web.Services;
@@ -39,12 +40,16 @@ try
 {
     logger.Trace("Initialization WebApplication");
 
+    var configuration = AppConfiguration.LoadConfiguration();
+
     var builder = WebApplication.CreateBuilder(args);
 
-    builder.WebHost.UseUrls("http://localhost:5289");
-    //builder.WebHost.UseUrls("http://localhost:5289", "https://localhost:7168");
+    builder.Configuration.AddConfiguration(configuration);
 
-    builder.Configuration.AddJsonFile(Path.Combine(AppContext.BaseDirectory, "appsettings.json"));
+    var webHostUrl = builder.Configuration["WebHost:Uri"] ?? "http://localhost:5289";
+
+    builder.WebHost.UseUrls(webHostUrl);
+    //builder.WebHost.UseUrls("http://localhost:5289", "https://localhost:7168");
 
     // Add services to the container.
     builder.Services.AddControllersWithViews();
@@ -55,13 +60,14 @@ try
             new MySqlServerVersion(new Version(8, 0, 28))
         ));
 
-    builder.Services.AddScoped<IPatientService, PatientService>();
-    builder.Services.AddScoped<IWorklistService, WorklistService>();
+    builder.Services.AddScoped<IPatientService, DataBaseGenerator.Web.Services.PatientService>();
+    builder.Services.AddScoped<IWorklistService, DataBaseGenerator.Web.Services.WorklistService>();
     builder.Services.AddScoped<PatientApiController>();
 
     builder.Services.AddHttpClient("DBGeneratorApi", client =>
     {
-        client.BaseAddress = new Uri("http://localhost:5289/api/");
+        var webHostApiUrl = builder.Configuration["WebHost:ApiUri"] ?? "http://localhost:5289/api/";
+        client.BaseAddress = new Uri(webHostApiUrl);
         client.DefaultRequestHeaders.Accept.Clear();
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
     });

@@ -45,15 +45,15 @@ namespace DataBaseGenerator.UI.Wpf
         {
             this.InitializeComponent();
 
+            var configuration = AppConfiguration.LoadConfiguration();
+
             var hostBuilder = Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration((context, config) =>
                 {
-                    config.AddJsonFile(Path.Combine(AppContext.BaseDirectory, "appsettings.json"));
+                    config.AddConfiguration(configuration);
                 })
                 .ConfigureServices((context, services) =>
                 {
-                    var configuration = context.Configuration;
-
                     services.AddDbContext<BaseGenerateContext>(options =>
                     options.UseMySql(
                         context.Configuration.GetConnectionString("DefaultConnection"),
@@ -70,7 +70,9 @@ namespace DataBaseGenerator.UI.Wpf
 
                     services.AddHttpClient("DBGeneratorApi", client =>
                     {
-                        client.BaseAddress = new Uri("http://localhost:5289/api/");
+                        var webHostApiUrl = context.Configuration["WebHost:ApiUri"] ?? "http://localhost:5289/api/";
+
+                        client.BaseAddress = new Uri(webHostApiUrl);
                         client.DefaultRequestHeaders.Accept.Clear();
                         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     });
