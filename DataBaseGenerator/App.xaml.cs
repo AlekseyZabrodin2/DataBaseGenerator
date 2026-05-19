@@ -66,16 +66,16 @@ namespace DataBaseGenerator.UI.Wpf
 
                     services.AddSingleton<IStudyStorageModule>(sp =>
                     {
-                        var dataDirectory = "D:\\Develop\\UniExpert\\Build\\Debug\\Data";
+                        //var dataDirectory = "D:\\Develop\\UniExpert\\Build\\Debug\\Data";
 
-                        if (!Directory.Exists(dataDirectory))
-                        {
-                            dataDirectory = Path.Combine(AppContext.BaseDirectory, "LiteDataBase");
+                        //if (!Directory.Exists(dataDirectory))
+                        //{
+                            var dataDirectory = Path.Combine(AppContext.BaseDirectory, "LiteDataBase");
                             Directory.CreateDirectory(dataDirectory);
-                        }                        
+                        //}                        
 
                         var dbPath = Path.Combine(dataDirectory, "patients.db");
-                        return new LiteDbStudyStorageModule(dbPath);
+                        return new LiteDbStudyStorageModule(dbPath, false);
                     })
                     .AddSingleton<IStudyApplicationService, StudyApplicationService>();
 
@@ -166,8 +166,10 @@ namespace DataBaseGenerator.UI.Wpf
             }
             catch(Exception ex)
             {
-                _logger.Fatal(ex, "Check your connection settings !");
-                MessageBox.Show($"Check your connection settings !!! \r\n {ex.Message}");                
+                _logger.Error(ex, "Нет подключения к БД");
+                MessageBox.Show($"Нет подключения к БД.\r\n Некоторые функции будут недоступны.\r\n {ex.Message}",
+                                "Ошибка подключения",
+                                MessageBoxButton.OK, MessageBoxImage.Warning);
                 base.Shutdown();
             }
         }
