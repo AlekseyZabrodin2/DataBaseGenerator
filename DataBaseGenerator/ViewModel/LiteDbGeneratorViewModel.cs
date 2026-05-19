@@ -7,12 +7,14 @@ using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DataBaseGenerator.Core.LiteDbGenerator.Contracts;
+using DataBaseGenerator.Core.LiteDbGenerator.Data;
 using DataBaseGenerator.Core.LiteDbGenerator.Enums;
 using DataBaseGenerator.Core.LiteDbGenerator.LiteDbModels;
 using DataBaseGenerator.Core.LiteDbGenerator.Models;
 using DataBaseGenerator.Core.MySqlGenerator;
 using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Patient;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Win32;
 using NLog;
 
 namespace DataBaseGenerator.UI.Wpf.ViewModel
@@ -25,6 +27,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private IStudyStorageModule _studyStorageModule;
         private string _gender;
         private PatientLiteDb _patientLiteDb;
+        private string _databasePath = string.Empty;
 
 
         [ObservableProperty]
@@ -101,7 +104,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
         [ObservableProperty]
-        public partial Patient SelectedPatient { get; set; }
+        public partial PatientLiteDb SelectedPatient { get; set; }
 
         [ObservableProperty]
         public partial bool UseEngNames { get; set; }
@@ -145,7 +148,21 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [ObservableProperty]
         public partial ObservableCollection<PatientLiteDb> AllPatients { get; set; }
 
+        public string DatabasePath
+        {
+            get => _databasePath;
+            set
+            {
+                SetProperty(ref _databasePath, value);
+                BuildShortPath(_databasePath);
+            }
+        }
 
+        [ObservableProperty]
+        public partial string DatabasePathShort { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsReadOnlyMode { get; set; } = true;
 
 
 
@@ -154,6 +171,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             _serviceProvider = serviceProvider;
             _studyStorageModule = _serviceProvider.GetService<IStudyStorageModule>();
 
+            DatabasePath = _studyStorageModule.DatabasePath;
             Gender = new List<string> { "Man", "Female", "Other" };
 
             _ = InitializeAsync();
@@ -599,6 +617,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             catch (Exception ex)
             {
                 _logger.Error(ex, "Patient not generated");
+                throw;
             }
         }
 
@@ -686,8 +705,87 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             };
         }
 
+        private string BuildShortPath(string fullPath, int keepFolders = 3)
+        {
+            if (string.IsNullOrWhiteSpace(fullPath))
+                return string.Empty;
 
+            // Нормализуем разделители и убираем хвостовые '\'
+            var normalized = fullPath.Replace('/', '\\').TrimEnd('\\');
 
+            // Для коротких путей ничего не делаем
+            var parts = normalized.Split('\\', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length <= keepFolders + 1) // +1 = имя файла
+                return normalized;
 
+            var fileName = parts[^1];
+            var startIndex = Math.Max(0, parts.Length - (keepFolders + 1));
+            var tail = string.Join("\\", parts[startIndex..]);
+
+            // Если есть диск (C:) или UNC, префикс всё равно делаем через "..."
+            DatabasePathShort = $@"...\{tail}";
+
+            return DatabasePathShort;
+        }
+
+        [RelayCommand]
+        public async Task BrowseDatabase()
+        {
+            var dialog = new OpenFileDialog
+            {
+                Filter = "LiteDB files (*.db)|*.db|All files (*.*)|*.*",
+                Title = "Выберите файл базы данных"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                DatabasePath = dialog.FileName;
+                //RefreshData();
+            }
+        }
+
+        [RelayCommand]
+        public void ChangeDatadaseMode(object? readOnlyFromToggle)
+        {
+            // Состояние с ToggleButton (после клика); object — чтобы не зависеть от того, как WPF боксит bool/bool?.
+            var readOnly = readOnlyFromToggle switch
+            {
+                bool b => b,
+                _ => IsReadOnlyMode
+            };
+
+            if (string.IsNullOrWhiteSpace(DatabasePath))
+            {
+                MessageBox.Show("Не задан путь к файлу базы.", "LiteDB", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var previous = _studyStorageModule;
+            try
+            {
+                previous?.Dispose();
+                _studyStorageModule = new LiteDbStudyStorageModule(DatabasePath, readOnly);
+                AllPatients = _studyStorageModule.Patients.GetAllPatients();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Не удалось переключить режим LiteDB");
+                MessageBox.Show(ex.Message, "Ошибка LiteDB", MessageBoxButton.OK, MessageBoxImage.Error);
+                try
+                {
+                    _studyStorageModule = new LiteDbStudyStorageModule(DatabasePath, false);
+                    AllPatients = _studyStorageModule.Patients.GetAllPatients();
+                }
+                catch (Exception ex2)
+                {
+                    _logger.Error(ex2, "Не удалось восстановить подключение к LiteDB");
+                    MessageBox.Show(
+                        "Не удалось восстановить подключение: " + ex2.Message,
+                        "Ошибка LiteDB",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
+            }
+        }
     }
 }
