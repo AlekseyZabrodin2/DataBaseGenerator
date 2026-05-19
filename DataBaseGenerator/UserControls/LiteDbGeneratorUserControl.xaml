@@ -11,6 +11,15 @@
     mc:Ignorable="d">
 
 
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Styles/Style.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+
     <Grid>
 
         <Grid.RowDefinitions>
@@ -32,10 +41,109 @@
             Grid.Column="0"
             Margin="5,5,5,5" />
 
-        <userControls:PatientLiteDbTableUserControl
+
+        <Grid
             Grid.Column="1"
             Grid.ColumnSpan="3"
-            Height="640"
+            Height="72"
+            ShowGridLines="False">
+
+            <Border
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="3"
+                Margin="5,5,5,0"
+                Padding="5"
+                BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
+                BorderThickness="5">
+
+                <Grid ShowGridLines="False">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!--<TextBox
+                Height="35"
+                Padding="5"
+                VerticalContentAlignment="Center"
+                mah:TextBoxHelper.Watermark="Выберите файл базы (*.db)"
+                Background="#F5F5F5"
+                BorderThickness="1"
+                IsReadOnly="True"
+                Text="{Binding DatabasePath}"/>-->
+
+                    <Border
+                        Height="35"
+                        Padding="6,0"
+                        Background="#F5F5F5"
+                        BorderBrush="#CCC"
+                        BorderThickness="1">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Text="{Binding DatabasePathShort}"
+                            TextTrimming="CharacterEllipsis"
+                            ToolTip="{Binding DatabasePath}" />
+                    </Border>
+
+                    <!--  Кнопка выбора файла  -->
+                    <Button
+                        Grid.Column="1"
+                        Width="35"
+                        Height="35"
+                        Margin="5,0"
+                        Padding="1,0,1,4"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Background="{DynamicResource MahApps.Brushes.Accent}"
+                        Command="{Binding BrowseDatabaseCommand}"
+                        Content="📁"
+                        FontSize="20"
+                        ToolTip="Выбрать файл базы данных" />
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <TextBlock
+                            Margin="5,0,0,0"
+                            VerticalAlignment="Center"
+                            FontWeight="SemiBold"
+                            Text="Режим:" />
+
+                        <!--  Контейнер для переключателей  -->
+                        <ToggleButton
+                            Margin="0,0,5,0"
+                            Command="{Binding ChangeDatadaseModeCommand}"
+                            CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}"
+                            IsChecked="{Binding IsReadOnlyMode, Mode=TwoWay}"
+                            Style="{StaticResource ToggleButtonStyle}" />
+                    </StackPanel>
+
+                    <!--  Кнопка обновления  -->
+                    <Button
+                        Grid.Column="3"
+                        Height="35"
+                        Margin="5"
+                        Command="{Binding RefreshPatientsCommand}"
+                        Content="Update data">
+                        <Button.ToolTip>
+                            <TextBlock Text="Загрузить актуальные данные из базы (F5)" />
+                        </Button.ToolTip>
+                    </Button>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <userControls:AddPatientUserControl
+            Grid.RowSpan="3"
+            Grid.Column="0"
+            Margin="5,5,5,5" />
+
+        <userControls:PatientLiteDbTableUserControl
+            Grid.Row="1"
+            Grid.Column="1"
+            Grid.ColumnSpan="3"
+            Height="570"
             Margin="5"
             VerticalAlignment="Top" />
 
