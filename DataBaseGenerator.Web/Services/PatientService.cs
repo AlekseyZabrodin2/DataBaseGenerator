@@ -53,6 +53,8 @@ namespace DataBaseGenerator.Web.Services
         {
             try
             {
+                _logger.Trace("Generate patients");
+
                 for (var patientindex = 0; patientindex < inputParameters.PatientCount; patientindex++)
                 {
                     await CreateAsync(patientindex, inputParameters);
@@ -62,6 +64,7 @@ namespace DataBaseGenerator.Web.Services
             catch (Exception ex)
             {
                 LogAllExceptions(ex, "Patient not generated");
+                throw;
             }
         }
 
