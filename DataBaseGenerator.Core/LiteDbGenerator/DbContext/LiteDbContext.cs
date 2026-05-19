@@ -13,6 +13,11 @@ namespace DataBaseGenerator.Core.LiteDbData.DbContext
             _database = new LiteDatabase(path);
         }
 
+        public LiteDbContext(ConnectionString connectionString)
+        {
+            _database = new LiteDatabase(connectionString);
+        }
+
         public ILiteCollection<LitePatient> Patients =>
             _database.GetCollection<LitePatient>("patients");
 

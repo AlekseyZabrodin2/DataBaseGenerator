@@ -2,6 +2,7 @@
 using DataBaseGenerator.Core.LiteDbData.DbContext;
 using DataBaseGenerator.Core.LiteDbGenerator.Contracts;
 using DataBaseGenerator.Core.LiteDbGenerator.Repositories;
+using LiteDB;
 
 namespace DataBaseGenerator.Core.LiteDbGenerator.Data
 {
@@ -9,19 +10,32 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Data
     {
         private readonly LiteDbContext _context;
 
-        public LiteDbStudyStorageModule(string databasePath)
+        public LiteDbStudyStorageModule(string databasePath, bool readOnly)
         {
             if (string.IsNullOrWhiteSpace(databasePath))
                 throw new ArgumentException("Database path must be provided", nameof(databasePath));
 
-            _context = new LiteDbContext(databasePath);
-            IndexInitializer.EnsureIndexes(_context);
+            DatabasePath = databasePath;
+            var connectionString = new ConnectionString
+            {
+                Filename = databasePath,
+                ReadOnly = readOnly
+            };
+
+            _context = new LiteDbContext(connectionString);
+            // В ReadOnly нельзя создавать индексы — это запись; из‑за этого часто сыпятся ошибки с -log.db.
+            if (!readOnly)
+            {
+                IndexInitializer.EnsureIndexes(_context);
+            }
 
             Patients = new LitePatientRepository(_context);
             Studies = new LiteStudyRepository(_context);
             Series = new LiteSeriesRepository(_context);
             Images = new LiteImageRepository(_context);
         }
+
+        public string DatabasePath { get; }
 
         public string Name => "LiteDB";
 

@@ -10,6 +10,8 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Contracts
         // Kind of database used (e.g. "Embedded", "Relational", "Document")
         string DatabaseKind { get; }
 
+        string DatabasePath { get; }
+
         IPatientRepository Patients { get; }
         IStudyRepository Studies { get; }
         ISeriesRepository Series { get; }
