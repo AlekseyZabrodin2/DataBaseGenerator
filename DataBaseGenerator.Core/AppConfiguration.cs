@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 
 namespace DataBaseGenerator.Core
@@ -20,11 +16,9 @@ namespace DataBaseGenerator.Core
             var configPath = Path.Combine(ConfigDirectory, $"appsettings.{environment}.json");
 
 
-            // Создаём папку, если её нет
             if (!Directory.Exists(ConfigDirectory))
                 Directory.CreateDirectory(ConfigDirectory);
-
-            // Если файла нет — создаём из embedded ресурса или дефолта
+                        
             if (!File.Exists(configPath))
                 CreateDefaultConfig(configPath);
 
