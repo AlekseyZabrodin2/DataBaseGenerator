@@ -6,10 +6,11 @@ using DataBaseGenerator.Web.Controllers.ApiControllers;
 using DataBaseGenerator.Web.Services;
 using Microsoft.EntityFrameworkCore;
 using NLog;
+using NLog.Web;
 
 
 
-var logger = LogManager.Setup().LoadConfigurationFromFile().GetCurrentClassLogger();
+var logger = LogManager.Setup().LoadConfigurationFromFile("Nlog.config", optional: false).GetCurrentClassLogger();
 
 var processName = Process.GetCurrentProcess().ProcessName;
 var existingProcesses = Process.GetProcessesByName(processName)
@@ -44,6 +45,9 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
+    builder.Logging.ClearProviders();
+    builder.Host.UseNLog();
+
     builder.Configuration.AddConfiguration(configuration);
 
     var webHostUrl = builder.Configuration["WebHost:Uri"] ?? "http://localhost:5289";
@@ -52,6 +56,10 @@ try
     //builder.WebHost.UseUrls("http://localhost:5289", "https://localhost:7168");
 
     builder.Services.AddControllersWithViews();
+
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+    logger.Info($"Web.ConnectionString = {connectionString}");
 
     builder.Services.AddDbContext<BaseGenerateContext>(options =>
         options.UseMySql(
