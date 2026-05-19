@@ -56,6 +56,9 @@ namespace DataBaseGenerator.UI.Wpf
                 })
                 .ConfigureServices((context, services) =>
                 {
+                    var connectionString = context.Configuration.GetConnectionString("DefaultConnection");
+                    _logger.Info($"ConnectionString = {connectionString}");
+
                     services.AddDbContext<BaseGenerateContext>(options =>
                     options.UseMySql(
                         context.Configuration.GetConnectionString("DefaultConnection"),
