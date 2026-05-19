@@ -20,7 +20,7 @@
     </UserControl.Resources>
 
 
-    <Grid>
+    <Grid ShowGridLines="False">
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
