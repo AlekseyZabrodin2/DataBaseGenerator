@@ -56,6 +56,18 @@ namespace DataBaseGenerator.UI.Wpf
                 })
                 .ConfigureServices((context, services) =>
                 {
+
+                    var root = (IConfigurationRoot)context.Configuration;
+
+                    foreach (var provider in root.Providers)
+                    {
+                        if (provider.TryGet("ConnectionStrings:DefaultConnection", out var value))
+                        {
+                            _logger.Info($"PROVIDER: {provider}");
+                            _logger.Info($"VALUE: {value}");
+                        }
+                    }
+
                     var connectionString = context.Configuration.GetConnectionString("DefaultConnection");
                     _logger.Info($"ConnectionString = {connectionString}");
 

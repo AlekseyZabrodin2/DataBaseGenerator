@@ -41,14 +41,13 @@ try
 {
     logger.Trace("Initialization WebApplication");
 
-    var configuration = AppConfiguration.LoadConfiguration();
-
     var builder = WebApplication.CreateBuilder(args);
+
+    var configuration = AppConfiguration.LoadWebConfiguration();
+    builder.Configuration.AddConfiguration(configuration);
 
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
-
-    builder.Configuration.AddConfiguration(configuration);
 
     var webHostUrl = builder.Configuration["WebHost:Uri"] ?? "http://localhost:5289";
 
@@ -56,6 +55,17 @@ try
     //builder.WebHost.UseUrls("http://localhost:5289", "https://localhost:7168");
 
     builder.Services.AddControllersWithViews();
+
+    var root = (IConfigurationRoot)builder.Configuration;
+
+    foreach (var provider in root.Providers)
+    {
+        if (provider.TryGet("ConnectionStrings:DefaultConnection", out var value))
+        {
+            logger.Info($"PROVIDER: {provider}");
+            logger.Info($"VALUE: {value}");
+        }
+    }
 
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
