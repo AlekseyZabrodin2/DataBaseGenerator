@@ -59,10 +59,13 @@ namespace DataBaseGenerator.Core.MySqlGenerator.Data
 
             modelBuilder.Entity<Patient>().HasIndex(patient => patient.MiddleName).HasDatabaseName("MiddleName").IsFullText();
 
-            
-            //WorkList index
 
+            //WorkList index
             modelBuilder.Entity<WorkList>().HasIndex(worklist => worklist.ID_Patient).HasDatabaseName("ID_Patient");
+
+            modelBuilder.Entity<WorkList>().HasIndex(worklist => worklist.WorkListID).HasDatabaseName("Idx_WorkListID");
+
+            modelBuilder.Entity<WorkList>().HasIndex(worklist => worklist.ID_WorkList).HasDatabaseName("Idx_ID_WorkList");
 
 
             #endregion
