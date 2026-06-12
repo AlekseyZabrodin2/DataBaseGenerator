@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NLog;
@@ -30,14 +31,14 @@ namespace DataBaseGenerator.Core.MySqlGenerator
             return JsonConvert.DeserializeObject<ObservableCollection<Patient>>(content);
         }
 
-        public async Task GenerateAsync(PatientGeneratorParameters inputParameters)
+        public async Task GenerateAsync(PatientGeneratorParameters inputParameters, CancellationToken cancellationToken)
         {
             _logger.Trace("Generate patients");
 
             var json = JsonConvert.SerializeObject(inputParameters);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("patient/generate", content);
+            var response = await _httpClient.PostAsync("patient/generate", content, cancellationToken);
             response.EnsureSuccessStatusCode();
         }  
 

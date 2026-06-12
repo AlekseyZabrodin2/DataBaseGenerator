@@ -24,10 +24,17 @@ namespace DataBaseGenerator.Web.Controllers.ApiControllers
             return Ok(workList);
         }
 
-        [HttpPost("generate")]
-        public async Task<IActionResult> GenerateAsync([FromBody] WorkListGeneratorDto inputParameters)
+        [HttpGet("workListCount")]
+        public async Task<IActionResult> GetWorkListCountAsync()
         {
-            await _worklistService.GenerateAsync(inputParameters);
+            var workList = await _worklistService.GetWorkListCountAsync();
+            return Ok(workList);
+        }
+
+        [HttpPost("generate")]
+        public async Task<IActionResult> GenerateAsync([FromBody] WorkListGeneratorDto inputParameters, CancellationToken cancellationToken)
+        {
+            await _worklistService.GenerateAsync(inputParameters, cancellationToken);
             return Ok("WorkList added");
         }
 

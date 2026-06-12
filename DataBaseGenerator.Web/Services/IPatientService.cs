@@ -6,9 +6,10 @@ namespace DataBaseGenerator.Web.Services
     public interface IPatientService
     {
         Task<List<Patient>> GetAllAsync();
-        Task GenerateAsync(PatientGeneratorDto inputParameters);
+        Task GenerateAsync(PatientGeneratorDto inputParameters, CancellationToken cancellationToken);
         Task AddOneAsync(PatientInputParameters inputParameters);
-        Task CreateAsync(int patientIndex, PatientGeneratorDto patientGeneratorParameters);
+        Task CreateByOneAsync(PatientGeneratorDto patientGeneratorParameters, CancellationToken cancellationToken); 
+        Task CreateByBulkAsync(PatientGeneratorDto patientGeneratorParameters, CancellationToken cancellationToken);
         Task CreateOne(PatientInputParameters patientGeneratorParameters);
         Task DeleteFirstAsync();
         Task DeleteAllAsync();

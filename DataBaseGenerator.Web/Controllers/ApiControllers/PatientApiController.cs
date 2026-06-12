@@ -27,9 +27,9 @@ namespace DataBaseGenerator.Web.Controllers.ApiControllers
         }
 
         [HttpPost("generate")]
-        public async Task<IActionResult> GenerateAsync([FromBody] PatientGeneratorDto inputParameters)
+        public async Task<IActionResult> GenerateAsync([FromBody] PatientGeneratorDto inputParameters, CancellationToken cancellationToken)
         {
-            await _patientService.GenerateAsync(inputParameters);
+            await _patientService.GenerateAsync(inputParameters, cancellationToken);
             return Ok("Patient added");
         }
 

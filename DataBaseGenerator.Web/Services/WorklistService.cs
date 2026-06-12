@@ -46,53 +46,77 @@ namespace DataBaseGenerator.Web.Services
             
         }
 
-        public async Task GenerateAsync(WorkListGeneratorDto inputParameters)
+        public async Task<int> GetWorkListCountAsync()
         {
             try
             {
-                for (var workListIndex = 0; workListIndex < inputParameters.WorkListCount; workListIndex++)
+                return await _context.WorkList.CountAsync();
+            }
+            catch (Exception ex)
+            {
+                LogAllExceptions(ex, "Can't get workList count");
+                return 0;
+            }
+        }
+
+        public async Task GenerateAsync(WorkListGeneratorDto inputParameters, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (cancellationToken.IsCancellationRequested)
                 {
-                    await CreateAsync(workListIndex, inputParameters);
+                    _logger.Info("Cancellation requested, stopping generation...");
+                    return;
                 }
+
+                await CreateAsync(inputParameters, cancellationToken);
                 _logger.Info($"Created {inputParameters.WorkListCount} WorkLists");
             }
             catch (Exception ex)
             {
                 LogAllExceptions(ex, "WorkList not generated");
-            }
-            
+            }            
         }
 
-        public async Task CreateAsync(int workListIndex, WorkListGeneratorDto inputParameters)
+        public async Task CreateAsync(WorkListGeneratorDto inputParameters, CancellationToken cancellationToken)
         {
-            var newWorkList = GenerateWorkList(workListIndex, inputParameters);
+            var total = inputParameters.WorkListCount;
+            var batchSize = 1000;
+            var newWorkLists = new List<WorkList>(batchSize);
 
-            bool checkIsExist = _context.WorkList.Any(
-                     workList => workList.ID_WorkList == newWorkList.ID_WorkList &&
-                                 workList.CreateDate == newWorkList.CreateDate &&
-                                 workList.CreateTime == newWorkList.CreateTime &&
-                                 workList.ID_Patient == newWorkList.ID_Patient &&
-                                 workList.State == newWorkList.State &&
-                                 workList.SOPInstanceUID == newWorkList.SOPInstanceUID &&
-                                 workList.Modality == newWorkList.Modality &&
-                                 workList.StationAeTitle == newWorkList.StationAeTitle &&
-                                 workList.ProcedureStepStartDateTime == newWorkList.ProcedureStepStartDateTime &&
-                                 workList.PerformingPhysiciansName == newWorkList.PerformingPhysiciansName &&
-                                 workList.StudyDescription == newWorkList.StudyDescription &&
-                                 workList.ReferringPhysiciansName == newWorkList.ReferringPhysiciansName &&
-                                 workList.RequestingPhysician == newWorkList.RequestingPhysician);
+            var maxId = await _context.WorkList
+                .AnyAsync(cancellationToken)
+                ? await _context.WorkList.MaxAsync(w => w.ID_WorkList, cancellationToken)
+                : 0;
 
-            if (checkIsExist)
-                return;
+            var currentId = maxId;
 
-            _context.WorkList.Add(newWorkList);
-            await _context.SaveChangesAsync();
+            for (var workListIndex = 0; workListIndex < total; workListIndex++)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                    break;
+
+                currentId ++;
+
+                var newWorkList = GenerateWorkList(currentId, inputParameters);
+                newWorkLists.Add(newWorkList);
+
+                if (newWorkLists.Count >= batchSize || workListIndex == total - 1)
+                {
+                    await _context.WorkList.AddRangeAsync(newWorkLists, cancellationToken);
+                    await _context.SaveChangesAsync(cancellationToken);
+
+                    _context.ChangeTracker.Clear();
+                    newWorkLists.Clear();
+                }
+            }
         }
 
         private WorkList GenerateWorkList(int workListIndex, WorkListGeneratorDto inputParameters)
         {
             return new WorkList()
             {
+                WorkListID = workListIndex,
                 ID_WorkList = inputParameters.ID_WorkList.Generate(workListIndex),
                 CreateDate = inputParameters.CreateDate.Generate(),
                 CreateTime = inputParameters.CreateTime.Generate(),

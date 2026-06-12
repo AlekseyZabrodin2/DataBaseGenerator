@@ -5,8 +5,9 @@ namespace DataBaseGenerator.Web.Services
     public interface IWorklistService
     {
         Task<List<WorkList>> GetAllAsync();
-        Task GenerateAsync(WorkListGeneratorDto inputParameters);
-        Task CreateAsync(int workListIndex, WorkListGeneratorDto inputParameters);
+        Task<int> GetWorkListCountAsync();
+        Task GenerateAsync(WorkListGeneratorDto inputParameters, CancellationToken cancellationToken);
+        Task CreateAsync(WorkListGeneratorDto inputParameters, CancellationToken cancellationToken);
         Task DeleteFirstAsync();
         Task DeleteAllAsync();
     }

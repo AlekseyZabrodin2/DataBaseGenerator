@@ -10,6 +10,7 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Contracts
         // Insert or update patient; implementation should return entity with storage Id set
         ObservableCollection<PatientLiteDb> GetAllPatients();
         PatientLiteDb Upsert(PatientLiteDb patient);
+        void InsertBulk(IEnumerable<PatientLiteDb> patients);
 
         PatientLiteDb? GetById(string id);
 
@@ -27,5 +28,6 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Contracts
         IEnumerable<PatientLiteDb> FindByPhone(string phone, int limit);
 
         void Delete(string id);
+        void DeleteAll();
     }
 }

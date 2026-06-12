@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NLog;
@@ -30,14 +31,25 @@ namespace DataBaseGenerator.Core.MySqlGenerator
             return JsonConvert.DeserializeObject<List<WorkList>>(content);
         }
 
-        public async Task GenerateAsync(WorkListGeneratorDto inputParameters)
+        public async Task<int> GetWorkListCountAsync()
+        {
+            _logger.Trace("Get worklist count");
+
+            var response = await _httpClient.GetAsync("worklist/workListCount");
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<int>(content);
+        }
+
+        public async Task GenerateAsync(WorkListGeneratorDto inputParameters, CancellationToken cancellationToken)
         {
             _logger.Trace("Generate worklists");
 
             var json = JsonConvert.SerializeObject(inputParameters);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("worklist/generate", content);
+            var response = await _httpClient.PostAsync("worklist/generate", content, cancellationToken);
             response.EnsureSuccessStatusCode();
         }
 
