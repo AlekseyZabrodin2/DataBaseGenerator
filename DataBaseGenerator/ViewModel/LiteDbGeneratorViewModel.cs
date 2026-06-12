@@ -455,7 +455,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                 //await _patientService.DeleteAllAsync();
 
-                _studyStorageModule.Patients.DeleteAll();
+                await Task.Run(() =>
+                {
+                    _studyStorageModule.Patients.DeleteAll();
+                });
 
                 await RefreshPatientsAsync();
             }
