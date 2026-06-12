@@ -87,7 +87,7 @@ namespace DataBaseGenerator.UI.Wpf
                         //{
                             var dataDirectory = Path.Combine(AppContext.BaseDirectory, "LiteDataBase");
                             Directory.CreateDirectory(dataDirectory);
-                        //}                        
+                        //}
 
                         var dbPath = Path.Combine(dataDirectory, "patients.db");
                         return new LiteDbStudyStorageModule(dbPath, false);
