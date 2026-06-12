@@ -29,7 +29,7 @@
                 Margin="5"
                 HorizontalContentAlignment="Center"
                 VerticalContentAlignment="Center"
-                FontSize="22"
+                FontSize="20"
                 IsReadOnly="True"
                 Text="{Binding UpdateText, UpdateSourceTrigger=PropertyChanged}" />
 
