@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
@@ -42,6 +43,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private string _addFamily;
         private string _addName;
         private string _addMiddleName;
+        private string _addFullName;
         private string _addAdress;
         private string _addWorkPlase;
         private string _addInfo;
@@ -179,6 +181,15 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
         }
 
+        public string AddFullName
+        {
+            get => _addFullName;
+            set
+            {
+                SetProperty(ref _addFullName, value);
+            }
+        }
+
         public List<string> Gender { get; }
 
         public string SelecedGender
@@ -310,6 +321,16 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [ObservableProperty]
         public partial bool UseSpecialChars { get; set; }
 
+        [ObservableProperty]
+        public partial string BusyMessage { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsBusy { get; set; }
+
+        [ObservableProperty]
+        public partial int CurrentProgress { get; set; }
+
+        private CancellationTokenSource _cancellationTokenSource;
 
 
         public MySqlGeneratorViewModel(BaseGenerateContext context, IHttpClientFactory clientFactory)
@@ -368,6 +389,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             AllPatients = await _patientService.GetAllAsync();
             AllWorkLists = await _worklistService.GetAllAsync();
+
+            UpdateText = $"Пациентов - [{AllPatients.Count}]. Рабочий список - [{AllWorkLists.Count}]";
         }
 
 
@@ -376,8 +399,15 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             _logger.Info(">>> AddPatientAsync: START");
 
+            var stopwatch = Stopwatch.StartNew();
+
+            _cancellationTokenSource = new CancellationTokenSource();
+            var generationCancelled = false;
+
             try
             {
+                StartBusy("Генерация пациентов...");
+
                 var newPatient = new PatientGeneratorParameters(
                     new OrderIdPatientRule(),
                     new RandomLastNameRule(),
@@ -424,17 +454,22 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     return;
                 }
 
-                _logger.Info("AddPatientAsync: Calling PatientService.GenerateAsync...");
+                _logger.Info("AddPatientAsync: Calling PatientService.GenerateAsync...");                
 
-                await _patientService.GenerateAsync(newPatient);
+                await _patientService.GenerateAsync(newPatient, _cancellationTokenSource.Token);
 
                 _logger.Info("AddPatientAsync: GenerateAsync completed successfully");
 
                 await RefreshPatientsAsync();
-                LolMessageForPatientCount(SetPatientCount);
-
-                UpdateText = "Пациент успешно добавлен";
+                //LolMessageForPatientCount(SetPatientCount);
+                
                 _logger.Info("AddPatientAsync: SUCCESS, UpdateText = {UpdateText}", UpdateText);
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.Info("AddPatientAsync: Generation was cancelled by user");
+                await RefreshPatientsAsync();
+                generationCancelled = true;
             }
             catch (DbUpdateException dbEx)
             {
@@ -450,11 +485,26 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 _logger.Error(ex, "AddPatientAsync: UNEXPECTED ERROR - {Message}", ex.Message);
                 UpdateText = $"Пациент не добавлен: {ex.Message}";
-                MessageBox.Show($"{ex.Message}");
             }
             finally
             {
+                stopwatch.Stop();
+                var timeString = FormatTimeSpan(stopwatch.Elapsed);
+
                 _logger.Info("<<< AddPatientAsync: END");
+                StopBusy();
+
+                if (generationCancelled)
+                {
+                    UpdateText = $"Генерация пациентов была прервана! Всего - [{AllPatients.Count}], Время выполнения: {timeString}";
+                }
+                else
+                {
+                    UpdateText = $"Пациент успешно добавлен! Всего - [{AllPatients.Count}]. Время выполнения: {timeString}";
+                }
+
+                _cancellationTokenSource?.Dispose();
+                _cancellationTokenSource = null;
             }
         }
 
@@ -503,7 +553,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     _logger.Warn("RefreshPatientsAsync: MainWindow.AllPatientView is null");
                 }
 
-                UpdateText = "Patient table is update";
+                UpdateText = $"Patient table is update! Всего пациентов - [{AllPatients.Count}]";
                 _logger.Info("RefreshPatientsAsync: SUCCESS");
             }
             catch (Exception ex)
@@ -583,6 +633,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             _logger.Info(">>> DeleteAllPatientAsync: START");
 
+            StartBusy("Удаление пациентов...");
+
             try
             {
                 var patient = new PatientGeneratorParameters(
@@ -625,6 +677,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             finally
             {
                 _logger.Info("<<< DeleteAllPatientAsync: END");
+                StopBusy();
             }
         }
 
@@ -633,8 +686,14 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             _logger.Info(">>> AddWorkListAsync: START");
 
+            var stopwatch = Stopwatch.StartNew();
+            _cancellationTokenSource = new CancellationTokenSource();
+            var generationCancelled = false;
+
             try
             {
+                StartBusy("Генерация рабочего списка ...");
+
                 var newWorkList = new WorkListGeneratorDto(
                     new OrderIdWorklistRule(),
                     new RandomCreateDateRule(),
@@ -657,14 +716,19 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                 _logger.Info("AddWorkListAsync: Calling WorklistService.GenerateAsync...");
 
-                await _worklistService.GenerateAsync(newWorkList);
+                await _worklistService.GenerateAsync(newWorkList, _cancellationTokenSource.Token);
 
                 _logger.Info("AddWorkListAsync: GenerateAsync completed");
 
                 await RefreshWorkListAsync();
 
-                UpdateText = "WorkList added";
                 _logger.Info("AddWorkListAsync: SUCCESS");
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.Info("AddWorkListAsync: Generation was cancelled by user");
+                generationCancelled = true;
+                await RefreshWorkListAsync();
             }
             catch (Exception ex)
             {
@@ -675,6 +739,23 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             finally
             {
                 _logger.Info("<<< AddWorkListAsync: END");
+
+                stopwatch.Stop();
+                var timeString = FormatTimeSpan(stopwatch.Elapsed);
+
+                StopBusy();
+
+                if (generationCancelled)
+                {
+                    UpdateText = $"Генерация списка была прервана! Всего - [{AllWorkLists.Count}], Время выполнения: {timeString}";
+                }
+                else
+                {
+                    UpdateText = $"Рабочий список успешно добавлен! Всего - [{AllWorkLists.Count}]. Время выполнения: {timeString}";
+                }
+
+                _cancellationTokenSource?.Dispose();
+                _cancellationTokenSource = null;
             }
         }
 
@@ -769,6 +850,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             _logger.Info(">>> DeleteAllWorkListAsync: START");
 
+            StartBusy("Удаление пациентов...");
+
             try
             {
                 var workList = new WorkListGeneratorParameters(
@@ -816,6 +899,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             finally
             {
                 _logger.Info("<<< DeleteAllWorkListAsync: END");
+                StopBusy();
             }
         }
 
@@ -947,16 +1031,21 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             try
             {
+                StartBusy("Генерация пациента...");
+
                 _logger.Info($"AddOnePatientAsync: Family={AddFamily}, " +
                     $"Name={AddName}, MiddleName={AddMiddleName}, Id={AddIdPatient}, " +
                     $"BirthDate={PatientBirthDate:yyyy-MM-dd}, Gender={SelecedGender}," +
                     $"Adress ={AddAdress}, Info={AddInfo}, WorkPlase={AddWorkPlase}");
+
+                AddFullName = $"{AddFamily} {AddName} {AddMiddleName}";
 
                 var newPatient = new PatientInputParameters(
                     1,
                     AddFamily,
                     AddName,
                     AddMiddleName,
+                    AddFullName,
                     AddIdPatient,
                     PatientBirthDate,
                     SelecedGender,
@@ -1002,11 +1091,12 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 CleareFields();
                 UpdateText = !string.IsNullOrEmpty(messageToUpdateText)
                     ? messageToUpdateText
-                    : "Пациент не добавлен";
+                    : $"Пациент не добавлен {ex.Message}";
             }
             finally
             {
                 _logger.Info("<<< AddOnePatientAsync: END");
+                StopBusy();
             }
         }
 
@@ -1122,5 +1212,37 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             MedicalInsuranceNumber = string.Empty;
         }
 
+        [RelayCommand]
+        public void CancelGeneration()
+        {
+            _cancellationTokenSource?.Cancel();
+            BusyMessage = "Отмена генерации...";
+        }
+
+        private string FormatTimeSpan(TimeSpan time)
+        {
+            if (time.TotalHours >= 1)
+            {
+                return $"{time.Hours} ч {time.Minutes} мин {time.Seconds} сек";
+            }                
+            if (time.TotalMinutes >= 1)
+            {
+                return $"{time.Minutes} мин {time.Seconds} сек";
+            }               
+            return $"{time.TotalSeconds:F1} сек";
+        }
+
+        private void StartBusy(string message = "Загрузка...")
+        {
+            BusyMessage = message;
+            IsBusy = true;
+        }
+
+        private void StopBusy()
+        {
+            IsBusy = false;
+            BusyMessage = string.Empty;
+
+        }
     }
 }
