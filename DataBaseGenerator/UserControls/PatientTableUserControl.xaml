@@ -23,9 +23,15 @@
                 AutoGenerateColumns="False"
                 CanUserAddRows="False"
                 CanUserDeleteRows="False"
+                EnableColumnVirtualization="True"
+                EnableRowVirtualization="True"
                 IsReadOnly="False"
                 ItemsSource="{Binding AllPatients}"
-                SelectedItem="{Binding SelectedPatient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                ScrollViewer.IsDeferredScrollingEnabled="True"
+                SelectedItem="{Binding SelectedPatient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                VirtualizingPanel.ScrollUnit="Pixel"
+                VirtualizingPanel.VirtualizationMode="Recycling">
 
                 <DataGrid.Columns>
                     <DataGridTextColumn

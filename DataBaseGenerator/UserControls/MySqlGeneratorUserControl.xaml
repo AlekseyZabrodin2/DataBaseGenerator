@@ -2,13 +2,20 @@
     x:Class="DataBaseGenerator.UI.Wpf.UserControls.MySqlGeneratorUserControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:convert="clr-namespace:DataBaseGenerator.UI.Wpf.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:DataBaseGenerator.UI.Wpf.UserControls"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:userControls="clr-namespace:DataBaseGenerator.UI.Wpf.UserControls"
     xmlns:viewmodels="clr-namespace:DataBaseGenerator.UI.Wpf.ViewModel"
     d:DataContext="{d:DesignInstance viewmodels:MySqlGeneratorViewModel}"
     mc:Ignorable="d">
+
+
+    <UserControl.Resources>
+        <convert:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+    </UserControl.Resources>
 
 
     <Grid ShowGridLines="False">
@@ -56,6 +63,41 @@
             Grid.Column="1"
             Grid.ColumnSpan="3"
             Margin="5" />
+
+        <Grid
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Grid.Column="0"
+            Grid.ColumnSpan="4"
+            Width="1200"
+            Height="780"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Border Background="White" Opacity=".7">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <mah:ProgressRing
+                        Width="100"
+                        Height="100"
+                        Foreground="{DynamicResource MahApps.Brushes.AccentBase}"
+                        IsActive="{Binding IsBusy}" />
+
+                    <TextBlock
+                        Margin="0,30,0,0"
+                        HorizontalAlignment="Center"
+                        FontSize="18"
+                        Foreground="Black"
+                        Text="{Binding BusyMessage}" />
+                </StackPanel>
+            </Border>
+            <Button
+                Width="120"
+                Height="50"
+                Margin="350,0,0,3"
+                VerticalAlignment="Bottom"
+                Command="{Binding CancelGenerationCommand}"
+                Content="Cancel" />
+        </Grid>
 
     </Grid>
 </UserControl>

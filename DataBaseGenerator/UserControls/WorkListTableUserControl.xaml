@@ -21,50 +21,69 @@
             Grid.ColumnSpan="3"
             Background="{DynamicResource MahApps.Brushes.Accent}">
 
-            <ListView
+            <DataGrid
                 Name="ViewAllWorkList"
                 Margin="5"
-                ItemsSource="{Binding AllWorkLists}">
+                AutoGenerateColumns="False"
+                CanUserAddRows="False"
+                CanUserDeleteRows="False"
+                EnableColumnVirtualization="True"
+                EnableRowVirtualization="True"
+                IsReadOnly="True"
+                ItemsSource="{Binding AllWorkLists}"
+                ScrollViewer.IsDeferredScrollingEnabled="True"
+                VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                VirtualizingPanel.ScrollUnit="Pixel"
+                VirtualizingPanel.VirtualizationMode="Recycling">
 
-                <ListView.View>
-                    <GridView>
-
-                        <GridViewColumn DisplayMemberBinding="{Binding ID_Patient}" Header="ID пациента" />
-
-                        <GridViewColumn DisplayMemberBinding="{Binding Modality}" Header="Модальность" />
-
-                        <GridViewColumn DisplayMemberBinding="{Binding StationAeTitle}" Header="AE_Title" />
-
-                        <GridViewColumn DisplayMemberBinding="{Binding State}" Header="Состояние" />
-
-                        <GridViewColumn DisplayMemberBinding="{Binding StudyDescription}" Header="Описание" />
-
-                        <GridViewColumn DisplayMemberBinding="{Binding CreateDate}" Header="Дата добавления" />
-
-                        <GridViewColumn DisplayMemberBinding="{Binding CreateTime}" Header="Время добавления" />
-
-                        <!--<GridViewColumn Header="CompleteDate"
-                                DisplayMemberBinding="{Binding CompleteDate}" />
-
-                <GridViewColumn Header="CompleteTime"
-                                DisplayMemberBinding="{Binding CompleteTime}" />-->
-
-                        <!--<GridViewColumn Header="SOPInstanceUID"
-                                DisplayMemberBinding="{Binding SOPInstanceUID}" />-->
-
-                        <GridViewColumn DisplayMemberBinding="{Binding ProcedureStepStartDateTime}" Header="Дата процедуры" />
-
-                        <GridViewColumn DisplayMemberBinding="{Binding PerformingPhysiciansName}" Header="Исполнит. врач" />
-
-                        <GridViewColumn DisplayMemberBinding="{Binding ReferringPhysiciansName}" Header="Направ. врач" />
-
-                        <GridViewColumn DisplayMemberBinding="{Binding RequestingPhysician}" Header="Запрос. врач" />
-
-                    </GridView>
-                </ListView.View>
-            </ListView>
+                <DataGrid.Columns>
+                    <DataGridTextColumn
+                        Width="100"
+                        Binding="{Binding ID_Patient}"
+                        Header="ID пациента" />
+                    <DataGridTextColumn
+                        Width="100"
+                        Binding="{Binding Modality}"
+                        Header="Модальность" />
+                    <DataGridTextColumn
+                        Width="120"
+                        Binding="{Binding StationAeTitle}"
+                        Header="AE_Title" />
+                    <DataGridTextColumn
+                        Width="100"
+                        Binding="{Binding State}"
+                        Header="Состояние" />
+                    <DataGridTextColumn
+                        Width="150"
+                        Binding="{Binding StudyDescription}"
+                        Header="Описание" />
+                    <DataGridTextColumn
+                        Width="120"
+                        Binding="{Binding CreateDate, StringFormat='dd.MM.yyyy'}"
+                        Header="Дата добавления" />
+                    <DataGridTextColumn
+                        Width="100"
+                        Binding="{Binding CreateTime}"
+                        Header="Время добавления" />
+                    <DataGridTextColumn
+                        Width="120"
+                        Binding="{Binding ProcedureStepStartDateTime, StringFormat='dd.MM.yyyy'}"
+                        Header="Дата процедуры" />
+                    <DataGridTextColumn
+                        Width="150"
+                        Binding="{Binding PerformingPhysiciansName}"
+                        Header="Исполнит. врач" />
+                    <DataGridTextColumn
+                        Width="150"
+                        Binding="{Binding ReferringPhysiciansName}"
+                        Header="Направ. врач" />
+                    <DataGridTextColumn
+                        Width="150"
+                        Binding="{Binding RequestingPhysician}"
+                        Header="Запрос. врач" />
+                </DataGrid.Columns>
+            </DataGrid>
         </Grid>
-
 
         <Grid Grid.Row="1" Grid.RowSpan="2">
             <Grid.RowDefinitions>
@@ -150,6 +169,7 @@
                         Name="AeTitleBox"
                         Width="150"
                         Height="50"
+                        Padding="10,0"
                         HorizontalAlignment="Right"
                         HorizontalContentAlignment="Left"
                         VerticalContentAlignment="Center"
