@@ -691,7 +691,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 var total = inputParameters.PatientCount;
                 var batchSize = 1000;
                 var patientsBatch = new List<PatientLiteDb>(batchSize);
-                var prefix = "MEX";
+                var prefix = "MXE";
                 var digitsCount = 7;
                 var format = new string('0', digitsCount);
 
@@ -739,7 +739,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 var total = inputParameters.PatientCount;
 
-                var prefix = "MEX";
+                var prefix = "MXE";
                 var digitsCount = 7;
                 var format = new string('0', digitsCount);
 

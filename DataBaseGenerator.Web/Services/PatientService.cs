@@ -78,7 +78,7 @@ namespace DataBaseGenerator.Web.Services
             var total = patientGeneratorParameters.PatientCount;
             var batchSize = 1000;
             var patients = new List<Patient>(batchSize);
-            var prefix = "MEX";
+            var prefix = "MXE";
             var digitsCount = 7;
             var format = new string('0', digitsCount);
 
@@ -119,7 +119,7 @@ namespace DataBaseGenerator.Web.Services
             var total = patientGeneratorParameters.PatientCount;
             var batchSize = 1000;
             var patients = new List<Patient>(batchSize);
-            var prefix = "MEX";
+            var prefix = "MXE";
             var digitsCount = 7;
             var format = new string('0', digitsCount);
             
