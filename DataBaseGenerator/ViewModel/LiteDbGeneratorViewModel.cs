@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -44,6 +47,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         [ObservableProperty]
         public partial string AddMiddleName { get; set; }
+
+        [ObservableProperty]
+        public partial string AddFullName { get; set; }
 
         public List<string> Gender { get; }
 
@@ -164,6 +170,20 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [ObservableProperty]
         public partial bool IsReadOnlyMode { get; set; } = true;
 
+        [ObservableProperty]
+        public partial string BusyMessage { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsBusy { get; set; }
+
+        [ObservableProperty]
+        public partial bool PercentShow { get; set; }
+
+        [ObservableProperty]
+        public partial int CurrentProgress { get; set; }
+        
+        private CancellationTokenSource _cancellationTokenSource;
+
 
 
         public LiteDbGeneratorViewModel(IServiceProvider serviceProvider)
@@ -183,6 +203,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             UseRandomBirthdate = true;
 
             AllPatients = _studyStorageModule.Patients.GetAllPatients();
+            UpdateText = $"Пациентов - [{AllPatients.Count}].";
         }
 
 
@@ -193,11 +214,16 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             var messageToUpdateText = string.Empty;
             try
             {
-                var newPatient = new PatientInputParameters(
+                StartBusy("Генерация пациента...");
+
+                AddFullName = $"{AddFamily} {AddName} {AddMiddleName}";
+
+                var newPatient = new PatientInputParameters(                    
                     1,
                     AddFamily,
                     AddName,
                     AddMiddleName,
+                    AddFullName,
                     AddIdPatient,
                     PatientBirthDate,
                     SelecedGender,
@@ -219,7 +245,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     ? messageToUpdateText
                     : "Patient added";
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 if (string.IsNullOrEmpty(AddFamily) || string.IsNullOrEmpty(AddName) || string.IsNullOrEmpty(AddMiddleName))
                 {
@@ -232,39 +258,39 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 CleareFields();
                 UpdateText = !string.IsNullOrEmpty(messageToUpdateText)
                     ? messageToUpdateText
-                    : "Пациент не добавлен";
+                    : $"Пациент не добавлен {ex.Message}";
             }
+            finally { StopBusy(); }
         }
 
         [RelayCommand]
         public void CancelAddPatient()
         {
             AddIdPatient = string.Empty;
-
             AddFamily = string.Empty;
-
             AddName = string.Empty;
-
             AddMiddleName = string.Empty;
-
+            AddFullName = string.Empty;
             AddAdress = string.Empty;
-
             AddWorkPlase = string.Empty;
-
             AddInfo = string.Empty;
-
             SelecedGender = null;
-
             MedicalInsuranceNumber = string.Empty;
-
             UpdateText = "Как скажете, отменяю !";
         }
 
         [RelayCommand]
         public async Task AddPatientAsync()
         {
+            var stopwatch = Stopwatch.StartNew();
+
+            _cancellationTokenSource = new CancellationTokenSource();
+            var generationCancelled = false;
+
             try
             {
+                StartBusy("Генерация пациентов...");
+
                 var newPatient = new PatientGeneratorParameters(
                     new OrderIdPatientRule(),
                     new RandomLastNameRule(),
@@ -295,19 +321,51 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     SpecialCharsGeneratorRule = UseSpecialChars
                 };
 
+                var progress = new Progress<int>(percent =>
+                {
+                    CurrentProgress = percent;
+                    BusyMessage = $"Генерация пациентов ...";
+                });
+
                 var patientDto = CreatePatientDto();
 
-                await GenerateLiteDbPatientAsync(patientDto);
+                await GeneratePatientByInsertBulkAsync(patientDto, progress, _cancellationTokenSource.Token);
 
                 await RefreshPatientsAsync();
 
-                UpdateText = "Пациент успешно добавлен";
+                if (_cancellationTokenSource.IsCancellationRequested)
+                {
+                    generationCancelled = true;
+                    return;
+                }
+
+                UpdateText = $"Пациент успешно добавлен! Всего - [{AllPatients.Count}]";
             }
             catch (Exception ex)
             {
                 UpdateText = "Пациент не добавлен";
                 _logger.Error(ex, "Error in patient generation");
                 MessageBox.Show($"{ex.Message}");
+            }
+            finally
+            {
+                stopwatch.Stop();
+                var elapsedTime = stopwatch.Elapsed;
+                var timeString = FormatTimeSpan(elapsedTime);
+
+                StopBusy();
+
+                if (generationCancelled)
+                {
+                    UpdateText = $"Генерация пациентов была прервана! Всего - [{AllPatients.Count}]. Время выполнения: {timeString}";
+                }
+                else
+                {
+                    UpdateText = $"Пациент успешно добавлен! Всего - [{AllPatients.Count}]. Время выполнения: {timeString}";
+                }
+
+                _cancellationTokenSource?.Dispose();
+                _cancellationTokenSource = null;
             }
         }
 
@@ -387,35 +445,37 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         public async Task DeleteAllPatientAsync()
         {
+            _logger.Info(">>> DeleteAllPatientAsync: START");
+
+            var stopwatch = Stopwatch.StartNew();
+
             try
             {
-                var patient = new PatientGeneratorParameters(
-                   new OrderIdPatientRule(),
-                   new RandomLastNameRule(),
-                   new RandomFirstNameRule(),
-                   new RandomMiddleNameRule(),
-                   new OrderPatientIdRule(),
-                   new RandomBirthDateRule(new DateTime()),
-                   new RandomSexRule(),
-                   new RandomAddressRule(),
-                   new RandomAddInfoRule(),
-                   new RandomOccupationRule())
-                {
-                    PatientCount = SetPatientCount
-                };
+                StartBusy("Удаление пациентов...", false);
 
                 //await _patientService.DeleteAllAsync();
 
-                //_studyStorageModule.Patients.Delete();
-                await RefreshPatientsAsync();
+                _studyStorageModule.Patients.DeleteAll();
 
-                UpdateText = "Patient Table Deletion completed";
+                await RefreshPatientsAsync();
             }
             catch (Exception ex)
             {
-                UpdateText = "Patient Table is not Deleted";
-                _logger.Error(ex, "Patient Table is not Deleted");
-                MessageBox.Show($"{ex.Message}");
+                UpdateText = $"Ошибка удаления: - [{ex.Message}]";
+                _logger.Error(UpdateText);
+            }
+            finally
+            {
+                stopwatch.Stop();
+                var timeString = FormatTimeSpan(stopwatch.Elapsed);
+
+                _logger.Info("<<< DeleteAllPatientAsync: END");
+                StopBusy();
+
+                if (UpdateText?.Contains("Ошибка") != true)
+                {
+                    UpdateText = $"Пациенты успешно удалены! Всего - [{AllPatients.Count}]. Время выполнения: {timeString}";
+                }
             }
         }
 
@@ -478,12 +538,29 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         public async Task RefreshPatientsAsync()
         {
-            AllPatients = _studyStorageModule.Patients.GetAllPatients();
-            //MainWindow.AllPatientView.ItemsSource = null;
-            //MainWindow.AllPatientView.Items.Clear();
-            //MainWindow.AllPatientView.ItemsSource = AllPatients;
-            //MainWindow.AllPatientView.Items.Refresh();
-            UpdateText = "Patient table is update";
+            try
+            {
+                StartBusy("Обновление списка пациентов...");
+
+                _studyStorageModule?.Dispose();
+                _studyStorageModule = new LiteDbStudyStorageModule(DatabasePath, IsReadOnlyMode);
+
+                await Task.Run(() =>
+                {
+                    AllPatients = _studyStorageModule.Patients.GetAllPatients();
+                });
+
+                UpdateText = $"База обновлена. Найдено пациентов: {AllPatients.Count}";
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Ошибка обновления БД");
+                UpdateText = $"Ошибка обновления: {ex.Message}";
+            }
+            finally
+            {
+                StopBusy();
+            }
         }
 
         private void CleareFields()
@@ -604,14 +681,46 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         //}
 
 
-        public async Task GenerateLiteDbPatientAsync(PatientGeneratorDto inputParameters)
+        public async Task GeneratePatientByInsertBulkAsync(PatientGeneratorDto inputParameters, IProgress<int> progress, CancellationToken cancellationToken)
         {
             try
             {
-                for (var patientindex = 0; patientindex < inputParameters.PatientCount; patientindex++)
+                var total = inputParameters.PatientCount;
+                var batchSize = 1000;
+                var patientsBatch = new List<PatientLiteDb>(batchSize);
+                var prefix = "MEX";
+                var digitsCount = 7;
+                var format = new string('0', digitsCount);
+
+
+                var nextPatientId = GenerateNextPatientId(prefix, digitsCount, 1);
+                var currentNumber = uint.Parse(new Regex(@"[^\d]").Replace(nextPatientId, string.Empty));
+
+                await Task.Run(() =>
                 {
-                    await CreateLiteDbPatientAsync(patientindex, inputParameters);
-                }
+                    for (var patientindex = 0; patientindex < total; patientindex++)
+                    {
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            _logger.Info("Cancellation requested, stopping generation...");
+                            break;
+                        }
+
+                        var patientId = $"{prefix}{(currentNumber + patientindex).ToString(format)}";
+                        var patient = GenerateLiteDbPatients(patientindex, inputParameters);
+                        patient.PatientID = patientId;
+                        patientsBatch.Add(patient);
+
+                        if (patientsBatch.Count >= batchSize || patientindex == total - 1)
+                        {
+                            _studyStorageModule.Patients.InsertBulk(patientsBatch);
+                            patientsBatch.Clear();
+
+                            progress?.Report((int)((double)(patientindex + 1) / total * 100));
+                        }
+                    }
+                }, cancellationToken);
+
                 _logger.Info($"Created {inputParameters.PatientCount} patients");
             }
             catch (Exception ex)
@@ -621,16 +730,50 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
         }
 
-        public async Task CreateLiteDbPatientAsync(int patientIndex, PatientGeneratorDto patientGeneratorParameters)
+        public async Task GeneratePatientByOneAsync(PatientGeneratorDto inputParameters, IProgress<int> progress, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var total = inputParameters.PatientCount;
+
+                var prefix = "MEX";
+                var digitsCount = 7;
+                var format = new string('0', digitsCount);
+
+
+                var nextPatientId = GenerateNextPatientId(prefix, digitsCount, 1);
+                var currentNumber = uint.Parse(new Regex(@"[^\d]").Replace(nextPatientId, string.Empty));
+
+                await Task.Run(() =>
+                {
+                    for (var patientindex = 0; patientindex < total; patientindex++)
+                    {
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            _logger.Info("Cancellation requested, stopping generation...");
+                            break;
+                        }
+
+                        var patientId = $"{prefix}{(currentNumber + patientindex).ToString(format)}";
+
+                        CreateLiteDbPatient(patientindex, inputParameters, patientId);
+                        progress?.Report((int)((double)(patientindex + 1) / total * 100));
+                    }
+                }, cancellationToken);
+
+                _logger.Info($"Created {inputParameters.PatientCount} patients");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Patient not generated");
+                throw;
+            }
+        }
+
+        public void CreateLiteDbPatient(int patientIndex, PatientGeneratorDto patientGeneratorParameters, string newPatientId)
         {
             _patientLiteDb = GenerateLiteDbPatients(patientIndex, patientGeneratorParameters);
-
-            //bool checkIsExist = _studyStorageModule.Patients.Exists(element => element.PatientId == _patientLiteDb.PatientId);
-
-            //if (checkIsExist)
-            //    return;
-
-            //var patients = ConvertPatientLiteDbToLitePatient(_patientLiteDb);
+            _patientLiteDb.PatientID = newPatientId;
             _studyStorageModule.Patients.Upsert(_patientLiteDb);
         }
 
@@ -786,6 +929,74 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                         MessageBoxImage.Error);
                 }
             }
+        }
+
+        [RelayCommand]
+        public void CancelGeneration()
+        {
+            _cancellationTokenSource?.Cancel();
+            BusyMessage = "Отмена генерации...";
+        }
+
+        public string GenerateNextPatientId(string prefix, int digitsCount, int startsFrom = 1)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(prefix);
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(digitsCount);
+
+            var format = new string('0', digitsCount);
+            
+            var matchedIds = _studyStorageModule.Patients.GetAllPatients()
+                .Select(p => p.PatientID) 
+                .Where(id => id.StartsWith(prefix))
+                .ToList();
+
+            if (matchedIds.Count == 0)
+                return $"{prefix}{((uint)startsFrom).ToString(format)}";
+
+            var nonDigitPattern = new Regex(@"[^\d]");
+
+            var maxIdValue = matchedIds
+                .Select(id =>
+                {
+                    var integerPart = nonDigitPattern.Replace(id, string.Empty);
+                    return uint.TryParse(integerPart, out var result) ? result : 0;
+                })
+                .Max();
+
+            var newIdValue = maxIdValue + 1 < (uint)startsFrom
+                ? (uint)startsFrom
+                : maxIdValue + 1;
+
+            return $"{prefix}{newIdValue.ToString(format)}";
+        }
+
+        private string FormatTimeSpan(TimeSpan time)
+        {
+            if (time.TotalHours >= 1)
+            {
+                return $"{time.Hours} ч {time.Minutes} мин {time.Seconds} сек";
+            }
+            if (time.TotalMinutes >= 1)
+            {
+                return $"{time.Minutes} мин {time.Seconds} сек";
+            }
+            return $"{time.TotalSeconds:F1} сек";
+        }
+
+        private void StartBusy(string message = "Загрузка...", bool percentShow = true)
+        {
+            BusyMessage = message;
+            CurrentProgress = 0;
+            IsBusy = true;
+            PercentShow = percentShow;
+        }
+
+        private void StopBusy()
+        {
+            IsBusy = false;
+            BusyMessage = string.Empty;
+            PercentShow= false;
+            CurrentProgress = 0;
         }
     }
 }
