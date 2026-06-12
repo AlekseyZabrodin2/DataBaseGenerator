@@ -20,7 +20,7 @@ namespace DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Patient
 
             //var patientId = $"{PatientID}{parameter}";
 
-            var patientId = PatientID + $"{parameter}".PadLeft(5,'0');
+            var patientId = PatientID + $"{parameter}".PadLeft(7,'0');
 
             return patientId;
         }
