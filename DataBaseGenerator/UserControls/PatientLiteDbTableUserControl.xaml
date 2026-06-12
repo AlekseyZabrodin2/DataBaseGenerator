@@ -23,9 +23,15 @@
                 AutoGenerateColumns="False"
                 CanUserAddRows="False"
                 CanUserDeleteRows="False"
+                EnableColumnVirtualization="True"
+                EnableRowVirtualization="True"
                 IsReadOnly="False"
                 ItemsSource="{Binding AllPatients}"
-                SelectedItem="{Binding SelectedPatient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                ScrollViewer.IsDeferredScrollingEnabled="True"
+                SelectedItem="{Binding SelectedPatient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                VirtualizingPanel.ScrollUnit="Pixel"
+                VirtualizingPanel.VirtualizationMode="Recycling">
 
                 <DataGrid.Columns>
                     <DataGridTextColumn
@@ -35,6 +41,7 @@
                     <DataGridTextColumn Binding="{Binding LastName}" Header="Фамилия" />
                     <DataGridTextColumn Binding="{Binding FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Имя" />
                     <DataGridTextColumn Binding="{Binding MiddleName}" Header="Отчество" />
+                    <DataGridTextColumn Binding="{Binding FullName}" Header="Полное имя" />
                     <DataGridTextColumn Binding="{Binding BirthDate}" Header="Дата Рождения" />
                     <DataGridTextColumn Binding="{Binding Sex}" Header="Пол" />
                     <DataGridTextColumn Binding="{Binding Address}" Header="Адрес" />

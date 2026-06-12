@@ -14,6 +14,7 @@ namespace DataBaseGenerator.Core.MySqlGenerator
             string lastName,
             string firstName,
             string middleName,
+            string fullName,
             string patientId,
             DateTime? birthDate,
             string sex,
@@ -26,6 +27,7 @@ namespace DataBaseGenerator.Core.MySqlGenerator
             LastName = lastName ?? throw new ArgumentNullException(nameof(lastName));
             FirstName = firstName ?? throw new ArgumentNullException(nameof(firstName));
             MiddleName = middleName ?? throw new ArgumentNullException(nameof(middleName));
+            FullName = fullName ?? throw new ArgumentNullException(nameof(fullName));
             PatientID = patientId ?? throw new ArgumentNullException(nameof(patientId));
             BirthDate = birthDate;
             Sex = sex ?? throw new ArgumentNullException(nameof(sex));
@@ -43,6 +45,8 @@ namespace DataBaseGenerator.Core.MySqlGenerator
         public string FirstName { get; set; }
 
         public string MiddleName { get; set; }
+
+        public string FullName { get; set; }
 
         public string PatientID { get; set; }
 

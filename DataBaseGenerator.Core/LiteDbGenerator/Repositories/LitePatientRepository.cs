@@ -52,6 +52,7 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Repositories
                 LastName = patient.LastName,
                 FirstName = patient.FirstName,
                 MiddleName = patient.MiddleName,
+                FullName = $"{patient.LastName} {patient.FirstName} {patient.MiddleName}",
                 BirthDate = patient.BirthDate,
                 Sex = patient.Sex,
                 Phone = patient.Phone,
@@ -78,6 +79,29 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Repositories
             _context.Patients.Upsert(entity);
 
             return PatientMapper.ToDomain(entity);
+        }
+
+        public void InsertBulk(IEnumerable<PatientLiteDb> patients)
+        {
+            var entities = new List<LitePatient>();
+            foreach (var patient in patients)
+            {
+                var entity = new LitePatient
+                {
+                    PatientId = patient.PatientID,
+                    LastName = patient.LastName,
+                    FirstName = patient.FirstName,
+                    MiddleName = patient.MiddleName,
+                    BirthDate = patient.BirthDate,
+                    Sex = patient.Sex,
+                    Phone = patient.Phone,
+                    Address = patient.Address,
+                    Comments = patient.Comments
+                };
+                entities.Add(entity);
+            }
+
+            _context.Patients.InsertBulk(entities);
         }
 
         public PatientLiteDb? GetById(string id)
@@ -171,6 +195,11 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Repositories
                 return;
 
             _context.Patients.Delete(objectId);
+        }
+
+        public void DeleteAll()
+        {
+            _context.Patients.DeleteAll();
         }
     }
 }

@@ -13,6 +13,12 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Models
         public string FirstName { get; set; } = string.Empty;
         public string MiddleName { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Stored computed field: "{LastName} {FirstName} {MiddleName}".
+        /// Indexed for full-name search.
+        /// </summary>
+        public string FullName { get; set; } = string.Empty;
+
         public PatientSex Sex { get; set; } = PatientSex.Other;
         public DateTime? BirthDate { get; set; }
         public string Age { get; set; }
