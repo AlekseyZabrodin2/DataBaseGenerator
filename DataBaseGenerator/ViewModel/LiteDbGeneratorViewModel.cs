@@ -862,7 +862,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             // Для коротких путей ничего не делаем
             var parts = normalized.Split('\\', StringSplitOptions.RemoveEmptyEntries);
             if (parts.Length <= keepFolders + 1) // +1 = имя файла
+            {
+                DatabasePathShort = normalized;
                 return normalized;
+            }
 
             var fileName = parts[^1];
             var startIndex = Math.Max(0, parts.Length - (keepFolders + 1));
