@@ -38,13 +38,6 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-
-        <userControls:AddPatientUserControl
-            Grid.RowSpan="3"
-            Grid.Column="0"
-            Margin="5,5,5,5" />
-
-
         <Grid
             Grid.Column="1"
             Grid.ColumnSpan="3"
@@ -67,16 +60,6 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-
-                    <!--<TextBox
-                Height="35"
-                Padding="5"
-                VerticalContentAlignment="Center"
-                mah:TextBoxHelper.Watermark="Выберите файл базы (*.db)"
-                Background="#F5F5F5"
-                BorderThickness="1"
-                IsReadOnly="True"
-                Text="{Binding DatabasePath}"/>-->
 
                     <Border
                         Height="35"
@@ -180,9 +163,9 @@
                         VerticalAlignment="Top"
                         FontSize="20"
                         FontWeight="Bold"
-                        Visibility="{Binding PercentShow, Converter={StaticResource BoolToVisibilityConverter}}"
                         Foreground="{DynamicResource MahApps.Brushes.AccentBase}"
-                        Text="{Binding CurrentProgress, StringFormat='{}{0}%'}" />
+                        Text="{Binding CurrentProgress, StringFormat='{}{0}%'}"
+                        Visibility="{Binding PercentShow, Converter={StaticResource BoolToVisibilityConverter}}" />
 
                     <TextBlock
                         Margin="0,30,0,0"
