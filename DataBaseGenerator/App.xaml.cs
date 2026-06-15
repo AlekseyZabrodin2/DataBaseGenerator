@@ -81,16 +81,16 @@ namespace DataBaseGenerator.UI.Wpf
 
                     services.AddSingleton<IStudyStorageModule>(sp =>
                     {
-                        //var dataDirectory = "D:\\Develop\\UniExpert\\Build\\Debug\\Data";
-
-                        //if (!Directory.Exists(dataDirectory))
-                        //{
-                            var dataDirectory = Path.Combine(AppContext.BaseDirectory, "LiteDataBase");
+                        var dataDirectory = "D:\\Develop\\UniExpert\\Build\\Debug\\Data";
+                        //var dataDirectory = Path.Combine(AppContext.BaseDirectory, "LiteDataBase");
+                         
+                        if (!Directory.Exists(dataDirectory))
+                        {
                             Directory.CreateDirectory(dataDirectory);
-                        //}
+                        }
 
                         var dbPath = Path.Combine(dataDirectory, "patients.db");
-                        return new LiteDbStudyStorageModule(dbPath, false);
+                        return new LiteDbStudyStorageModule(dbPath, true);
                     })
                     .AddSingleton<IStudyApplicationService, StudyApplicationService>();
 
