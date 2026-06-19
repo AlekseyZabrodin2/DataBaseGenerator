@@ -31,6 +31,8 @@ namespace DataBaseGenerator.UI.Wpf
         const string _webHostPath = "WebHost\\DataBaseGenerator.Web.exe";
         private string _exeToRun;
 
+        public static IStudyStorageModule SharedStorage { get; set; }
+
 
         public static T GetService<T>()
         where T : class
@@ -48,6 +50,13 @@ namespace DataBaseGenerator.UI.Wpf
             this.InitializeComponent();
 
             var configuration = AppConfiguration.LoadConfiguration();
+
+            var dataDirectory = Path.Combine(AppContext.BaseDirectory, "LiteDataBase");
+            if (!Directory.Exists(dataDirectory))
+                Directory.CreateDirectory(dataDirectory);
+
+            var dbPath = Path.Combine(dataDirectory, "patients.db");
+            SharedStorage = new LiteDbStudyStorageModule(dbPath, true);
 
             var hostBuilder = Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration((context, config) =>
@@ -79,25 +88,12 @@ namespace DataBaseGenerator.UI.Wpf
                     services.AddScoped<PatientService>();
                     services.AddScoped<WorklistService>();
 
-                    services.AddSingleton<IStudyStorageModule>(sp =>
-                    {
-                        var dataDirectory = "D:\\Develop\\UniExpert\\Build\\Debug\\Data";
-                        //var dataDirectory = Path.Combine(AppContext.BaseDirectory, "LiteDataBase");
-                         
-                        if (!Directory.Exists(dataDirectory))
-                        {
-                            Directory.CreateDirectory(dataDirectory);
-                        }
-
-                        var dbPath = Path.Combine(dataDirectory, "patients.db");
-                        return new LiteDbStudyStorageModule(dbPath, true);
-                    })
-                    .AddSingleton<IStudyApplicationService, StudyApplicationService>();
-
+                    services.AddSingleton<IStudyApplicationService, StudyApplicationService>();
                     services.AddSingleton(this);
                     services.AddSingleton<MainViewModel>();
                     services.AddSingleton<MySqlGeneratorViewModel>();
                     services.AddSingleton<LiteDbGeneratorViewModel>();
+                    services.AddSingleton<LiteDbStudiesTableViewModel>();
                     services.AddTransient<DialogMessageWindow>();
                     services.AddTransient<MainWindow>();
                     services.AddTransient<SpecificationWindow>();
@@ -240,5 +236,21 @@ namespace DataBaseGenerator.UI.Wpf
             return pathFromDebug;
         }
 
+        public static void UpdateSharedStorage(string dbPath, bool readOnly)
+        {
+            SharedStorage?.Dispose();
+            SharedStorage = new LiteDbStudyStorageModule(dbPath, readOnly);
+            _logger.Info($"SharedStorage updated: {dbPath}, ReadOnly: {readOnly}");
+        }
+
+        public static IStudyStorageModule GetSharedStorage()
+        {
+            if (SharedStorage == null)
+            {
+                var dbPath = Path.Combine(AppContext.BaseDirectory, "LiteDataBase", "patients.db");
+                SharedStorage = new LiteDbStudyStorageModule(dbPath, true);
+            }
+            return SharedStorage;
+        }
     }
 }
