@@ -2,6 +2,7 @@
     x:Class="DataBaseGenerator.UI.Wpf.View.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:convert="clr-namespace:DataBaseGenerator.UI.Wpf.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -15,6 +16,12 @@
     WindowStartupLocation="CenterScreen"
     WindowStyle="ThreeDBorderWindow"
     mc:Ignorable="d">
+
+
+
+    <Window.Resources>
+        <convert:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+    </Window.Resources>
 
 
     <Window.InputBindings>
@@ -45,7 +52,35 @@
                     <Menu x:Name="ContextMenu">
                         <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="DataBases">
                             <MenuItem Command="{Binding SwitchToMySqlCommand}" Header="MySql Generator" />
-                            <MenuItem Command="{Binding SwitchToLiteDbCommand}" Header="LiteDB Generator" />
+                            <MenuItem Header="LiteDB - Patients">
+                                <MenuItem
+                                    Command="{Binding ShowPatientsTableCommand}"
+                                    Header="Patients"
+                                    IsCheckable="True"
+                                    IsChecked="{Binding ShowPatients}"
+                                    IsEnabled="{Binding SelectedDatabaseTab.HasPatientsTable}" />
+
+                                <MenuItem
+                                    Command="{Binding ShowStudiesTableCommand}"
+                                    Header="Studies"
+                                    IsCheckable="True"
+                                    IsChecked="{Binding ShowStudies}"
+                                    IsEnabled="{Binding SelectedDatabaseTab.HasStudiesTable}" />
+
+                                <!--<MenuItem
+                                    Command="{Binding ShowSeriesTableCommand}"
+                                    Header="Series"
+                                    IsCheckable="True"
+                                    IsChecked="{Binding ShowSeries}"
+                                    IsEnabled="{Binding SelectedDatabaseTab.HasSeriesTable}" />
+
+                                <MenuItem
+                                    Command="{Binding ShowImagesTableCommand}"
+                                    Header="Images"
+                                    IsCheckable="True"
+                                    IsChecked="{Binding ShowImages}"
+                                    IsEnabled="{Binding SelectedDatabaseTab.HasImagesTable}" />-->
+                            </MenuItem>
                         </MenuItem>
                         <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="File">
                             <MenuItem Header="Новый (Ctrl + N)" />

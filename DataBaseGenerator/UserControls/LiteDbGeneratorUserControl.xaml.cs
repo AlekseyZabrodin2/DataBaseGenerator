@@ -8,14 +8,12 @@ namespace DataBaseGenerator.UI.Wpf.UserControls
     /// </summary>
     public partial class LiteDbGeneratorUserControl : UserControl
     {
-        public LiteDbGeneratorViewModel ViewModel { get; }
+        public LiteDbGeneratorViewModel ViewModel { get; private set; }
 
         public LiteDbGeneratorUserControl()
         {
             ViewModel = App.GetService<LiteDbGeneratorViewModel>();
-
             InitializeComponent();
-
             DataContext = ViewModel;
         }
     }

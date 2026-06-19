@@ -17,23 +17,21 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <Grid
+        <Border
             Name="ViewUpdateText"
             Grid.ColumnSpan="3"
-            Margin="0"
-            Background="{DynamicResource MahApps.Brushes.Accent}">
+            BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
+            BorderThickness="4">
 
             <TextBox
                 Name="UpdateText"
-                Height="50"
-                Margin="5"
                 HorizontalContentAlignment="Center"
                 VerticalContentAlignment="Center"
                 FontSize="20"
                 IsReadOnly="True"
                 Text="{Binding UpdateText, UpdateSourceTrigger=PropertyChanged}" />
 
-        </Grid>
+        </Border>
 
         <Grid
             Name="ButtonConnect"
