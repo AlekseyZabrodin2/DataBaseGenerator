@@ -1,13 +1,18 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DataBaseGenerator.Core.LiteDbGenerator.Data;
 using DataBaseGenerator.UI.Wpf.UserControls;
 using DataBaseGenerator.UI.Wpf.View;
+using DataBaseGenerator.UI.Wpf.ViewModel.LiteDbTabs;
 using NLog;
 
 namespace DataBaseGenerator.UI.Wpf.ViewModel
@@ -17,7 +22,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
         private DialogMessageWindow _dialogMessage = new DialogMessageWindow();
         private MediaPlayer _mediaPlayer = new MediaPlayer();
-        private SpecificationWindow _specificationWindow = new SpecificationWindow();
+        private SpecificationWindow _specificationWindow = new SpecificationWindow(); 
+        private readonly IServiceProvider _serviceProvider;
+        private LiteDbGeneratorUserControl _patientUserControl;
+        private StudiesLiteDbTableUserControl _studyUserControl;
 
 
         [ObservableProperty]
@@ -48,6 +56,30 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         public partial string PathToResourceForSpecificationWindow { get; set; }
 
         [ObservableProperty]
+        public partial ObservableCollection<PatientDatabaseTab> DatabaseTabs { get; set; }
+
+        [ObservableProperty]
+        public partial PatientDatabaseTab SelectedDatabaseTab { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsMySqlMode { get; set; } = true;
+
+        [ObservableProperty]
+        public partial bool IsLiteDbMode { get; set; }
+
+        [ObservableProperty]
+        public partial bool ShowPatients { get; set; } = true;
+
+        [ObservableProperty]
+        public partial bool ShowStudies { get; set; }
+
+        [ObservableProperty]
+        public partial bool ShowSeries { get; set; }
+
+        [ObservableProperty]
+        public partial bool ShowImages { get; set; }
+
+        [ObservableProperty]
         public partial string PathToIcon { get; set; }
 
         private string _resourceAudioDir = "MySqlGenerator\\Resources\\NoNo.mp3";
@@ -56,21 +88,51 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private string _specificationWindowDir = "MySqlGenerator\\Resources\\Specification.jpg";
         private string _iconDir = "MySqlGenerator\\Resources\\DBGenerator.ico";
 
-        public ICommand SwitchToMySqlCommand { get; }
-        public ICommand SwitchToLiteDbCommand { get; }
 
 
-
-        public MainViewModel()
+        public MainViewModel(IServiceProvider serviceProvider)
         {
-            SwitchToMySql();
+            _serviceProvider = serviceProvider;
 
-            SwitchToMySqlCommand = new RelayCommand(SwitchToMySql);
-            SwitchToLiteDbCommand = new RelayCommand(SwitchToLiteDb);
+            DatabaseTabs = new();
+            _ = InitializeDatabaseAsync();
+
+            SwitchToMySql();
 
             InitializeDirectories();
         }
 
+
+        private async Task InitializeDatabaseAsync()
+        {
+            var defaultDbPath = Path.Combine(AppContext.BaseDirectory, "LiteDataBase", "patients.db");
+
+            var dataDir = Path.GetDirectoryName(defaultDbPath);
+            if (!Directory.Exists(dataDir))
+                Directory.CreateDirectory(dataDir);
+
+            if (!File.Exists(defaultDbPath))
+            {
+                CreateEmptyDatabase(defaultDbPath);
+            }
+
+            var dbTab = new PatientDatabaseTab(defaultDbPath);
+            DatabaseTabs.Add(dbTab);
+            SelectedDatabaseTab = dbTab;
+
+            await Task.CompletedTask;
+        }
+
+        private void CreateEmptyDatabase(string dbPath)
+        {
+            using var storage = new LiteDbStudyStorageModule(dbPath, false);
+            _ = storage.Patients;
+            _ = storage.Studies;
+            _ = storage.Series;
+            _ = storage.Images;
+
+            _logger.Info($"Created new database at {dbPath}");
+        }
 
         private void InitializeDirectories()
         {
@@ -145,19 +207,66 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
 
-
+        [RelayCommand]
         private void SwitchToMySql()
         {
             CurrentPage = new MySqlGeneratorUserControl();
             CurrentPageName = "MySql Generator";
+            IsMySqlMode = true;
+            IsLiteDbMode = false;
         }
 
-        private void SwitchToLiteDb()
+        //[RelayCommand]
+        //private void SwitchToLiteDb()
+        //{
+        //    CurrentPage = new LiteDbGeneratorUserControl();
+        //    CurrentPageName = "LiteDb Generator";
+        //    IsMySqlMode = false;
+        //    IsLiteDbMode = true;
+        //}
+
+
+
+        
+        //[RelayCommand]
+        //private void ShowSeriesTable() => ShowTable("Series");
+
+        //[RelayCommand]
+        //private void ShowImagesTable() => ShowTable("Images");
+        
+        [RelayCommand]
+        private void ShowPatientsTable()
         {
-            CurrentPage = new LiteDbGeneratorUserControl();
-            CurrentPageName = "LiteDb Generator";
+            _patientUserControl = new LiteDbGeneratorUserControl();
+
+            ShowPatients = true;
+            ShowStudies = false;
+            ShowSeries = false;
+            ShowImages = false;
+
+            ShowTable("Patients", _patientUserControl);
         }
 
+        [RelayCommand]
+        private void ShowStudiesTable()
+        {
+            _studyUserControl = new StudiesLiteDbTableUserControl();
+
+            ShowPatients = false;
+            ShowStudies = true;
+            ShowSeries = false;
+            ShowImages = false;
+
+            ShowTable("Studies", _studyUserControl);
+        }
+
+        private void ShowTable(string tableName, UserControl control)
+        {
+            CurrentPage = control;
+            CurrentPageName = $"LiteDb - {tableName}";
+            IsMySqlMode = false;
+            IsLiteDbMode = true;
+        }
 
     }
 }
