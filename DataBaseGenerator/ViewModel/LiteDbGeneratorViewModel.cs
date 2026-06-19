@@ -27,7 +27,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
         private readonly IServiceProvider _serviceProvider;
-        private IStudyStorageModule _studyStorageModule;
+        private IStudyStorageModule _storage => App.SharedStorage;
         private string _gender;
         private PatientLiteDb _patientLiteDb;
         private string _databasePath = string.Empty;
@@ -131,7 +131,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         public partial bool UseAge61_120 { get; set; }
 
         [ObservableProperty]
-        public partial bool UseRandomBirthdate { get; set; }
+        public partial bool UseRandomBirthdate { get; set; } = true;
 
         [ObservableProperty]
         public partial bool UseMissingBirthdate { get; set; }
@@ -181,7 +181,31 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         [ObservableProperty]
         public partial int CurrentProgress { get; set; }
-        
+
+        [ObservableProperty]
+        public partial bool ShowPatients { get; set; } = true;
+
+        [ObservableProperty]
+        public partial bool ShowStudies { get; set; }
+
+        [ObservableProperty]
+        public partial bool ShowSeries { get; set; }
+
+        [ObservableProperty]
+        public partial bool ShowImages { get; set; }
+
+        //[ObservableProperty]
+        //private partial PatientsTableViewModel PatientsVM { get; set; }
+
+        [ObservableProperty]
+        public partial LiteDbStudiesTableViewModel StudiesVM { get; set; }
+
+        //[ObservableProperty]
+        //private partial SeriesTableViewModel SeriesVM { get; set; }
+
+        //[ObservableProperty]
+        //private partial ImagesTableViewModel ImagesVM { get; set; }
+
         private CancellationTokenSource _cancellationTokenSource;
 
 
@@ -189,9 +213,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         public LiteDbGeneratorViewModel(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            _studyStorageModule = _serviceProvider.GetService<IStudyStorageModule>();
-
-            DatabasePath = _studyStorageModule.DatabasePath;
+            
             Gender = new List<string> { "Man", "Female", "Other" };
 
             _ = InitializeAsync();
@@ -200,16 +222,45 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private async Task InitializeAsync()
         {
             AllPatients = new();
-            UseRandomBirthdate = true;
+            IsReadOnlyMode = true;
 
-            AllPatients = _studyStorageModule.Patients.GetAllPatients();
-            UpdateText = $"Пациентов - [{AllPatients.Count}].";
+            DatabasePath = _storage.DatabasePath;
+
+            await GetAllPatientsAsync();
+        }
+
+        public async Task GetAllPatientsAsync()
+        {
+            try
+            {
+                StartBusy("Обновление списка пациентов...");
+
+                await Task.Run(() =>
+                {
+                    AllPatients = _storage.Patients.GetAllPatients();
+                });
+
+                UpdateStatistics();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Ошибка обновления БД");
+                UpdateText = $"Ошибка обновления: {ex.Message}";
+            }
+            finally
+            {
+                StopBusy();
+            }            
+        }
+
+        private void UpdateStatistics()
+        {
+            UpdateText = $"Всего - [{AllPatients.Count}] пациентов.";
         }
 
 
-
         [RelayCommand]
-        public async Task AddOnePatientAsync()
+        public void AddOnePatient()
         {
             var messageToUpdateText = string.Empty;
             try
@@ -236,9 +287,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                 // await _patientService.AddOneAsync(newPatient);
                 var patientLiteDb = ConvertPatientToPatientLiteDb(newPatient);
-                _studyStorageModule.Patients.Upsert(patientLiteDb);
+                _storage.Patients.Upsert(patientLiteDb);
 
-                await RefreshPatientsAsync();
+                _ = RefreshDataBaseAsync();
                 CleareFields();
 
                 UpdateText = !string.IsNullOrEmpty(messageToUpdateText)
@@ -331,7 +382,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                 await GeneratePatientByInsertBulkAsync(patientDto, progress, _cancellationTokenSource.Token);
 
-                await RefreshPatientsAsync();
+                await RefreshDataBaseAsync();
 
                 if (_cancellationTokenSource.IsCancellationRequested)
                 {
@@ -370,7 +421,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
         [RelayCommand]
-        public async Task SavePatientsAsync()
+        public void SavePatients()
         {
             try
             {
@@ -410,7 +461,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
         [RelayCommand]
-        public async Task DeleteFirstPatientAsync()
+        public void DeleteFirstPatient()
         {
             try
             {
@@ -430,7 +481,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 };
 
                 //_studyStorageModule.Patients.Delete(patient);
-                await RefreshPatientsAsync();
+                _ = RefreshDataBaseAsync();
 
                 UpdateText = "First Patient is Delete";
             }
@@ -443,10 +494,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
         [RelayCommand]
-        public async Task DeleteAllPatientAsync()
+        public async Task DeleteAllPatient()
         {
-            _logger.Info(">>> DeleteAllPatientAsync: START");
-
             var stopwatch = Stopwatch.StartNew();
 
             try
@@ -457,10 +506,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                 await Task.Run(() =>
                 {
-                    _studyStorageModule.Patients.DeleteAll();
-                });
+                    _storage.Patients.DeleteAll();
+                });               
 
-                await RefreshPatientsAsync();
+                await RefreshDataBaseAsync();
             }
             catch (Exception ex)
             {
@@ -472,7 +521,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 stopwatch.Stop();
                 var timeString = FormatTimeSpan(stopwatch.Elapsed);
 
-                _logger.Info("<<< DeleteAllPatientAsync: END");
+                _logger.Info("<<< DeleteAllPatient: END");
                 StopBusy();
 
                 if (UpdateText?.Contains("Ошибка") != true)
@@ -525,8 +574,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             try
             {
-                await DeleteAllPatientAsync();
-                await RefreshPatientsAsync();
+                await DeleteAllPatient();
+                await RefreshDataBaseAsync();
 
                 UpdateText = "All Tables Deletion completed";
             }
@@ -539,18 +588,18 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
 
         [RelayCommand]
-        public async Task RefreshPatientsAsync()
+        public async Task RefreshDataBaseAsync()
         {
             try
             {
                 StartBusy("Обновление списка пациентов...");
 
-                _studyStorageModule?.Dispose();
-                _studyStorageModule = new LiteDbStudyStorageModule(DatabasePath, IsReadOnlyMode);
+                _storage?.Dispose();
+                App.UpdateSharedStorage(DatabasePath, IsReadOnlyMode);                              
 
                 await Task.Run(() =>
                 {
-                    AllPatients = _studyStorageModule.Patients.GetAllPatients();
+                    AllPatients = _storage.Patients.GetAllPatients();
                 });
 
                 UpdateText = $"База обновлена. Найдено пациентов: {AllPatients.Count}";
@@ -623,16 +672,12 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             };
         }
 
-
-
-
-
         public ObservableCollection<PatientLiteDb> GetAllLiteDbPatients()
         {
             try
             {
                 var patientCollection = new ObservableCollection<PatientLiteDb>();
-                var patients = _studyStorageModule.Patients.GetAllPatients();
+                var patients = _storage.Patients.GetAllPatients();
 
                 foreach (var patient in patients)
                 {
@@ -689,7 +734,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             try
             {
                 var total = inputParameters.PatientCount;
-                var batchSize = 1000;
+                var batchSize = 5000;
                 var patientsBatch = new List<PatientLiteDb>(batchSize);
                 var prefix = "MXE";
                 var digitsCount = 7;
@@ -716,7 +761,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                         if (patientsBatch.Count >= batchSize || patientindex == total - 1)
                         {
-                            _studyStorageModule.Patients.InsertBulk(patientsBatch);
+                            _storage.Patients.InsertBulk(patientsBatch);
                             patientsBatch.Clear();
 
                             progress?.Report((int)((double)(patientindex + 1) / total * 100));
@@ -777,7 +822,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             _patientLiteDb = GenerateLiteDbPatients(patientIndex, patientGeneratorParameters);
             _patientLiteDb.PatientID = newPatientId;
-            _studyStorageModule.Patients.Upsert(_patientLiteDb);
+            _storage.Patients.Upsert(_patientLiteDb);
         }
 
         private PatientLiteDb GenerateLiteDbPatients(int patientIndex, PatientGeneratorDto patientGeneratorParameters)
@@ -878,7 +923,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
         [RelayCommand]
-        public async Task BrowseDatabase()
+        public void BrowseDatabase()
         {
             var dialog = new OpenFileDialog
             {
@@ -889,12 +934,12 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             if (dialog.ShowDialog() == true)
             {
                 DatabasePath = dialog.FileName;
-                //RefreshData();
+                _ = RefreshDataBaseAsync();
             }
         }
 
         [RelayCommand]
-        public void ChangeDatadaseMode(object? readOnlyFromToggle)
+        public async Task ChangeDatadaseMode(object? readOnlyFromToggle)
         {
             // Состояние с ToggleButton (после клика); object — чтобы не зависеть от того, как WPF боксит bool/bool?.
             var readOnly = readOnlyFromToggle switch
@@ -909,12 +954,14 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 return;
             }
 
-            var previous = _studyStorageModule;
+            var previous = _storage;
             try
             {
                 previous?.Dispose();
-                _studyStorageModule = new LiteDbStudyStorageModule(DatabasePath, readOnly);
-                AllPatients = _studyStorageModule.Patients.GetAllPatients();
+                App.UpdateSharedStorage(DatabasePath, readOnly);
+                AllPatients = _storage.Patients.GetAllPatients();
+
+                await GetAllPatientsAsync();
             }
             catch (Exception ex)
             {
@@ -922,8 +969,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 MessageBox.Show(ex.Message, "Ошибка LiteDB", MessageBoxButton.OK, MessageBoxImage.Error);
                 try
                 {
-                    _studyStorageModule = new LiteDbStudyStorageModule(DatabasePath, false);
-                    AllPatients = _studyStorageModule.Patients.GetAllPatients();
+                    App.UpdateSharedStorage(DatabasePath, false);
+                    AllPatients = _storage.Patients.GetAllPatients();
                 }
                 catch (Exception ex2)
                 {
@@ -951,7 +998,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             var format = new string('0', digitsCount);
             
-            var matchedIds = _studyStorageModule.Patients.GetAllPatients()
+            var matchedIds = _storage.Patients.GetAllPatients()
                 .Select(p => p.PatientID) 
                 .Where(id => id.StartsWith(prefix))
                 .ToList();
