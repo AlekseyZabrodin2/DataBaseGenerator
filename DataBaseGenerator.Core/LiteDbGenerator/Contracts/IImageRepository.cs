@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using DataBaseGenerator.Core.LiteDbGenerator.Models;
 
 namespace DataBaseGenerator.Core.LiteDbGenerator.Contracts
 {
     public interface IImageRepository
     {
-        ImageLiteDb Insert(ImageLiteDb image);
+        ObservableCollection<ImageLiteDb> GetAllImage();
+        ImageLiteDb Insert(ImageLiteDb image); 
+        void InsertBulk(IEnumerable<ImageLiteDb> images);
         void Update(ImageLiteDb image);
 
         ImageLiteDb? GetById(string id);
@@ -19,7 +22,9 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Contracts
         IEnumerable<ImageLiteDb> FindByLaterality(string laterality, int limit);
         IEnumerable<ImageLiteDb> FindByAcquisitionDateRange(DateTime? from, DateTime? to, int limit);
 
+        void DeleteAll();
         void DeleteById(string id);
-        void DeleteBySopInstanceUid(string sopInstanceUid);
+        void DeleteBySopInstanceUid(string sopInstanceUid); 
+        bool Any();
     }
 }

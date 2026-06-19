@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace DataBaseGenerator.Core.LiteDbGenerator.Contracts
 {
@@ -11,6 +12,8 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Contracts
         string DatabaseKind { get; }
 
         string DatabasePath { get; }
+
+        List<string> GetCollectionNames();
 
         IPatientRepository Patients { get; }
         IStudyRepository Studies { get; }

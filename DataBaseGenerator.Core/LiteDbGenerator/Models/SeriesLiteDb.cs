@@ -1,10 +1,11 @@
 ﻿using System;
+using LiteDB;
 
 namespace DataBaseGenerator.Core.LiteDbGenerator.Models
 {
     public sealed class SeriesLiteDb
     {
-        public string? Id { get; set; }
+        public ObjectId? Id { get; set; }
 
         public string SeriesInstanceUid { get; set; } = default!;
 

@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using DataBaseGenerator.Core.LiteDbGenerator.Models;
 
 namespace DataBaseGenerator.Core.LiteDbGenerator.Contracts
 {
     public interface ISeriesRepository
     {
+        ObservableCollection<SeriesLiteDb> GetAllSeries();
         SeriesLiteDb Insert(SeriesLiteDb series);
+        void InsertBulk(IEnumerable<SeriesLiteDb> series);
         void Update(SeriesLiteDb series);
 
         SeriesLiteDb? GetById(string id);
@@ -18,7 +21,9 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Contracts
         IEnumerable<SeriesLiteDb> FindByOperatorName(string operatorName, int limit);
         IEnumerable<SeriesLiteDb> FindBySeriesDateRange(DateTime? from, DateTime? to, int limit);
 
+        void DeleteAll();
         void DeleteById(string id);
-        void DeleteBySeriesInstanceUid(string seriesInstanceUid);
+        void DeleteBySeriesInstanceUid(string seriesInstanceUid); 
+        bool Any();
     }
 }

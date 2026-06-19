@@ -47,7 +47,7 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Repositories
         {
             return new PatientLiteDb()
             {
-                Id = patientId,
+                Id = patient.Id.ToString(),
                 PatientID = patient.PatientId,
                 LastName = patient.LastName,
                 FirstName = patient.FirstName,
@@ -200,6 +200,11 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Repositories
         public void DeleteAll()
         {
             _context.Patients.DeleteAll();
+        }
+
+        public bool Any()
+        {
+            return _context.Patients.Count() > 0;
         }
     }
 }

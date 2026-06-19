@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using DataBaseGenerator.Core.LiteDbGenerator.LiteDbModels;
 using LiteDB;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataBaseGenerator.Core.LiteDbData.DbContext
 {
@@ -16,6 +19,11 @@ namespace DataBaseGenerator.Core.LiteDbData.DbContext
         public LiteDbContext(ConnectionString connectionString)
         {
             _database = new LiteDatabase(connectionString);
+        }
+
+        public List<string> GetCollectionNames()
+        {
+            return _database.GetCollectionNames().ToList();
         }
 
         public ILiteCollection<LitePatient> Patients =>

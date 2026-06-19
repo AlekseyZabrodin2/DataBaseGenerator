@@ -3,18 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LiteDB;
 
 namespace DataBaseGenerator.Core.LiteDbGenerator.Models
 {
     public sealed class StudyLiteDb
     {
-        public string? Id { get; set; }
+        public ObjectId? Id { get; set; }
 
         public string StudyInstanceUid { get; set; } = default!;
         public string StudyId { get; set; } = string.Empty;
 
         // Internal patient identifier used by storage implementation
-        public string? PatientId { get; set; }
+        public ObjectId? PatientId { get; set; }
 
         // Patient snapshot at study time
         public string SnapshotLastName { get; set; } = string.Empty;
@@ -24,7 +25,10 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Models
         public DateTime? PatientBirthDate { get; set; }
 
         public string AccessionNumber { get; set; } = string.Empty;
-        public string[] BodyParts { get; set; } = Array.Empty<string>();
+        public string[] BodyParts { get; set; } = Array.Empty<string>(); 
+        
+        [BsonIgnore]
+        public string BodyPartsDisplay => BodyParts != null ? string.Join(", ", BodyParts) : string.Empty;
 
         public DateTime StudyDateTime { get; set; }
         public double EffectiveDosemSv { get; set; }

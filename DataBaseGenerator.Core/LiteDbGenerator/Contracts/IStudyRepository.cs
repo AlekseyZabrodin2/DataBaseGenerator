@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.ObjectModel;
 using DataBaseGenerator.Core.LiteDbGenerator.Models;
 
 namespace DataBaseGenerator.Core.LiteDbGenerator.Contracts
 {
     public interface IStudyRepository
     {
+        ObservableCollection<StudyLiteDb> GetAllStudies();
         StudyLiteDb Insert(StudyLiteDb study);
         void Update(StudyLiteDb study);
+        StudyLiteDb Upsert(StudyLiteDb patient);
+        void InsertBulk(IEnumerable<StudyLiteDb> patients);
 
         StudyLiteDb? GetById(string id);
 
@@ -31,5 +32,7 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Contracts
 
         void DeleteById(string id);
         void DeleteByStudyInstanceUid(string uid);
+        void DeleteAll();
+        bool Any();
     }
 }

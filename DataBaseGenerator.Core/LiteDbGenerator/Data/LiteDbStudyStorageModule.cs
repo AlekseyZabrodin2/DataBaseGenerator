@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using DataBaseGenerator.Core.LiteDbData.DbContext;
 using DataBaseGenerator.Core.LiteDbGenerator.Contracts;
 using DataBaseGenerator.Core.LiteDbGenerator.Repositories;
@@ -48,6 +51,11 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Data
         public ISeriesRepository Series { get; }
 
         public IImageRepository Images { get; }
+
+        public List<string> GetCollectionNames()
+        {
+            return _context.GetCollectionNames().ToList();
+        }
 
         public void Dispose()
         {

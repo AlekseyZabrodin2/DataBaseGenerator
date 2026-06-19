@@ -28,6 +28,7 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Contracts
         IEnumerable<PatientLiteDb> FindByPhone(string phone, int limit);
 
         void Delete(string id);
-        void DeleteAll();
+        void DeleteAll(); 
+        bool Any();
     }
 }
