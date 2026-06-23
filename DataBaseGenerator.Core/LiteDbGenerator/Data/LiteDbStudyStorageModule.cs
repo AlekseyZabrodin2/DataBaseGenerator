@@ -15,6 +15,14 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Data
 
         public LiteDbStudyStorageModule(string databasePath, bool readOnly)
         {
+            if (!File.Exists(databasePath))
+            {
+                readOnly = false;
+                var dir = Path.GetDirectoryName(databasePath);
+                if (!string.IsNullOrEmpty(dir))
+                    Directory.CreateDirectory(dir);
+            }
+
             if (string.IsNullOrWhiteSpace(databasePath))
                 throw new ArgumentException("Database path must be provided", nameof(databasePath));
 
