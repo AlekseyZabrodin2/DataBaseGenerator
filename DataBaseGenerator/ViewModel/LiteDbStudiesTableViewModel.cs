@@ -208,6 +208,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [ObservableProperty]
         public partial bool OptimisationIsEnabled { get; set; } = true;
 
+        [ObservableProperty]
+        public partial bool CancelButtonIsVisibil { get; set; } = true;
+        
+
 
 
         public LiteDbStudiesTableViewModel(IServiceProvider serviceProvider)
@@ -895,6 +899,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             try
             {
+                StartBusy("Оптимизация Базы данных ...", false);
+                CancelButtonIsVisibil = false;
+
                 _storage?.Dispose();
                 _cachedPatients = null;
 
@@ -907,11 +914,14 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                 Thread.Sleep(200);
 
-                lock (_dbLock)
+                await Task.Run(() =>
                 {
-                    using var db = new LiteDatabase(DatabasePath);
-                    db.Rebuild();
-                }
+                    lock (_dbLock)
+                    {
+                        using var db = new LiteDatabase(DatabasePath);
+                        db.Rebuild();
+                    }
+                });
 
                 CleanupTempFiles();
 
@@ -925,6 +935,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
             finally
             {
+                StopBusy();
+                CancelButtonIsVisibil = true;
+
                 if (!string.IsNullOrEmpty(UpdateText) && !UpdateText.StartsWith("Error"))
                 {
                     UpdateText = "Optimisation successful";
@@ -950,10 +963,16 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                         File.Delete(file);
                         _logger.Info($"Deleted: {Path.GetFileName(file)}");
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        _logger.Warn($"Cannot delete {file}: {ex.Message}");
+                    }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.Warn($"Cleanup error: {ex.Message}");
+            }
         }
 
         [RelayCommand]
