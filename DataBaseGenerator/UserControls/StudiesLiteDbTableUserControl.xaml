@@ -420,10 +420,11 @@
             <Button
                 Width="120"
                 Height="50"
-                Margin="350,0,0,3"
+                Margin="380,0,0,5"
                 VerticalAlignment="Bottom"
                 Command="{Binding CancelGenerationCommand}"
-                Content="Cancel" />
+                Content="Cancel"
+                Visibility="{Binding CancelButtonIsVisibil, Converter={StaticResource BoolToVisibilityConverter}}" />
         </Grid>
 
     </Grid>
