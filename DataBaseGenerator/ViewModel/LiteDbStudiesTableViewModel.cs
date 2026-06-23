@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,11 +13,9 @@ using DataBaseGenerator.Core.LiteDbGenerator.Contracts;
 using DataBaseGenerator.Core.LiteDbGenerator.Data;
 using DataBaseGenerator.Core.LiteDbGenerator.Enums;
 using DataBaseGenerator.Core.LiteDbGenerator.Models;
-using DataBaseGenerator.Core.MySqlGenerator;
 using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Image;
 using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Study;
 using LiteDB;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 using NLog;
 
@@ -39,7 +38,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private readonly int _studyBatchSize = 5000;
         private readonly int _batchSize = 10000;
         private List<PatientLiteDb> _cachedPatients;
-        private readonly Random _random = new Random();
+        private readonly Random _random = new Random(); 
+        private readonly object _dbLock = new object();
 
         [ObservableProperty]
         public partial ObservableCollection<StudyLiteDb> AllStudies { get; set; }
@@ -204,6 +204,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         [ObservableProperty]
         public partial bool IsReadOnlyMode { get; set; } = true;
+
+        [ObservableProperty]
+        public partial bool OptimisationIsEnabled { get; set; } = true;
 
 
 
@@ -885,6 +888,72 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 UpdateText = "Tables is not Deleted";
             }
+        }
+
+        [RelayCommand]
+        public async Task OptimisationDataBase()
+        {
+            try
+            {
+                _storage?.Dispose();
+                _cachedPatients = null;
+
+                AllStudies = new ObservableCollection<StudyLiteDb>();
+                AllSeries = new ObservableCollection<SeriesLiteDb>();
+                AllImages = new ObservableCollection<ImageLiteDb>();
+
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+
+                Thread.Sleep(200);
+
+                lock (_dbLock)
+                {
+                    using var db = new LiteDatabase(DatabasePath);
+                    db.Rebuild();
+                }
+
+                CleanupTempFiles();
+
+                App.UpdateSharedStorage(DatabasePath, IsReadOnlyMode);
+                await GetDataFromAllDbAsync();
+            }
+            catch (Exception ex)
+            {
+                UpdateText = $"Error: - [{ex.Message}]";
+                _logger.Error(UpdateText);
+            }
+            finally
+            {
+                if (!string.IsNullOrEmpty(UpdateText) && !UpdateText.StartsWith("Error"))
+                {
+                    UpdateText = "Optimisation successful";
+                }
+            }
+        }
+
+        private void CleanupTempFiles()
+        {
+            try
+            {
+                var dir = Path.GetDirectoryName(DatabasePath);
+                if (string.IsNullOrEmpty(dir))
+                    return;
+
+                var baseName = Path.GetFileNameWithoutExtension(DatabasePath);
+                var tempFiles = Directory.GetFiles(dir, $"{baseName}-backup*.db");
+
+                foreach (var file in tempFiles)
+                {
+                    try
+                    {
+                        File.Delete(file);
+                        _logger.Info($"Deleted: {Path.GetFileName(file)}");
+                    }
+                    catch { }
+                }
+            }
+            catch { }
         }
 
         [RelayCommand]

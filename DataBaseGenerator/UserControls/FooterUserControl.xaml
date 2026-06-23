@@ -58,6 +58,22 @@
         </Grid>
 
         <Grid
+            Name="ButtonOptimisation"
+            Grid.Row="1"
+            Grid.Column="1"
+            Margin="5,10,5,0"
+            IsEnabled="{Binding OptimisationIsEnabled}">
+
+            <Button
+                Name="Optimisation"
+                Width="150"
+                Height="50"
+                HorizontalAlignment="Center"
+                Command="{Binding OptimisationDataBaseCommand}"
+                Content="Optimisation DB" />
+        </Grid>
+
+        <Grid
             Name="ButtonSelect"
             Grid.Row="1"
             Grid.Column="2"

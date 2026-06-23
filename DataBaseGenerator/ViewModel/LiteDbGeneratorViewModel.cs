@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -10,13 +11,12 @@ using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DataBaseGenerator.Core.LiteDbGenerator.Contracts;
-using DataBaseGenerator.Core.LiteDbGenerator.Data;
 using DataBaseGenerator.Core.LiteDbGenerator.Enums;
 using DataBaseGenerator.Core.LiteDbGenerator.LiteDbModels;
 using DataBaseGenerator.Core.LiteDbGenerator.Models;
 using DataBaseGenerator.Core.MySqlGenerator;
 using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Patient;
-using Microsoft.Extensions.DependencyInjection;
+using LiteDB;
 using Microsoft.Win32;
 using NLog;
 
@@ -31,6 +31,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private string _gender;
         private PatientLiteDb _patientLiteDb;
         private string _databasePath = string.Empty;
+        private readonly object _dbLock = new object();
 
 
         [ObservableProperty]
@@ -206,7 +207,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         //[ObservableProperty]
         //private partial ImagesTableViewModel ImagesVM { get; set; }
 
-        private CancellationTokenSource _cancellationTokenSource;
+        private CancellationTokenSource _cancellationTokenSource; 
+        
+        [ObservableProperty]
+        public partial bool OptimisationIsEnabled { get; set; } = true;
 
 
 
@@ -585,7 +589,68 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
         }
 
+        [RelayCommand]
+        public async Task OptimisationDataBase()
+        {
+            try
+            {
+                _storage?.Dispose();
 
+                AllPatients = new ObservableCollection<PatientLiteDb>();
+
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+
+                Thread.Sleep(200);
+
+                lock (_dbLock)
+                {
+                    using var db = new LiteDatabase(DatabasePath);
+                    db.Rebuild();
+                }
+
+                CleanupTempFiles();
+
+                App.UpdateSharedStorage(DatabasePath, IsReadOnlyMode);
+                await GetAllPatientsAsync();
+            }
+            catch (Exception ex)
+            {
+                UpdateText = $"Error: - [{ex.Message}]";
+                _logger.Error(UpdateText);
+            }
+            finally
+            {
+                if (!string.IsNullOrEmpty(UpdateText) && !UpdateText.StartsWith("Error"))
+                {
+                    UpdateText = "Optimisation successful";
+                }
+            }
+        }
+
+        private void CleanupTempFiles()
+        {
+            try
+            {
+                var dir = Path.GetDirectoryName(DatabasePath);
+                if (string.IsNullOrEmpty(dir))
+                    return;
+
+                var baseName = Path.GetFileNameWithoutExtension(DatabasePath);
+                var tempFiles = Directory.GetFiles(dir, $"{baseName}-backup*.db");
+
+                foreach (var file in tempFiles)
+                {
+                    try
+                    {
+                        File.Delete(file);
+                        _logger.Info($"Deleted: {Path.GetFileName(file)}");
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+        }
 
         [RelayCommand]
         public async Task RefreshDataBaseAsync()

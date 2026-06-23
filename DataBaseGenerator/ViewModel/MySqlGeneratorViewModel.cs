@@ -332,6 +332,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         private CancellationTokenSource _cancellationTokenSource;
 
+        [ObservableProperty]
+        public partial bool OptimisationIsEnabled { get; set; } = false;
 
         public MySqlGeneratorViewModel(BaseGenerateContext context, IHttpClientFactory clientFactory)
         {
@@ -1117,6 +1119,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 MessageBox.Show("Не удалось открыть веб-страницу: " + ex.Message);
             }
         }
+
+        [RelayCommand]
+        public async Task OptimisationDataBase()
+        { }
 
         private readonly List<string> _thirteenPhrases = new()
         {
