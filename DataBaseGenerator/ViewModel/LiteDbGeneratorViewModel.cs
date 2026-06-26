@@ -1042,9 +1042,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 previous?.Dispose();
                 App.UpdateSharedStorage(DatabasePath, readOnly);
-                AllPatients = _storage.Patients.GetAllPatients();
 
-                await GetAllPatientsAsync();
+                var anyPatients = _storage.Patients.Any();
+
+                IsReadOnlyMode = readOnly;
+                UpdateText = $"Режим переключен: {(readOnly ? "Только чтение" : "Чтение/Запись")}";
             }
             catch (Exception ex)
             {
@@ -1053,7 +1055,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 try
                 {
                     App.UpdateSharedStorage(DatabasePath, false);
-                    AllPatients = _storage.Patients.GetAllPatients();
+
+                    var anyPatients = _storage.Patients.Any();
+
+                    IsReadOnlyMode = false;
+                    UpdateText = "Режим восстановлен: Чтение/Запись";
                 }
                 catch (Exception ex2)
                 {

@@ -25,7 +25,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
     {
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
         private IStudyStorageModule _storage => App.SharedStorage;
-        private readonly IServiceProvider _serviceProvider;
         private string _gender;
         private string _databasePath = string.Empty;
         private CancellationTokenSource _cancellationTokenSource;
@@ -214,11 +213,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
 
 
-        public LiteDbStudiesTableViewModel(IServiceProvider serviceProvider)
+        public LiteDbStudiesTableViewModel()
         {
-            _serviceProvider = serviceProvider;
-            //_storage = App.SharedStorage;            
-
             _ = InitializeAsync();
         }
 
@@ -701,7 +697,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 previous?.Dispose();
                 App.UpdateSharedStorage(DatabasePath, readOnly);
 
-                await GetDataFromAllDbAsync();
+                var anyStudies = _storage.Studies.Any();
+
+                IsReadOnlyMode = readOnly;
+                UpdateText = $"Режим переключен: {(readOnly ? "Только чтение" : "Чтение/Запись")}";
             }
             catch (Exception ex)
             {
@@ -710,7 +709,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 try
                 {
                     App.UpdateSharedStorage(DatabasePath, false);
-                    AllStudies = _storage.Studies.GetAllStudies();
+
+                    var anyStudies = _storage.Studies.Any();
+
+                    IsReadOnlyMode = false;
+                    UpdateText = "Режим восстановлен: Чтение/Запись";
                 }
                 catch (Exception ex2)
                 {
