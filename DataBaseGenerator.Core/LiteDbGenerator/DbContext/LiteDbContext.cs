@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using DataBaseGenerator.Core.LiteDbGenerator.LiteDbModels;
 using LiteDB;
-using Microsoft.EntityFrameworkCore;
 
 namespace DataBaseGenerator.Core.LiteDbData.DbContext
 {

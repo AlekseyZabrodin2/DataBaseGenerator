@@ -68,6 +68,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         public partial bool IsLiteDbMode { get; set; }
 
         [ObservableProperty]
+        public partial bool IsLiteDbPlannedStudiesMode { get; set; }
+
+        [ObservableProperty]
         public partial bool ShowPatients { get; set; } = true;
 
         [ObservableProperty]
@@ -214,25 +217,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             CurrentPageName = "MySql Generator";
             IsMySqlMode = true;
             IsLiteDbMode = false;
+            IsLiteDbPlannedStudiesMode = false;
         }
-
-        //[RelayCommand]
-        //private void SwitchToLiteDb()
-        //{
-        //    CurrentPage = new LiteDbGeneratorUserControl();
-        //    CurrentPageName = "LiteDb Generator";
-        //    IsMySqlMode = false;
-        //    IsLiteDbMode = true;
-        //}
-
-
-
-        
-        //[RelayCommand]
-        //private void ShowSeriesTable() => ShowTable("Series");
-
-        //[RelayCommand]
-        //private void ShowImagesTable() => ShowTable("Images");
         
         [RelayCommand]
         private void ShowPatientsTable()
@@ -258,6 +244,16 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             ShowImages = false;
 
             ShowTable("Studies", _studyUserControl);
+        }        
+
+        [RelayCommand]
+        private void SwitchToPlannedStudies()
+        {
+            CurrentPage = new PlannedStudiesLiteDbUserControl();
+            CurrentPageName = "LiteDb - Planned Studies";
+            IsMySqlMode = false;
+            IsLiteDbMode = false;
+            IsLiteDbPlannedStudiesMode = true;
         }
 
         private void ShowTable(string tableName, UserControl control)
@@ -266,6 +262,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             CurrentPageName = $"LiteDb - {tableName}";
             IsMySqlMode = false;
             IsLiteDbMode = true;
+            IsLiteDbPlannedStudiesMode = false;
         }
 
     }

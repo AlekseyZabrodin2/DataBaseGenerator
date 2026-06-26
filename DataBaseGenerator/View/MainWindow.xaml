@@ -66,21 +66,8 @@
                                     IsCheckable="True"
                                     IsChecked="{Binding ShowStudies}"
                                     IsEnabled="{Binding SelectedDatabaseTab.HasStudiesTable}" />
-
-                                <!--<MenuItem
-                                    Command="{Binding ShowSeriesTableCommand}"
-                                    Header="Series"
-                                    IsCheckable="True"
-                                    IsChecked="{Binding ShowSeries}"
-                                    IsEnabled="{Binding SelectedDatabaseTab.HasSeriesTable}" />
-
-                                <MenuItem
-                                    Command="{Binding ShowImagesTableCommand}"
-                                    Header="Images"
-                                    IsCheckable="True"
-                                    IsChecked="{Binding ShowImages}"
-                                    IsEnabled="{Binding SelectedDatabaseTab.HasImagesTable}" />-->
                             </MenuItem>
+                            <MenuItem Command="{Binding SwitchToPlannedStudiesCommand}" Header="Planned studies" />
                         </MenuItem>
                         <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="File">
                             <MenuItem Header="Новый (Ctrl + N)" />
