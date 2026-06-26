@@ -32,6 +32,7 @@ namespace DataBaseGenerator.UI.Wpf
         private string _exeToRun;
 
         public static IStudyStorageModule SharedStorage { get; set; }
+        public static IPlannedStudyStorageModule PlannedStorage { get; private set; }
 
 
         public static T GetService<T>()
@@ -56,7 +57,10 @@ namespace DataBaseGenerator.UI.Wpf
                 Directory.CreateDirectory(dataDirectory);
 
             var dbPath = Path.Combine(dataDirectory, "patients.db");
+            var plannedDbPath = Path.Combine(dataDirectory, "planned_studies.db");
+
             SharedStorage = new LiteDbStudyStorageModule(dbPath, true);
+            PlannedStorage = new LiteDbPlannedStudyStorageModule(plannedDbPath, false);
 
             var hostBuilder = Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration((context, config) =>
@@ -94,6 +98,7 @@ namespace DataBaseGenerator.UI.Wpf
                     services.AddSingleton<MySqlGeneratorViewModel>();
                     services.AddSingleton<LiteDbGeneratorViewModel>();
                     services.AddSingleton<LiteDbStudiesTableViewModel>();
+                    services.AddSingleton<LiteDbPlannedStudiesViewModel>();
                     services.AddTransient<DialogMessageWindow>();
                     services.AddTransient<MainWindow>();
                     services.AddTransient<SpecificationWindow>();
@@ -251,6 +256,23 @@ namespace DataBaseGenerator.UI.Wpf
                 SharedStorage = new LiteDbStudyStorageModule(dbPath, true);
             }
             return SharedStorage;
+        }
+
+        public static void UpdatePlannedStorage(string dbPath, bool readOnly)
+        {
+            PlannedStorage?.Dispose();
+            PlannedStorage = new LiteDbPlannedStudyStorageModule(dbPath, readOnly);
+            _logger.Info($"PlannedStorage updated: {dbPath}, ReadOnly: {readOnly}");
+        }
+
+        public static IPlannedStudyStorageModule GetPlannedStorage()
+        {
+            if (PlannedStorage == null)
+            {
+                var dbPath = Path.Combine(AppContext.BaseDirectory, "LiteDataBase", "planned_studies.db");
+                PlannedStorage = new LiteDbPlannedStudyStorageModule(dbPath, true);
+            }
+            return PlannedStorage;
         }
     }
 }
