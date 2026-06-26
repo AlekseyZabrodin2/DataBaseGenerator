@@ -8,7 +8,6 @@ using DataBaseGenerator.Core.LiteDbGenerator.LiteDbModels;
 using DataBaseGenerator.Core.LiteDbGenerator.Models;
 using LiteDB;
 using NLog;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace DataBaseGenerator.Core.LiteDbGenerator.Repositories
 {
