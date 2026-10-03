@@ -64,6 +64,7 @@
                     <DataGridTextColumn Binding="{Binding StudyDateTime, StringFormat='dd.MM.yyyy HH:mm'}" Header="Дата исследования" />
                     <DataGridTextColumn Binding="{Binding EffectiveDosemSv}" Header="Эфф. доза (мЗв)" />
                     <DataGridTextColumn Binding="{Binding Status}" Header="Статус" />
+                    <DataGridTextColumn Binding="{Binding SnapshotPatientSex}" Header="Пол" />
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

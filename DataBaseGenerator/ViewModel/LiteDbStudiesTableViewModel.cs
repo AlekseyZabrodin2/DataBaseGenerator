@@ -361,6 +361,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     SnapshotPatronymic = _patientLiteDb.MiddleName,
                     SnapshotPatientId = _patientLiteDb.PatientID,
                     PatientBirthDate = _patientLiteDb.BirthDate,
+                    SnapshotPatientSex = _patientLiteDb.Sex,
 
                     AccessionNumber = study.RandomAccessionNumber.Generate(),
                     BodyParts = study.RandomBodyParts.Generate(),

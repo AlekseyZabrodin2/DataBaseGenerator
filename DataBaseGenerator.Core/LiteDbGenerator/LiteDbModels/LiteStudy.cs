@@ -1,4 +1,5 @@
 ﻿using System;
+using DataBaseGenerator.Core.LiteDbGenerator.Enums;
 using LiteDB;
 
 namespace DataBaseGenerator.Core.LiteDbGenerator.LiteDbModels
@@ -19,6 +20,7 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.LiteDbModels
         public string SnapshotPatronymic { get; set; } = string.Empty;
         public string SnapshotPatientId { get; set; } = string.Empty;
         public DateTime? PatientBirthDate { get; set; }
+        public PatientSex SnapshotPatientSex { get; set; } = PatientSex.Other;
 
         public string AccessionNumber { get; set; } = string.Empty;
         public string[] BodyParts { get; set; } = Array.Empty<string>(); // Области исследования

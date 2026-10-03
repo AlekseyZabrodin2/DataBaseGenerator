@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DataBaseGenerator.Core.LiteDbGenerator.Enums;
 using LiteDB;
 
 namespace DataBaseGenerator.Core.LiteDbGenerator.Models
@@ -23,6 +24,7 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Models
         public string SnapshotPatronymic { get; set; } = string.Empty;
         public string SnapshotPatientId { get; set; } = string.Empty;
         public DateTime? PatientBirthDate { get; set; }
+        public PatientSex SnapshotPatientSex { get; set; } = PatientSex.Other;
 
         public string AccessionNumber { get; set; } = string.Empty;
         public string[] BodyParts { get; set; } = Array.Empty<string>(); 

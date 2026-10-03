@@ -24,6 +24,7 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Data
             context.Studies.EnsureIndex(x => x.StudyDateTime);
             context.Studies.EnsureIndex(x => x.Status);
             context.Studies.EnsureIndex(x => x.EffectiveDosemSv);
+            context.Studies.EnsureIndex(x => x.SnapshotPatientSex);
 
             context.Series.EnsureIndex(x => x.SeriesInstanceUid, true);
             context.Series.EnsureIndex(x => x.StudyInstanceUid);
