@@ -75,6 +75,12 @@
                 <TextBlock
                     Margin="5,5,0,0"
                     FontWeight="DemiBold"
+                    Text="Telephone:" />
+                <TextBox Margin="5" Text="{Binding AddTelephone, Mode=TwoWay}" />
+
+                <TextBlock
+                    Margin="5,5,0,0"
+                    FontWeight="DemiBold"
                     Text="Place of work" />
                 <TextBox Margin="5" Text="{Binding AddWorkPlase, Mode=TwoWay}" />
 
@@ -83,7 +89,7 @@
                     FontWeight="DemiBold"
                     Text="Additional information:" />
                 <TextBox
-                    Height="217"
+                    Height="160"
                     Margin="5"
                     Text="{Binding AddInfo, Mode=TwoWay}"
                     TextWrapping="Wrap" />

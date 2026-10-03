@@ -80,6 +80,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         public partial string AddAdress { get; set; }
 
         [ObservableProperty]
+        public partial string AddTelephone { get; set; }
+
+        [ObservableProperty]
         public partial string AddWorkPlase { get; set; }
 
         [ObservableProperty]
@@ -286,6 +289,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     PatientBirthDate,
                     SelecedGender,
                     AddAdress,
+                    AddTelephone,
                     AddInfo,
                     AddWorkPlase)
                 {
@@ -330,6 +334,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             AddMiddleName = string.Empty;
             AddFullName = string.Empty;
             AddAdress = string.Empty;
+            AddTelephone = string.Empty;
             AddWorkPlase = string.Empty;
             AddInfo = string.Empty;
             SelecedGender = null;
@@ -358,6 +363,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     new RandomBirthDateRule(new DateTime()),
                     new RandomSexRule(),
                     new RandomAddressRule(),
+                    new RandomPhoneRule(),
                     new RandomAddInfoRule(),
                     new RandomOccupationRule())
                 {
@@ -481,6 +487,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                    new RandomBirthDateRule(new DateTime()),
                    new RandomSexRule(),
                    new RandomAddressRule(),
+                   new RandomPhoneRule(),
                    new RandomAddInfoRule(),
                    new RandomOccupationRule())
                 {
@@ -706,6 +713,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             AddMiddleName = string.Empty;
             SelecedGender = null;
             AddAdress = string.Empty;
+            AddTelephone = string.Empty;
             AddWorkPlase = string.Empty;
             AddInfo = string.Empty;
             MedicalInsuranceNumber = string.Empty;
@@ -728,7 +736,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     "Не определен" => PatientSex.Other,
                     _ => PatientSex.Other
                 },
-                //Phone = patient.Telephone,
+                Phone = patient.Telephone,
                 Address = patient.Address,
                 Comments = patient.AddInfo
                 //Age = patient.Age
@@ -748,7 +756,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 MiddleName = patient.MiddleName.ToString(),
                 BirthDate = DateTime.Parse(patient.BirthDate.ToString()),
                 Sex = parsedSex,
-                //Phone = patient.Telephone,
+                Phone = patient.Telephone.ToString(),
                 Address = patient.Address.ToString(),
                 Comments = patient.AddInfo.ToString()
                 //Age = patient.Age
@@ -927,7 +935,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 },
                 Address = patientGeneratorParameters.Address.Generate(),
                 Comments = patientGeneratorParameters.AddInfo.Generate(),
-                Phone = string.Empty,
+                Phone = patientGeneratorParameters.Telephone.Generate(),
                 Age = string.Empty
             };
         }
@@ -960,6 +968,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 new RandomBirthDateRule(new DateTime()),
                 new RandomSexRule(),
                 new RandomAddressRule(),
+                new RandomPhoneRule(),
                 new RandomAddInfoRule(),
                 new RandomOccupationRule())
             {
