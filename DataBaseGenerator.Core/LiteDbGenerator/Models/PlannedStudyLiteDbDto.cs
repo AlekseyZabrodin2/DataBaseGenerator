@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using DataBaseGenerator.Core.LiteDbGenerator.Enums;
 using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.PlannedStudy;
@@ -45,6 +46,11 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Models
 
         public string Status { get; set; }
         public string ImagesCount { get; set; }
+
+        public DateTime? StudyDateTime { get; set; }
+        public bool IsEmergencyPatient { get; set; }
+        public double EffectiveDosemSv { get; set; }
+        public bool HasDose{ get; set; }
 
         public RandomBodyPartDataRule RandomBodyPart { get; }
         public RandomProjectionPathsRule RandomProjectionPaths {  get; }

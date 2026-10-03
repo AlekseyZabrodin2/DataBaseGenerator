@@ -102,17 +102,24 @@
                 VirtualizingPanel.ScrollUnit="Pixel"
                 VirtualizingPanel.VirtualizationMode="Recycling">
 
+                <DataGrid.Resources>
+                    <Style x:Key="CenteredCellText" TargetType="TextBlock">
+                        <Setter Property="HorizontalAlignment" Value="Stretch" />
+                        <Setter Property="TextAlignment" Value="Center" />
+                    </Style>
+                </DataGrid.Resources>
+
                 <DataGrid.Columns>
                     <DataGridTextColumn Binding="{Binding PatientIdDataBase}" Header="PatientId (DB)" />
                     <DataGridTextColumn Binding="{Binding PatientId}" Header="Patient ID" />
                     <DataGridTextColumn Binding="{Binding PatientLastName}" Header="Фамилия" />
                     <DataGridTextColumn Binding="{Binding PatientFirstName}" Header="Имя" />
                     <DataGridTextColumn Binding="{Binding PatientMiddleName}" Header="Отчество" />
-                    <DataGridTextColumn Binding="{Binding BirthDate, StringFormat='dd.MM.yyyy'}" Header="Дата рождения" />
+                    <DataGridTextColumn Binding="{Binding BirthDate, StringFormat='dd.MM.yyyy'}" Header="Дата рождения" ElementStyle="{StaticResource CenteredCellText}"/>
                     <DataGridTextColumn Binding="{Binding Gender}" Header="Пол" />
                     <DataGridTextColumn Binding="{Binding Telephone}" Header="Телефон" />
                     <DataGridTextColumn Binding="{Binding Address}" Header="Адрес" />
-                    <DataGridTextColumn Binding="{Binding Age}" Header="Возраст" />
+                    <DataGridTextColumn Binding="{Binding Age}" Header="Возраст" ElementStyle="{StaticResource CenteredCellText}"/>
                     <DataGridTextColumn Binding="{Binding Comments}" Header="Комментарии" />
                     <DataGridTextColumn Binding="{Binding StudyID}" Header="ID исследования" />
                     <DataGridTextColumn Binding="{Binding AccessionNumber}" Header="Accession №" />
@@ -133,7 +140,16 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding Status}" Header="Статус" />
-                    <DataGridTextColumn Binding="{Binding ImagesCount}" Header="Кол-во снимков" />
+                    <DataGridTextColumn Binding="{Binding ImagesCount}" Header="Снимки" ElementStyle="{StaticResource CenteredCellText}"/>
+
+                    <DataGridTextColumn
+                        Binding="{Binding StudyDateTime, StringFormat='dd.MM.yyyy HH:mm:ss'}"
+                        ElementStyle="{StaticResource CenteredCellText}"
+                        Header="Дата и время исследования" />
+                    <DataGridTextColumn Binding="{Binding IsEmergencyPatient}" Header="Экстренный" ElementStyle="{StaticResource CenteredCellText}"/>
+                    <DataGridTextColumn Binding="{Binding EffectiveDosemSv}" Header="Эф. доза" ElementStyle="{StaticResource CenteredCellText}"/>
+                    <DataGridTextColumn Binding="{Binding HasDose}" Header="Доза" ElementStyle="{StaticResource CenteredCellText}" />
+
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

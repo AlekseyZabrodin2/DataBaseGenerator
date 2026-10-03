@@ -50,6 +50,7 @@
                 VirtualizingPanel.VirtualizationMode="Recycling">
 
                 <DataGrid.Columns>
+                    <DataGridTextColumn Binding="{Binding Id}" Header="Id DB" />
                     <DataGridTextColumn
                         Binding="{Binding PatientID}"
                         Header="ID"
@@ -58,10 +59,11 @@
                     <DataGridTextColumn Binding="{Binding FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Имя" />
                     <DataGridTextColumn Binding="{Binding MiddleName}" Header="Отчество" />
                     <DataGridTextColumn Binding="{Binding FullName}" Header="Полное имя" />
-                    <DataGridTextColumn Binding="{Binding BirthDate}" Header="Дата Рождения" />
                     <DataGridTextColumn Binding="{Binding Sex}" Header="Пол" />
+                    <DataGridTextColumn Binding="{Binding BirthDate, StringFormat='dd.MM.yyyy'}" Header="Дата Рождения" />
                     <DataGridTextColumn Binding="{Binding Address}" Header="Адрес" />
-                    <DataGridTextColumn Binding="{Binding Comments}" Header="Доп. информация" />
+                    <DataGridTextColumn Binding="{Binding Phone}" Header="Телефон" />
+                    <DataGridTextColumn Binding="{Binding Comments}" Header="Комментарий" />
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

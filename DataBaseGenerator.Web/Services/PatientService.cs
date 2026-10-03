@@ -178,7 +178,7 @@ namespace DataBaseGenerator.Web.Services
                 PatientID = newPatientId, //patientGeneratorParameters.PatientID.Generate(patientIndex),
                 BirthDate = patientGeneratorParameters.BirthDate.GenerateBirthdate(patientGeneratorParameters),
                 Sex = patientGeneratorParameters.Sex.Generate(),
-                Address = patientGeneratorParameters.Address.Generate(),
+                Address = patientGeneratorParameters.Address.Generate(),                
                 AddInfo = patientGeneratorParameters.AddInfo.Generate(),
                 Occupation = patientGeneratorParameters.Occupation.Generate()
             };

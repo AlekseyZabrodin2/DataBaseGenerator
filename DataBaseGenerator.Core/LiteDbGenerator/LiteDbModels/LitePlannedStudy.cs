@@ -51,6 +51,10 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.LiteDbModels
         public PlannedStudyStatus Status { get; set; }
 
         public int? ImagesCount { get; set; }
+        public DateTime? StudyDateTime { get; set; }
+        public bool IsEmergencyPatient { get; set; }
+        public double EffectiveDosemSv { get; set; }
+        public bool HasDose { get; set; }
 
         private static string FormatArrayDisplay<T>(T[] array)
         {
@@ -99,7 +103,11 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.LiteDbModels
                 StudyAreas = item.StudyAreas?.ToArray() ?? Array.Empty<PlannedStudyArea>(),
                 ProjectionPaths = item.ProjectionPaths?.ToArray() ?? Array.Empty<string>(),
                 Status = item.Status,
-                ImagesCount = item.ImagesCount ?? 0
+                ImagesCount = item.ImagesCount ?? 0,
+                StudyDateTime = item.StudyDateTime,
+                IsEmergencyPatient = item.IsEmergencyPatient,
+                EffectiveDosemSv = item.EffectiveDosemSv,
+                HasDose = item.HasDose
             };
         }
 

@@ -14,6 +14,7 @@ namespace DataBaseGenerator.Core.MySqlGenerator
             IGeneratorRule<DateTime?> birthDate,
             IGeneratorRule<string> sex,
             IGeneratorRule<string> address,
+            IGeneratorRule<string> telephone,
             IGeneratorRule<string> addInfo,
             IGeneratorRule<string> occupation)
 
@@ -27,6 +28,7 @@ namespace DataBaseGenerator.Core.MySqlGenerator
             BirthDate = birthDate ?? throw new ArgumentNullException(nameof(birthDate));
             Sex = sex ?? throw new ArgumentNullException(nameof(sex));
             Address = address ?? throw new ArgumentNullException(nameof(address));
+            Telephone = telephone ?? throw new ArgumentNullException(nameof(telephone));
             AddInfo = addInfo ?? throw new ArgumentNullException(nameof(addInfo));
             Occupation = occupation ?? throw new ArgumentNullException(nameof(occupation));
         }
@@ -75,6 +77,8 @@ namespace DataBaseGenerator.Core.MySqlGenerator
         public IGeneratorRule<string> Sex { get; }
 
         public IGeneratorRule<string> Address { get; }
+
+        public IGeneratorRule<string> Telephone { get; }
 
         public IGeneratorRule<string> AddInfo { get; }
 

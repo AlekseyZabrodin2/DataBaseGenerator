@@ -297,7 +297,12 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                     StudyAreas = GenerateRandomStudyAreas(plannedStudyDto),
                     ProjectionPaths = plannedStudyDto.RandomProjectionPaths.Generate(),
-                    ImagesCount = plannedStudyDto.RandomImagesCount.Generate()
+                    ImagesCount = plannedStudyDto.RandomImagesCount.Generate(),
+                    StudyDateTime = plannedStudyDto.StudyDateTime,
+                    IsEmergencyPatient = plannedStudyDto.IsEmergencyPatient,
+                    EffectiveDosemSv = plannedStudyDto.EffectiveDosemSv,
+                    HasDose = plannedStudyDto.HasDose
+
                 };
 
                 return _plannedStudyLiteDb;

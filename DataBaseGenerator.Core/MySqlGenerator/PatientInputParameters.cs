@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataBaseGenerator.Core.MySqlGenerator
 {
@@ -19,6 +14,7 @@ namespace DataBaseGenerator.Core.MySqlGenerator
             DateTime? birthDate,
             string sex,
             string address,
+            string telephone,
             string addInfo,
             string occupation
             )
@@ -32,6 +28,7 @@ namespace DataBaseGenerator.Core.MySqlGenerator
             BirthDate = birthDate;
             Sex = sex ?? throw new ArgumentNullException(nameof(sex));
             Address = address ?? throw new ArgumentNullException(nameof(address));
+            Telephone = telephone ?? throw new ArgumentNullException(nameof(telephone));
             AddInfo = addInfo ?? throw new ArgumentNullException(nameof(addInfo));
             Occupation = occupation ?? throw new ArgumentNullException(nameof(occupation));
         }
@@ -55,6 +52,8 @@ namespace DataBaseGenerator.Core.MySqlGenerator
         public string Sex { get; set; }
 
         public string Address { get; set; }
+
+        public string Telephone { get; set; }
 
         public string AddInfo { get; set; }
 

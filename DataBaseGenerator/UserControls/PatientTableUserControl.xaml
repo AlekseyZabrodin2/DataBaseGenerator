@@ -41,7 +41,7 @@
                     <DataGridTextColumn Binding="{Binding LastName}" Header="Фамилия" />
                     <DataGridTextColumn Binding="{Binding FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Имя" />
                     <DataGridTextColumn Binding="{Binding MiddleName}" Header="Отчество" />
-                    <DataGridTextColumn Binding="{Binding BirthDate}" Header="Дата Рождения" />
+                    <DataGridTextColumn Binding="{Binding BirthDate, StringFormat='dd.MM.yyyy'}" Header="Дата Рождения" />
                     <DataGridTextColumn Binding="{Binding Sex}" Header="Пол" />
                     <DataGridTextColumn Binding="{Binding Address}" Header="Адрес" />
                     <DataGridTextColumn Binding="{Binding AddInfo}" Header="Доп. информация" />

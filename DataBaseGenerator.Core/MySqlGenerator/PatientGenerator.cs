@@ -33,6 +33,7 @@ namespace DataBaseGenerator.Core.MySqlGenerator
                 new RandomBirthDateRule(new DateTime()),
                 new RandomSexRule(),
                 new RandomAddressRule(),
+                new RandomPhoneRule(),
                 new RandomAddInfoRule(),
                 new RandomOccupationRule()
             );
@@ -45,6 +46,7 @@ namespace DataBaseGenerator.Core.MySqlGenerator
             newPatient.BirthDate.Generate();
             newPatient.Sex.Generate();
             newPatient.Address.Generate();
+            newPatient.Telephone.Generate();
             newPatient.AddInfo.Generate();
             newPatient.Occupation.Generate();
 

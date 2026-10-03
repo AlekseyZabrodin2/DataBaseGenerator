@@ -45,6 +45,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private string _addMiddleName;
         private string _addFullName;
         private string _addAdress;
+        private string _addTelephone;
         private string _addWorkPlase;
         private string _addInfo;
         private string _medInsurNumber;
@@ -220,6 +221,15 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             set
             {
                 SetProperty(ref _addAdress, value);
+            }
+        }
+
+        public string AddTelephone
+        {
+            get => _addTelephone;
+            set
+            {
+                SetProperty(ref _addTelephone, value);
             }
         }
 
@@ -419,6 +429,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     new RandomBirthDateRule(new DateTime()),
                     new RandomSexRule(),
                     new RandomAddressRule(),
+                    new RandomPhoneRule(),
                     new RandomAddInfoRule(),
                     new RandomOccupationRule())
                 {
@@ -602,6 +613,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                    new RandomBirthDateRule(new DateTime()),
                    new RandomSexRule(),
                    new RandomAddressRule(),
+                   new RandomPhoneRule(),
                    new RandomAddInfoRule(),
                    new RandomOccupationRule())
                 {
@@ -648,6 +660,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                    new RandomBirthDateRule(new DateTime()),
                    new RandomSexRule(),
                    new RandomAddressRule(),
+                   new RandomPhoneRule(),
                    new RandomAddInfoRule(),
                    new RandomOccupationRule())
                 {
@@ -1013,6 +1026,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             AddAdress = string.Empty;
 
+            AddTelephone = string.Empty;
+
             AddWorkPlase = string.Empty;
 
             AddInfo = string.Empty;
@@ -1052,6 +1067,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     PatientBirthDate,
                     SelecedGender,
                     AddAdress,
+                    AddTelephone,
                     AddInfo,
                     AddWorkPlase)
                 {
@@ -1213,6 +1229,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             AddMiddleName = string.Empty;
             SelecedGender = null;
             AddAdress = string.Empty;
+            AddTelephone = string.Empty;
             AddWorkPlase = string.Empty;
             AddInfo = string.Empty;
             MedicalInsuranceNumber = string.Empty;

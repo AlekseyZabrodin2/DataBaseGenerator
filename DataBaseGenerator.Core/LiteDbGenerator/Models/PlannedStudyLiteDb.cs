@@ -25,6 +25,10 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Models
         public string[] ProjectionPaths { get; set; }
         public PlannedStudyStatus Status { get; set; }
         public int? ImagesCount { get; set; }
+        public DateTime? StudyDateTime { get; set; }
+        public bool IsEmergencyPatient { get; set; }
+        public double EffectiveDosemSv { get; set; }
+        public bool HasDose { get; set; }
         public string PatientFullName
         {
             get

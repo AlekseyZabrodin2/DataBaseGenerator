@@ -105,7 +105,11 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Repositories
                 StudyAreas = plannedStudy.StudyAreas ?? Array.Empty<PlannedStudyArea>(),
                 ProjectionPaths = plannedStudy.ProjectionPaths ?? Array.Empty<string>(),
                 Status = plannedStudy.Status,
-                ImagesCount = plannedStudy.ImagesCount ?? 0
+                ImagesCount = plannedStudy.ImagesCount ?? 0,
+                StudyDateTime = plannedStudy.StudyDateTime,
+                IsEmergencyPatient = plannedStudy.IsEmergencyPatient,
+                EffectiveDosemSv = plannedStudy.EffectiveDosemSv,
+                HasDose = plannedStudy.HasDose
             };
         }
     }
