@@ -59,7 +59,7 @@
                         Header="Описание" />
                     <DataGridTextColumn
                         Width="120"
-                        Binding="{Binding CreateDate, StringFormat='dd.MM.yyyy'}"
+                        Binding="{Binding CreateDate, StringFormat='dd.MM.yyyy HH:mm'}"
                         Header="Дата добавления" />
                     <DataGridTextColumn
                         Width="100"
@@ -67,7 +67,7 @@
                         Header="Время добавления" />
                     <DataGridTextColumn
                         Width="120"
-                        Binding="{Binding ProcedureStepStartDateTime, StringFormat='dd.MM.yyyy'}"
+                        Binding="{Binding ProcedureStepStartDateTime, StringFormat='dd.MM.yyyy HH:mm'}"
                         Header="Дата процедуры" />
                     <DataGridTextColumn
                         Width="150"
