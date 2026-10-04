@@ -11,7 +11,7 @@ namespace DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.WorkList
     {
         public string Generate()
         {
-            return string.Empty;
+            return null; //string.Empty;
         }
     }
 }
