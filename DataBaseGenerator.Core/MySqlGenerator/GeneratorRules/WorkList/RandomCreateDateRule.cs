@@ -11,9 +11,8 @@ namespace DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.WorkList
     {
         public DateTime Generate()
         {
-            DateTime dateNow = DateTime.Today;
-
-            return dateNow;
+            var maxSecondsBack = 7 * 24 * 60 * 60;
+            return DateTime.Now.AddSeconds(-Random.Shared.Next(0, maxSecondsBack + 1));
         }
     }
 }
