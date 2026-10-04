@@ -116,8 +116,7 @@ namespace DataBaseGenerator.Web.Services
         {
             return new WorkList()
             {
-                WorkListID = workListIndex,
-                ID_WorkList = inputParameters.ID_WorkList.Generate(workListIndex),
+                ID_WorkList = workListIndex,
                 CreateDate = inputParameters.CreateDate.Generate(),
                 CreateTime = inputParameters.CreateTime.Generate(),
                 ID_Patient = inputParameters.ID_Patient.Generate(workListIndex),

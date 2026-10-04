@@ -2,8 +2,6 @@
 {
     public class WorklistViewModel
     {
-        public int WorkListID { get; set; }
-
         public int ID_WorkList { get; set; }
 
         public DateTime CreateDate { get; set; }

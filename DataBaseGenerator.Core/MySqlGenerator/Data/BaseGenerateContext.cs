@@ -37,7 +37,7 @@ namespace DataBaseGenerator.Core.MySqlGenerator.Data
 
             modelBuilder.Entity<Patient>().HasCharSet("Utf8");
 
-            modelBuilder.Entity<WorkList>().HasKey(worklist => worklist.WorkListID).HasName("PK_WorkList");
+            modelBuilder.Entity<WorkList>().HasKey(worklist => worklist.ID_WorkList).HasName("PK_WorkList");
 
             modelBuilder.Entity<WorkList>().HasCharSet("Utf8");
 
@@ -62,8 +62,6 @@ namespace DataBaseGenerator.Core.MySqlGenerator.Data
 
             //WorkList index
             modelBuilder.Entity<WorkList>().HasIndex(worklist => worklist.ID_Patient).HasDatabaseName("ID_Patient");
-
-            modelBuilder.Entity<WorkList>().HasIndex(worklist => worklist.WorkListID).HasDatabaseName("Idx_WorkListID");
 
             modelBuilder.Entity<WorkList>().HasIndex(worklist => worklist.ID_WorkList).HasDatabaseName("Idx_ID_WorkList");
 
@@ -101,8 +99,6 @@ namespace DataBaseGenerator.Core.MySqlGenerator.Data
             #region Configure columns table WorkList
 
             
-            modelBuilder.Entity<WorkList>().Property(patient => patient.WorkListID).HasColumnType("INT UNSIGNED NOT NULL").IsRequired();
-
             modelBuilder.Entity<WorkList>().Property(patient => patient.ID_WorkList).HasColumnType("INT UNSIGNED NOT NULL").IsRequired();
 
             modelBuilder.Entity<WorkList>().Property(patient => patient.ID_Patient).HasColumnType("INT UNSIGNED NOT NULL").IsRequired();
