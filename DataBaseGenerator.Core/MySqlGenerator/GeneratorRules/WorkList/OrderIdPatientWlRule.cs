@@ -1,26 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DataBaseGenerator.Core.MySqlGenerator;
 
 namespace DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.WorkList
 {
-    public sealed class OrderIdPatientWlRule : IGeneratorRule<int, int>
+    public sealed class OrderIdPatientWlRule : IGeneratorRule<int>
     {
-        public int Generate(int parameter)
-        {
-            
-                var iDWlPatient = parameter;
+        public IReadOnlyList<int> PatientIds { get; }
+        private readonly Random _random = new();
 
-                return iDWlPatient;
-            
+        public OrderIdPatientWlRule(IReadOnlyList<int> patientIds)
+        {
+            PatientIds = patientIds;
         }
 
-        //public override string ToString()
-        //{
-        //    return $"{Generate()}";
-        //}
+        public int Generate()
+        {
+            return PatientIds[_random.Next(PatientIds.Count)];
+        }
     }
 }
