@@ -119,7 +119,7 @@ namespace DataBaseGenerator.Web.Services
                 ID_WorkList = workListIndex,
                 CreateDate = inputParameters.CreateDate.Generate(),
                 CreateTime = inputParameters.CreateTime.Generate(),
-                ID_Patient = inputParameters.ID_Patient.Generate(workListIndex),
+                ID_Patient = inputParameters.ID_Patient.Generate(),
                 State = inputParameters.State.Generate(),
                 SOPInstanceUID = inputParameters.SOPInstanceUID.Generate(),
                 Modality = inputParameters.Modality.Generate(),

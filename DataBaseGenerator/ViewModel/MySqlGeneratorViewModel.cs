@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -345,6 +346,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [ObservableProperty]
         public partial bool OptimisationIsEnabled { get; set; } = false;
 
+        public IReadOnlyList<int> PatientIds { get; private set; } = [];
+
+
+
         public MySqlGeneratorViewModel(BaseGenerateContext context, IHttpClientFactory clientFactory)
         {
             _context = context;
@@ -553,7 +558,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 _logger.Info("RefreshPatientsAsync: Calling PatientService.GetAllAsync...");
 
-                AllPatients = await _patientService.GetAllAsync();
+                AllPatients = await _patientService.GetAllAsync() ?? [];
+
+                PatientIds = AllPatients.Select(patient => patient.ID_Patient).ToList();
 
                 _logger.Info($"RefreshPatientsAsync: Retrieved {AllPatients?.Count ?? 0} patients");
 
@@ -704,10 +711,19 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             var stopwatch = Stopwatch.StartNew();
             _cancellationTokenSource = new CancellationTokenSource();
             var generationCancelled = false;
+            var generationSkipped = false;
 
             try
             {
                 StartBusy("Генерация рабочего списка ...");
+
+                if (PatientIds.Count == 0)
+                {
+                    generationSkipped = true;
+                    UpdateText = "Генерация невозможна: список пациентов пуст.";
+                    _logger.Warn("AddWorkListAsync: PatientIds is empty, generation skipped");
+                    return;
+                }
 
                 var newWorkList = new WorkListGeneratorDto(
                     new OrderIdWorklistRule(),
@@ -715,7 +731,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     new RandomCreateTimeRule(),
                     new RandomCompleteDateRule(),
                     new RandomCompleteTimeRule(),
-                    new OrderIdPatientWlRule(),
+                    new OrderIdPatientWlRule(PatientIds),
                     new RandomStateRule(),
                     new RandomSOPInstanceUIDRule(),
                     SelectModality,
@@ -764,7 +780,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 {
                     UpdateText = $"Генерация списка была прервана! Всего - [{AllWorkLists.Count}], Время выполнения: {timeString}";
                 }
-                else
+                else if (!generationSkipped)
                 {
                     UpdateText = $"Рабочий список успешно добавлен! Всего - [{AllWorkLists.Count}]. Время выполнения: {timeString}";
                 }
@@ -823,7 +839,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     new RandomCreateTimeRule(),
                     new RandomCompleteDateRule(),
                     new RandomCompleteTimeRule(),
-                    new OrderIdPatientWlRule(),
+                    new OrderIdPatientWlRule(PatientIds),
                     new RandomStateRule(),
                     new RandomSOPInstanceUIDRule(),
                     SelectModality,
@@ -875,7 +891,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     new RandomCreateTimeRule(),
                     new RandomCompleteDateRule(),
                     new RandomCompleteTimeRule(),
-                    new OrderIdPatientWlRule(),
+                    new OrderIdPatientWlRule(PatientIds),
                     new RandomStateRule(),
                     new RandomSOPInstanceUIDRule(),
                     SelectModality,

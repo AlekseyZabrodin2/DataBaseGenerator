@@ -8,13 +8,13 @@ namespace DataBaseGenerator.Core.MySqlGenerator
         private string _modality;
         private string _aeTitle;
 
-        public IEnumerable<WorkListGeneratorParameters> Generator(WorkListGeneratorParameters workListGeneratorParameters)
+        public IEnumerable<WorkListGeneratorParameters> Generator(WorkListGeneratorParameters workListGeneratorParameters, IReadOnlyList<int> patientIds)
         {
             var workListGenerator = new List<WorkListGeneratorParameters>();
 
             for (int workListIndex = 0; workListIndex < workListGeneratorParameters.WorkListCount; workListIndex++)
             {
-                var workLists = CreateWorkListModule(workListIndex);
+                var workLists = CreateWorkListModule(workListIndex, patientIds);
 
                 workListGenerator.Add(workLists);
             }
@@ -22,7 +22,7 @@ namespace DataBaseGenerator.Core.MySqlGenerator
             return workListGenerator;
         }
 
-        public WorkListGeneratorParameters CreateWorkListModule(int workListIndex)
+        public WorkListGeneratorParameters CreateWorkListModule(int workListIndex, IReadOnlyList<int> patientIds)
         {
             var newWorkList = new WorkListGeneratorParameters(
                 new OrderIdWorklistRule(),
@@ -30,7 +30,7 @@ namespace DataBaseGenerator.Core.MySqlGenerator
                 new RandomCreateTimeRule(),
                 new RandomCompleteDateRule(),
                 new RandomCompleteTimeRule(),
-                new OrderIdPatientWlRule(),
+                new OrderIdPatientWlRule(patientIds),
                 new RandomStateRule(),
                 new RandomSOPInstanceUIDRule(),
                 new RandomModalityRule(_modality),
@@ -43,11 +43,11 @@ namespace DataBaseGenerator.Core.MySqlGenerator
             );
 
             newWorkList.ID_WorkList.Generate(workListIndex);
+            newWorkList.ID_Patient.Generate();
             newWorkList.CreateDate.Generate();
             newWorkList.CreateTime.Generate();
             //newWorkList.CompleteDate.Generate();
             //newWorkList.CompleteTime.Generate();
-            newWorkList.ID_Patient.Generate(workListIndex);
             newWorkList.State.Generate();
             newWorkList.SOPInstanceUID.Generate();
             newWorkList.Modality.Generate();

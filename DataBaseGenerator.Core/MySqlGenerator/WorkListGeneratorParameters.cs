@@ -10,7 +10,7 @@ namespace DataBaseGenerator.Core.MySqlGenerator
             IGeneratorRule<TimeSpan> createTime,
             IGeneratorRule<DateTime> completeDate,
             IGeneratorRule<TimeSpan> completeTime,
-            IGeneratorRule<int, int> iD_Patient,
+            IGeneratorRule<int> iD_Patient,
             IGeneratorRule<string> state,
             IGeneratorRule<string> sOPInstanceUID,
             IGeneratorRule<string> modality,
@@ -45,6 +45,8 @@ namespace DataBaseGenerator.Core.MySqlGenerator
 
         public IGeneratorRule<int, int> ID_WorkList { get; }
 
+        public IGeneratorRule<int> ID_Patient { get; }
+
         public IGeneratorRule<DateTime> CreateDate { get; }
 
         public IGeneratorRule<TimeSpan> CreateTime { get; }
@@ -52,8 +54,6 @@ namespace DataBaseGenerator.Core.MySqlGenerator
         public IGeneratorRule<DateTime> CompleteDate { get; }
 
         public IGeneratorRule<TimeSpan> CompleteTime { get; }
-
-        public IGeneratorRule<int, int> ID_Patient { get; }
 
         public IGeneratorRule<string> State { get; }
 
