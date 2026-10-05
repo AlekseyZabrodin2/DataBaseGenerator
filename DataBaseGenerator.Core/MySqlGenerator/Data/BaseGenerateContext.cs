@@ -99,9 +99,9 @@ namespace DataBaseGenerator.Core.MySqlGenerator.Data
             #region Configure columns table WorkList
 
             
-            modelBuilder.Entity<WorkList>().Property(patient => patient.ID_WorkList).HasColumnType("INT UNSIGNED NOT NULL").IsRequired();
+            modelBuilder.Entity<WorkList>().Property(patient => patient.ID_WorkList).HasColumnType("INT UNSIGNED").IsRequired();
 
-            modelBuilder.Entity<WorkList>().Property(patient => patient.ID_Patient).HasColumnType("INT UNSIGNED NOT NULL").IsRequired();
+            modelBuilder.Entity<WorkList>().Property(patient => patient.ID_Patient).HasColumnType("INT UNSIGNED").IsRequired();
 
             modelBuilder.Entity<WorkList>().Property(patient => patient.CreateDate).HasColumnType("DATE").ValueGeneratedNever();
 
