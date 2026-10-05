@@ -346,6 +346,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [ObservableProperty]
         public partial bool OptimisationIsEnabled { get; set; } = false;
 
+        [ObservableProperty]
+        public partial bool OptimisIsVisibility { get; set; } = false;
+
         public IReadOnlyList<int> PatientIds { get; private set; } = [];
 
 

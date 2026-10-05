@@ -95,6 +95,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         public partial bool OptimisationIsEnabled { get; set; } = true;
 
         [ObservableProperty]
+        public partial bool OptimisIsVisibility { get; set; } = true;
+
+        [ObservableProperty]
         public partial bool CancelButtonIsVisibil { get; set; } = true;
 
 
