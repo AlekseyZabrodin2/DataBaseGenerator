@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using DataBaseGenerator.Core.MySqlGenerator;
 using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Patient;
 using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.WorkList;
@@ -96,6 +97,7 @@ namespace DataBaseGenerator.Test
         public void CreateNewWorkList()
         {
             var workList = new WorkListGenerator();
+            var patientIDs = new [] { 2, 15, 17 };
 
             var newWorkList = new WorkListGeneratorParameters(
                 new OrderIdWorklistRule(),
@@ -103,7 +105,7 @@ namespace DataBaseGenerator.Test
                 new RandomCreateTimeRule(),
                 new RandomCompleteDateRule(),
                 new RandomCompleteTimeRule(),
-                new OrderIdPatientWlRule(),
+                new OrderIdPatientWlRule(patientIDs),
                 new RandomStateRule(),
                 new RandomSOPInstanceUIDRule(),
                 new RandomModalityRule(_modality),
@@ -117,7 +119,7 @@ namespace DataBaseGenerator.Test
                 WorkListCount = 4
             };
 
-            var result = workList.Generator(newWorkList);
+            var result = workList.Generator(newWorkList, patientIDs);
 
             Console.WriteLine(result);
         }
