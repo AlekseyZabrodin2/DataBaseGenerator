@@ -35,6 +35,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private SpecificationWindow _specificationWindow = new SpecificationWindow();
         //private List<Patient> _allPatients = new List<Patient>();
         private List<WorkList> _allWorkLists = new List<WorkList>();
+        private List<WorkList> _workLists = [];
+        private List<Patient> _patients = [];
+        private string _workListPatientIdFilter = string.Empty;
+        private string _patientIdFilter = string.Empty;
         private string _updateText;
         private int _setPatientCount;
         private int _setWorkListCount;
@@ -291,6 +295,26 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             get => _allWorkLists;
             set => SetProperty(ref _allWorkLists, value);
+        }
+
+        public string WorkListPatientIdFilter
+        {
+            get => _workListPatientIdFilter;
+            set
+            {
+                if (SetProperty(ref _workListPatientIdFilter, value))
+                    ApplyWorkListFilter();
+            }
+        }
+
+        public string PatientIdFilter
+        {
+            get => _patientIdFilter;
+            set
+            {
+                if (SetProperty(ref _patientIdFilter, value))
+                    ApplyPatientFilter();
+            }
         }
 
         [ObservableProperty]
@@ -552,7 +576,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             try
             {
                 var updatePatients = new ObservableCollection<Patient>();
-                foreach (var patient in AllPatients)
+                foreach (var patient in _patients)
                 {
                     updatePatients.Add(patient);
                 }
@@ -580,16 +604,19 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 _logger.Info("RefreshPatientsAsync: Calling PatientService.GetAllAsync...");
 
-                AllPatients = await _patientService.GetAllAsync() ?? [];
+                var patients = await _patientService.GetAllAsync() ?? [];
+                _patients = patients.ToList();
 
-                PatientIds = AllPatients.Select(patient => patient.ID_Patient).ToList();
-                NextPatientId = AllPatients.Count == 0
+                PatientIds = _patients.Select(patient => patient.ID_Patient).ToList();
+                NextPatientId = _patients.Count == 0
                     ? 1
-                    : AllPatients.Max(patient => patient.ID_Patient) + 1;
+                    : _patients.Max(patient => patient.ID_Patient) + 1;
 
-                UpdateText = $"Patient table is update! Всего пациентов - [{AllPatients.Count}]";
+                ApplyPatientFilter();
 
-                _logger.Info($"RefreshPatientsAsync: SUCCESS, Retrieved {AllPatients?.Count ?? 0} patients");
+                UpdateText = $"Patient table is update! Всего пациентов - [{_patients.Count}]";
+
+                _logger.Info($"RefreshPatientsAsync: SUCCESS, Retrieved {_patients.Count} patients");
 
                 patientsRefreshed = true;
             }
@@ -603,6 +630,22 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 _logger.Info("<<< RefreshPatientsAsync: END");
             }
             return patientsRefreshed;
+        }
+
+        private void ApplyPatientFilter()
+        {
+            IEnumerable<Patient> patients = _patients.OrderBy(patient => patient.ID_Patient);
+            var filter = PatientIdFilter?.Trim();
+
+            if (!string.IsNullOrEmpty(filter))
+            {
+                var hasPatientId = int.TryParse(filter, out var patientId);
+                patients = patients.Where(patient =>
+                    (patient.PatientID?.Contains(filter, StringComparison.OrdinalIgnoreCase) ?? false)
+                    || (hasPatientId && patient.ID_Patient == patientId));
+            }
+
+            AllPatients = new ObservableCollection<Patient>(patients);
         }
 
         [RelayCommand]
@@ -796,11 +839,12 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 _logger.Info("RefreshWorkListAsync: Calling WorklistService.GetAllAsync...");
 
-                AllWorkLists = await _worklistService.GetAllAsync() ?? [];
+                _workLists = await _worklistService.GetAllAsync() ?? [];
+                ApplyWorkListFilter();
 
                 UpdateText = "WorkList table is update";
 
-                _logger.Info($"RefreshWorkListAsync: SUCCESS, Retrieved {AllWorkLists?.Count ?? 0} worklists");
+                _logger.Info($"RefreshWorkListAsync: SUCCESS, Retrieved {_workLists.Count} worklists");
 
                 workListRefreshed = true;
             }
@@ -815,6 +859,16 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
 
             return workListRefreshed;
+        }
+
+        private void ApplyWorkListFilter()
+        {
+            IEnumerable<WorkList> workLists = _workLists.OrderBy(workList => workList.ID_Patient);
+
+            if (int.TryParse(WorkListPatientIdFilter, out var patientId))
+                workLists = workLists.Where(workList => workList.ID_Patient == patientId);
+
+            AllWorkLists = workLists.ToList();
         }
 
         [RelayCommand]
@@ -1073,8 +1127,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             catch (HttpRequestException httpEx)
             {
                 _logger.Error(httpEx, "AddOnePatientAsync: HTTP ERROR - {Message}", httpEx.Message);
-                CleareFields();
-                UpdateText = $"Ошибка API: {httpEx.Message}";
+                UpdateText = httpEx.Message;
             }
             catch (Exception ex)
             {
