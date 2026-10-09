@@ -206,11 +206,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 }
                 else if (value == Gender[1])
                 {
-                    value = "O";
+                    value = "F";
                 }
                 else if (value == Gender[2])
                 {
-                    value = "F";
+                    value = "O";
                 }
                 SetProperty(ref _gender, value);
             }
@@ -404,13 +404,19 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         private async Task InitializeAsync()
         {
-            AllPatients = new();
             UseRandomBirthdate = true;
 
-            AllPatients = await _patientService.GetAllAsync();
-            AllWorkLists = await _worklistService.GetAllAsync();
+            var refreshPat = await RefreshPatientsAsync();
+            var patientsText = UpdateText;
 
-            UpdateText = $"Пациентов - [{AllPatients.Count}]. Рабочий список - [{AllWorkLists.Count}]";
+            var refreshWl = await RefreshWorkListAsync();
+
+            if (refreshPat && refreshWl)
+                UpdateText = $"Пациентов - [{AllPatients.Count}]. Рабочий список - [{AllWorkLists.Count}]";
+            else if (!refreshPat && refreshWl)
+                UpdateText = patientsText;
+            else if (!refreshPat && !refreshWl)
+                UpdateText = $"{patientsText} {UpdateText}";
         }
 
 
@@ -423,6 +429,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             _cancellationTokenSource = new CancellationTokenSource();
             var generationCancelled = false;
+            var generationSkipped = false;
+            var generationFailed = false;
 
             try
             {
@@ -463,6 +471,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 {
                     StopGenerateMessage(SetPatientCount);
                     SetPatientCount = 0;
+                    generationSkipped = true;
 
                     return;
                 }
@@ -471,6 +480,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 {
                     RandomMessageFor13Patient();
                     SetPatientCount = 0;
+                    generationSkipped = true;
 
                     return;
                 }
@@ -481,10 +491,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                 _logger.Info("AddPatientAsync: GenerateAsync completed successfully");
 
-                await RefreshPatientsAsync();
+                generationFailed = !await RefreshPatientsAsync();
                 //LolMessageForPatientCount(SetPatientCount);
-                
-                _logger.Info("AddPatientAsync: SUCCESS, UpdateText = {UpdateText}", UpdateText);
+
+                if (!generationFailed)
+                    _logger.Info("AddPatientAsync: SUCCESS, UpdateText = {UpdateText}", UpdateText);
             }
             catch (OperationCanceledException)
             {
@@ -494,16 +505,19 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
             catch (DbUpdateException dbEx)
             {
+                generationFailed = true;
                 _logger.Error(dbEx, "AddPatientAsync: DB ERROR - {Message}", dbEx.InnerException?.Message ?? dbEx.Message);
                 UpdateText = $"Ошибка БД: {dbEx.InnerException?.Message ?? dbEx.Message}";
             }
             catch (HttpRequestException httpEx)
             {
+                generationFailed = true;
                 _logger.Error(httpEx, "AddPatientAsync: HTTP ERROR - {Message}", httpEx.Message);
                 UpdateText = $"Ошибка API: {httpEx.Message}";
             }
             catch (Exception ex)
             {
+                generationFailed = true;
                 _logger.Error(ex, "AddPatientAsync: UNEXPECTED ERROR - {Message}", ex.Message);
                 UpdateText = $"Пациент не добавлен: {ex.Message}";
             }
@@ -517,11 +531,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                 if (generationCancelled)
                 {
-                    UpdateText = $"Генерация пациентов была прервана! Всего - [{AllPatients.Count}], Время выполнения: {timeString}";
+                    UpdateText = $"Генерация пациентов была прервана! Всего - [{AllPatients?.Count ?? 0}], Время выполнения: {timeString}";
                 }
-                else
+                else if (!generationFailed && !generationSkipped)
                 {
-                    UpdateText = $"Пациент успешно добавлен! Всего - [{AllPatients.Count}]. Время выполнения: {timeString}";
+                    UpdateText = $"Пациент успешно добавлен! Всего - [{AllPatients?.Count ?? 0}]. Время выполнения: {timeString}";
                 }
 
                 _cancellationTokenSource?.Dispose();
@@ -553,9 +567,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
         [RelayCommand]
-        public async Task RefreshPatientsAsync()
+        public async Task<bool> RefreshPatientsAsync()
         {
             _logger.Info(">>> RefreshPatientsAsync: START");
+
+            var patientsRefreshed = false;
 
             try
             {
@@ -565,19 +581,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                 PatientIds = AllPatients.Select(patient => patient.ID_Patient).ToList();
 
-                _logger.Info($"RefreshPatientsAsync: Retrieved {AllPatients?.Count ?? 0} patients");
-
-                if (AllPatients != null)
-                {
-                    _logger.Info("RefreshPatientsAsync: UI updated");
-                }
-                else
-                {
-                    _logger.Warn("RefreshPatientsAsync: MainWindow.AllPatientView is null");
-                }
-
                 UpdateText = $"Patient table is update! Всего пациентов - [{AllPatients.Count}]";
-                _logger.Info("RefreshPatientsAsync: SUCCESS");
+
+                _logger.Info($"RefreshPatientsAsync: SUCCESS, Retrieved {AllPatients?.Count ?? 0} patients");
+
+                patientsRefreshed = true;
             }
             catch (Exception ex)
             {
@@ -588,6 +596,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 _logger.Info("<<< RefreshPatientsAsync: END");
             }
+            return patientsRefreshed;
         }
 
         [RelayCommand]
@@ -614,28 +623,14 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             try
             {
-                var patient = new PatientGeneratorParameters(
-                   new OrderIdPatientRule(),
-                   new RandomLastNameRule(),
-                   new RandomFirstNameRule(),
-                   new RandomMiddleNameRule(),
-                   new OrderPatientIdRule(),
-                   new RandomBirthDateRule(new DateTime()),
-                   new RandomSexRule(),
-                   new RandomAddressRule(),
-                   new RandomPhoneRule(),
-                   new RandomAddInfoRule(),
-                   new RandomOccupationRule())
-                {
-                    PatientCount = SetPatientCount
-                };
                 _logger.Info("DeleteFirstPatientAsync: Calling PatientService.DeleteFirstAsync...");
 
                 await _patientService.DeleteFirstAsync();
 
                 _logger.Info("DeleteFirstPatientAsync: DeleteFirstAsync completed");
 
-                await RefreshPatientsAsync();
+                if (!await RefreshPatientsAsync())
+                    return;
 
                 UpdateText = "First Patient is Delete";
                 _logger.Info("DeleteFirstPatientAsync: SUCCESS");
@@ -653,7 +648,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
         [RelayCommand]
-        public async Task DeleteAllPatientAsync()
+        public async Task<bool> DeleteAllPatientAsync()
         {
             _logger.Info(">>> DeleteAllPatientAsync: START");
 
@@ -661,43 +656,31 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             try
             {
-                var patient = new PatientGeneratorParameters(
-                   new OrderIdPatientRule(),
-                   new RandomLastNameRule(),
-                   new RandomFirstNameRule(),
-                   new RandomMiddleNameRule(),
-                   new OrderPatientIdRule(),
-                   new RandomBirthDateRule(new DateTime()),
-                   new RandomSexRule(),
-                   new RandomAddressRule(),
-                   new RandomPhoneRule(),
-                   new RandomAddInfoRule(),
-                   new RandomOccupationRule())
-                {
-                    PatientCount = SetPatientCount
-                };
-
                 _logger.Info("DeleteAllPatientAsync: Calling PatientService.DeleteAllAsync...");
 
                 await _patientService.DeleteAllAsync();
 
                 _logger.Info("DeleteAllPatientAsync: DeleteAllAsync completed");
 
-                await RefreshPatientsAsync();
+                if (!await RefreshPatientsAsync())
+                    return false;
 
                 UpdateText = "Patient Table Deletion completed";
                 _logger.Info("DeleteAllPatientAsync: SUCCESS");
+                return true;
             }
             catch (DbUpdateException dbEx)
             {
                 _logger.Error(dbEx, "DeleteAllPatientAsync: DB ERROR - {Message}", dbEx.InnerException?.Message ?? dbEx.Message);
                 UpdateText = $"Ошибка БД при удалении: {dbEx.InnerException?.Message ?? dbEx.Message}";
+                return false;
             }
             catch (Exception ex)
             {
                 UpdateText = "Patient Table is not Deleted";
                 _logger.Error(ex, "DeleteAllPatientAsync: ERROR - {Message}", ex.Message);
                 MessageBox.Show($"{ex.Message}");
+                return false;
             }
             finally
             {
@@ -715,6 +698,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             _cancellationTokenSource = new CancellationTokenSource();
             var generationCancelled = false;
             var generationSkipped = false;
+            var generationFailed = false;
 
             try
             {
@@ -754,9 +738,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                 _logger.Info("AddWorkListAsync: GenerateAsync completed");
 
-                await RefreshWorkListAsync();
+                generationFailed = !await RefreshWorkListAsync();
 
-                _logger.Info("AddWorkListAsync: SUCCESS");
+                if (!generationFailed)
+                    _logger.Info("AddWorkListAsync: SUCCESS");
             }
             catch (OperationCanceledException)
             {
@@ -766,6 +751,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
             catch (Exception ex)
             {
+                generationFailed = true;
                 UpdateText = "WorkList not added";
                 _logger.Error(ex, "AddWorkListAsync: ERROR - {Message}", ex.Message);
                 MessageBox.Show($"{ex.Message}");
@@ -781,11 +767,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                 if (generationCancelled)
                 {
-                    UpdateText = $"Генерация списка была прервана! Всего - [{AllWorkLists.Count}], Время выполнения: {timeString}";
+                    UpdateText = $"Генерация списка была прервана! Всего - [{AllWorkLists?.Count ?? 0}], Время выполнения: {timeString}";
                 }
-                else if (!generationSkipped)
+                else if (!generationFailed && !generationSkipped)
                 {
-                    UpdateText = $"Рабочий список успешно добавлен! Всего - [{AllWorkLists.Count}]. Время выполнения: {timeString}";
+                    UpdateText = $"Рабочий список успешно добавлен! Всего - [{AllWorkLists?.Count ?? 0}]. Время выполнения: {timeString}";
                 }
 
                 _cancellationTokenSource?.Dispose();
@@ -794,39 +780,35 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
         [RelayCommand]
-        public async Task RefreshWorkListAsync()
+        public async Task<bool> RefreshWorkListAsync()
         {
             _logger.Info(">>> RefreshWorkListAsync: START");
+
+            var workListRefreshed = false;
 
             try
             {
                 _logger.Info("RefreshWorkListAsync: Calling WorklistService.GetAllAsync...");
 
-                AllWorkLists = await _worklistService.GetAllAsync();
-
-                _logger.Info($"RefreshWorkListAsync: Retrieved {AllWorkLists?.Count ?? 0} worklists");
-
-                if (AllWorkLists != null)
-                {
-                    _logger.Info("RefreshWorkListAsync: UI updated");
-                }
-                else
-                {
-                    _logger.Warn("RefreshWorkListAsync: MainWindow.AllWorkListView is null");
-                }
+                AllWorkLists = await _worklistService.GetAllAsync() ?? [];
 
                 UpdateText = "WorkList table is update";
-                _logger.Info("RefreshWorkListAsync: SUCCESS");
+
+                _logger.Info($"RefreshWorkListAsync: SUCCESS, Retrieved {AllWorkLists?.Count ?? 0} worklists");
+
+                workListRefreshed = true;
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, "RefreshWorkListAsync: ERROR - {Message}", ex.Message);
-                UpdateText = $"Ошибка обновления WorkList: {ex.Message}";
+                UpdateText = $"Ошибка обновления WorkList: {ex.Message}";                
             }
             finally
             {
                 _logger.Info("<<< RefreshWorkListAsync: END");
             }
+
+            return workListRefreshed;
         }
 
         [RelayCommand]
@@ -836,33 +818,14 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             try
             {
-                var workList = new WorkListGeneratorParameters(
-                    new OrderIdWorklistRule(),
-                    new RandomCreateDateRule(),
-                    new RandomCreateTimeRule(),
-                    new RandomCompleteDateRule(),
-                    new RandomCompleteTimeRule(),
-                    new OrderIdPatientWlRule(PatientIds),
-                    new RandomStateRule(),
-                    new RandomSOPInstanceUIDRule(),
-                    SelectModality,
-                    new RandomStationAeTitleRule(_aeTitle),
-                    new RandomProcedureStepStartDateTimeRule(),
-                    new RandomPerformingPhysiciansNameRule(),
-                    new RandomStudyDescriptionRule(),
-                    new RandomReferringPhysiciansNameRule(),
-                    new RandomRequestingPhysicianRule())
-                {
-                    WorkListCount = SetWorkListCount
-                };
-
                 _logger.Info("DeleteFirstWorkListAsync: Calling WorklistService.DeleteFirstAsync...");
 
                 await _worklistService.DeleteFirstAsync();
 
                 _logger.Info("DeleteFirstWorkListAsync: DeleteFirstAsync completed");
 
-                await RefreshWorkListAsync();
+                if (!await RefreshWorkListAsync())
+                    return;
 
                 UpdateText = "First in WorkList Delete";
                 _logger.Info("DeleteFirstWorkListAsync: SUCCESS");
@@ -880,55 +843,39 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
         [RelayCommand]
-        public async Task DeleteAllWorkListAsync()
+        public async Task<bool> DeleteAllWorkListAsync()
         {
             _logger.Info(">>> DeleteAllWorkListAsync: START");
 
-            StartBusy("Удаление пациентов...");
+            StartBusy("Удаление рабочего списка...");
 
             try
             {
-                var workList = new WorkListGeneratorParameters(
-                    new OrderIdWorklistRule(),
-                    new RandomCreateDateRule(),
-                    new RandomCreateTimeRule(),
-                    new RandomCompleteDateRule(),
-                    new RandomCompleteTimeRule(),
-                    new OrderIdPatientWlRule(PatientIds),
-                    new RandomStateRule(),
-                    new RandomSOPInstanceUIDRule(),
-                    SelectModality,
-                    new RandomStationAeTitleRule(_aeTitle),
-                    new RandomProcedureStepStartDateTimeRule(),
-                    new RandomPerformingPhysiciansNameRule(),
-                    new RandomStudyDescriptionRule(),
-                    new RandomReferringPhysiciansNameRule(),
-                    new RandomRequestingPhysicianRule())
-                {
-                    WorkListCount = SetWorkListCount
-                };
-
                 _logger.Info("DeleteAllWorkListAsync: Calling WorklistService.DeleteAllAsync...");
 
                 await _worklistService.DeleteAllAsync();
 
                 _logger.Info("DeleteAllWorkListAsync: DeleteAllAsync completed");
 
-                await RefreshWorkListAsync();
+                if (!await RefreshWorkListAsync())
+                    return false;
 
                 UpdateText = "WorkList Table Deletion completed";
                 _logger.Info("DeleteAllWorkListAsync: SUCCESS");
+                return true;
             }
             catch (DbUpdateException dbEx)
             {
                 _logger.Error(dbEx, "DeleteAllWorkListAsync: DB ERROR - {Message}", dbEx.InnerException?.Message ?? dbEx.Message);
                 UpdateText = $"Ошибка БД при удалении: {dbEx.InnerException?.Message ?? dbEx.Message}";
+                return false;
             }
             catch (Exception ex)
             {
                 UpdateText = "WorkList Table is not Deleted";
                 _logger.Error(ex, "DeleteAllWorkListAsync: ERROR - {Message}", ex.Message);
                 MessageBox.Show($"{ex.Message}");
+                return false;
             }
             finally
             {
@@ -965,15 +912,25 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             try
             {
                 _logger.Info("DeleteAllTablesAsync: Deleting patients...");
-                await DeleteAllPatientAsync();
-                await RefreshPatientsAsync();
+                var patientsDeleted = await DeleteAllPatientAsync();
+                var patientsText = UpdateText;
 
                 _logger.Info("DeleteAllTablesAsync: Deleting worklists...");
-                await DeleteAllWorkListAsync();
-                await RefreshWorkListAsync();
+                var worklistsDeleted = await DeleteAllWorkListAsync();
 
-                UpdateText = "All Tables Deletion completed";
-                _logger.Info("DeleteAllTablesAsync: SUCCESS - All tables cleared");
+                if (patientsDeleted && worklistsDeleted)
+                {
+                    UpdateText = "All Tables Deletion completed";
+                    _logger.Info("DeleteAllTablesAsync: SUCCESS - All tables cleared");
+                }
+                else if (!patientsDeleted && worklistsDeleted)
+                {
+                    UpdateText = patientsText;
+                }
+                else if (!patientsDeleted && !worklistsDeleted)
+                {
+                    UpdateText = $"{patientsText} {UpdateText}";
+                }
             }
             catch (Exception ex)
             {
