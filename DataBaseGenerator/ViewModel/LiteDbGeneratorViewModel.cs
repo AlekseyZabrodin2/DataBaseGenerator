@@ -28,7 +28,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
         private readonly IServiceProvider _serviceProvider;
         private IStudyStorageModule _storage => App.SharedStorage;
-        private string _gender;
+        private string _gender = string.Empty;
         private PatientLiteDb _patientLiteDb;
         private string _databasePath = string.Empty;
         private readonly object _dbLock = new object();
@@ -38,19 +38,19 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         public partial string UpdateText { get; set; }
 
         [ObservableProperty]
-        public partial string AddIdPatient { get; set; }
+        public partial string AddIdPatient { get; set; } = string.Empty;
 
         [ObservableProperty]
-        public partial string AddFamily { get; set; }
+        public partial string AddFamily { get; set; } = string.Empty;
 
         [ObservableProperty]
-        public partial string AddName { get; set; }
+        public partial string AddName { get; set; } = string.Empty;
 
         [ObservableProperty]
-        public partial string AddMiddleName { get; set; }
+        public partial string AddMiddleName { get; set; } = string.Empty;
 
         [ObservableProperty]
-        public partial string AddFullName { get; set; }
+        public partial string AddFullName { get; set; } = string.Empty;
 
         public List<string> Gender { get; }
 
@@ -66,30 +66,30 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 }
                 else if (value == Gender[1])
                 {
-                    value = "O";
+                    value = "F";
                 }
                 else if (value == Gender[2])
                 {
-                    value = "F";
+                    value = "O";
                 }
                 SetProperty(ref _gender, value);
             }
         }
 
         [ObservableProperty]
-        public partial string AddAdress { get; set; }
+        public partial string AddAdress { get; set; } = string.Empty;
 
         [ObservableProperty]
-        public partial string AddTelephone { get; set; }
+        public partial string AddTelephone { get; set; } = string.Empty;
 
         [ObservableProperty]
-        public partial string AddWorkPlase { get; set; }
+        public partial string AddWorkPlase { get; set; } = string.Empty;
 
         [ObservableProperty]
         public partial string MedicalInsuranceNumber { get; set; }
 
         [ObservableProperty]
-        public partial string AddInfo { get; set; }
+        public partial string AddInfo { get; set; } = string.Empty;
 
         [ObservableProperty]
         public partial string BirthDateToolTip { get; set; }
@@ -273,59 +273,52 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
 
         [RelayCommand]
-        public void AddOnePatient()
+        public async Task AddOnePatient()
         {
-            var messageToUpdateText = string.Empty;
+            if (IsReadOnlyMode)
+            {
+                UpdateText = "База открыта только для чтения.";
+                return;
+            }
+
             try
             {
-                StartBusy("Генерация пациента...");
+                StartBusy("Добавление пациента...");
 
                 AddFullName = $"{AddFamily} {AddName} {AddMiddleName}";
 
-                var newPatient = new PatientInputParameters(                    
+                var newPatient = new PatientInputParameters(
                     1,
-                    AddFamily,
-                    AddName,
-                    AddMiddleName,
-                    AddFullName,
-                    AddIdPatient,
+                    AddFamily ?? string.Empty,
+                    AddName ?? string.Empty,
+                    AddMiddleName ?? string.Empty,
+                    AddFullName ?? string.Empty,
+                    AddIdPatient ?? string.Empty,
                     PatientBirthDate,
-                    SelecedGender,
-                    AddAdress,
-                    AddTelephone,
-                    AddInfo,
-                    AddWorkPlase)
-                {
-                    PatientCount = SetPatientCount
-                };
+                    SelecedGender ?? string.Empty,
+                    AddAdress ?? string.Empty,
+                    AddTelephone ?? string.Empty,
+                    AddInfo ?? string.Empty,
+                    AddWorkPlase ?? string.Empty);
 
-                // await _patientService.AddOneAsync(newPatient);
                 var patientLiteDb = ConvertPatientToPatientLiteDb(newPatient);
                 _storage.Patients.Upsert(patientLiteDb);
 
-                _ = RefreshDataBaseAsync();
-                CleareFields();
+                if (!await RefreshDataBaseAsync())
+                    return;
 
-                UpdateText = !string.IsNullOrEmpty(messageToUpdateText)
-                    ? messageToUpdateText
-                    : "Patient added";
+                CleareFields();
+                UpdateText = "Пациент добавлен";
             }
             catch (Exception ex)
             {
-                if (string.IsNullOrEmpty(AddFamily) || string.IsNullOrEmpty(AddName) || string.IsNullOrEmpty(AddMiddleName))
-                {
-                    UpdateText = "Создан пациент-призрак. Поздравляю!";
-                    CleareFields();
-
-                    return;
-                }
-
-                CleareFields();
-                UpdateText = !string.IsNullOrEmpty(messageToUpdateText)
-                    ? messageToUpdateText
-                    : $"Пациент не добавлен {ex.Message}";
+                _logger.Error(ex, "AddOnePatient: пациент не добавлен");
+                UpdateText = $"Пациент не добавлен: {ex.Message}";
             }
-            finally { StopBusy(); }
+            finally
+            {
+                StopBusy();
+            }
         }
 
         [RelayCommand]
@@ -681,7 +674,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
         [RelayCommand]
-        public async Task RefreshDataBaseAsync()
+        public async Task<bool> RefreshDataBaseAsync()
         {
             try
             {
@@ -696,11 +689,13 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 });
 
                 UpdateText = $"База обновлена. Найдено пациентов: {AllPatients.Count}";
+                return true;
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, "Ошибка обновления БД");
                 UpdateText = $"Ошибка обновления: {ex.Message}";
+                return false;
             }
             finally
             {
@@ -734,9 +729,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 BirthDate = patient.BirthDate,
                 Sex = patient.Sex switch
                 {
-                    "Мужской" => PatientSex.Male,
-                    "Женский" => PatientSex.Female,
-                    "Не определен" => PatientSex.Other,
+                    "M" => PatientSex.Male,
+                    "F" => PatientSex.Female,
+                    "O" => PatientSex.Other,
                     _ => PatientSex.Other
                 },
                 Phone = patient.Telephone,
