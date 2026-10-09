@@ -7,10 +7,10 @@ namespace DataBaseGenerator.Web.Services
     {
         Task<List<Patient>> GetAllAsync();
         Task GenerateAsync(PatientGeneratorDto inputParameters, CancellationToken cancellationToken);
-        Task AddOneAsync(PatientInputParameters inputParameters);
+        Task<bool> AddOneAsync(PatientInputParameters inputParameters);
         Task CreateByOneAsync(PatientGeneratorDto patientGeneratorParameters, CancellationToken cancellationToken); 
         Task CreateByBulkAsync(PatientGeneratorDto patientGeneratorParameters, CancellationToken cancellationToken);
-        Task CreateOne(PatientInputParameters patientGeneratorParameters);
+        Task<bool> CreateOne(PatientInputParameters patientGeneratorParameters);
         Task DeleteFirstAsync();
         Task DeleteAllAsync();
         Task EditeAsync(ObservableCollection<Patient> patients);

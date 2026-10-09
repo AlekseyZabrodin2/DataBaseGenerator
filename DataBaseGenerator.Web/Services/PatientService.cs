@@ -184,29 +184,28 @@ namespace DataBaseGenerator.Web.Services
             };
         }
 
-        public async Task AddOneAsync(PatientInputParameters inputParameters)
+        public async Task<bool> AddOneAsync(PatientInputParameters inputParameters)
         {
-            try
-            {
-                await CreateOne(inputParameters);
-                _logger.Info($"Add patient");
-            }
-            catch (Exception ex)
-            {
-                LogAllExceptions(ex, "One patient not generated");
-            }            
+            var added = await CreateOne(inputParameters);
+            if (added)
+                _logger.Info("Add patient");
+            else
+                _logger.Warn($"Patient with ID_Patient '{inputParameters.ID_Patient}' already exists");
+
+            return added;
         }
 
-        public async Task CreateOne(PatientInputParameters patientGeneratorParameters)
+        public async Task<bool> CreateOne(PatientInputParameters patientGeneratorParameters)
         {
-            bool checkIsExist = _context.Patient.Any(element => element.PatientID == patientGeneratorParameters.PatientID);
+            bool checkIsExist = _context.Patient.Any(element => element.ID_Patient == patientGeneratorParameters.ID_Patient);
 
             if (checkIsExist)
-                return;
+                return false;
 
             _patient = CreateOnePatient(patientGeneratorParameters);
             _context.Patient.Add(_patient);
             await _context.SaveChangesAsync();
+            return true;
         }
 
         private Patient CreateOnePatient(PatientInputParameters patientGeneratorParameters)

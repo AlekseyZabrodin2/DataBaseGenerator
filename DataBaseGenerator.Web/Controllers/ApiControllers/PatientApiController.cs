@@ -36,7 +36,17 @@ namespace DataBaseGenerator.Web.Controllers.ApiControllers
         [HttpPost("addOne")]
         public async Task<IActionResult> AddOneAsync([FromBody] PatientInputParameters inputParameters)
         {
-            await _patientService.AddOneAsync(inputParameters);
+            var added = await _patientService.AddOneAsync(inputParameters);
+            if (!added)
+            {
+                return new ContentResult
+                {
+                    StatusCode = StatusCodes.Status409Conflict,
+                    Content = "Пациент с таким ID_Patient уже существует",
+                    ContentType = "text/plain"
+                };
+            }
+
             return Ok("One patient added");
         }
 

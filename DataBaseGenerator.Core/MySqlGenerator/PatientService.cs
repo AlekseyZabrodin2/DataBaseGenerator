@@ -50,7 +50,13 @@ namespace DataBaseGenerator.Core.MySqlGenerator
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PostAsync("patient/addOne", content);
-            response.EnsureSuccessStatusCode();
+            if (response.IsSuccessStatusCode)
+                return;
+
+            var error = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException(string.IsNullOrWhiteSpace(error)
+                ? $"Ошибка API: {(int)response.StatusCode}"
+                : error);
         }        
 
         public async Task DeleteFirstAsync()
