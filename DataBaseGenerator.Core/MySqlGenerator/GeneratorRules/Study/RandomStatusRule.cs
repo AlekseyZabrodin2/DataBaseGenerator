@@ -7,11 +7,11 @@ namespace DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Study
     {
         private static IDictionary<int, string> _studyStatus = new Dictionary<int, string>
         {
-            {0, "Completed"},
-            {1, "InProgress"},
-            {2, "Scheduled"},
-            {3, "Cancelled"},
-            {4, "Pending"}
+            {0, "Pending"},
+            {1, "Sending"},
+            {2, "Delivered"},
+            {3, "Failed"},
+            {4, "NotRequired"}
         };
 
         public string Generate()
