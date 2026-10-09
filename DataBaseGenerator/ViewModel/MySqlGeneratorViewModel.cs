@@ -1079,15 +1079,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             catch (Exception ex)
             {
                 _logger.Error(ex, "AddOnePatientAsync: UNEXPECTED ERROR - {Message}", ex.Message);
-
-                if (string.IsNullOrEmpty(AddFamily) || string.IsNullOrEmpty(AddName) || string.IsNullOrEmpty(AddMiddleName))
-                {
-                    UpdateText = "Создан пациент-призрак. Поздравляю!";
-                    CleareFields();
-
-                    return;
-                }
-
                 UpdateText = $"Пациент не добавлен {ex.Message}";
             }
             finally
