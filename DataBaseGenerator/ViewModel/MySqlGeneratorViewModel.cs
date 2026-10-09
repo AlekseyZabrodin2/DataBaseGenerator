@@ -39,16 +39,16 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private int _setPatientCount;
         private int _setWorkListCount;
         private string _aeTitle;
-        private string _gender;
-        private string _addIdPatient;
-        private string _addFamily;
-        private string _addName;
-        private string _addMiddleName;
-        private string _addFullName;
-        private string _addAdress;
-        private string _addTelephone;
-        private string _addWorkPlase;
-        private string _addInfo;
+        private string _gender = string.Empty;
+        private string _addIdPatient = string.Empty;
+        private string _addFamily = string.Empty;
+        private string _addName = string.Empty;
+        private string _addMiddleName = string.Empty;
+        private string _addFullName = string.Empty;
+        private string _addAdress = string.Empty;
+        private string _addTelephone = string.Empty;
+        private string _addWorkPlase = string.Empty;
+        private string _addInfo = string.Empty;
         private string _medInsurNumber;
         private string _resourceAudioDir = "Resources\\NoNo.mp3";
         private string _godFatherAudioDir = "Resources\\GodFatherAudio.mp3";
@@ -351,6 +351,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         public IReadOnlyList<int> PatientIds { get; private set; } = [];
 
+        [ObservableProperty]
+        public partial int NextPatientId { get; set; } = 1;
+
 
 
         public MySqlGeneratorViewModel(BaseGenerateContext context, IHttpClientFactory clientFactory)
@@ -580,6 +583,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 AllPatients = await _patientService.GetAllAsync() ?? [];
 
                 PatientIds = AllPatients.Select(patient => patient.ID_Patient).ToList();
+                NextPatientId = AllPatients.Count == 0
+                    ? 1
+                    : AllPatients.Max(patient => patient.ID_Patient) + 1;
 
                 UpdateText = $"Patient table is update! Всего пациентов - [{AllPatients.Count}]";
 
@@ -1020,11 +1026,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             _logger.Info(">>> AddOnePatientAsync: START");
 
-            var messageToUpdateText = string.Empty;
-
             try
             {
                 StartBusy("Генерация пациента...");
+
+                var assignedPatientId = NextPatientId;
 
                 _logger.Info($"AddOnePatientAsync: Family={AddFamily}, " +
                     $"Name={AddName}, MiddleName={AddMiddleName}, Id={AddIdPatient}, " +
@@ -1034,14 +1040,14 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 AddFullName = $"{AddFamily} {AddName} {AddMiddleName}";
 
                 var newPatient = new PatientInputParameters(
-                    1,
+                    assignedPatientId,
                     AddFamily,
                     AddName,
                     AddMiddleName,
                     AddFullName,
                     AddIdPatient,
                     PatientBirthDate,
-                    SelecedGender,
+                    SelecedGender ?? string.Empty,
                     AddAdress,
                     AddTelephone,
                     AddInfo,
@@ -1055,12 +1061,12 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                 _logger.Info("AddOnePatientAsync: AddOneAsync completed successfully");
 
-                await RefreshPatientsAsync();
-                CleareFields();                
+                if (!await RefreshPatientsAsync())
+                    return;
 
-                UpdateText = !string.IsNullOrEmpty(messageToUpdateText)
-                    ? messageToUpdateText
-                    : "Patient added";
+                CleareFields();
+
+                UpdateText = "Пациент добавлен";
 
                 _logger.Info("AddOnePatientAsync: SUCCESS, UpdateText = {UpdateText}", UpdateText);
             }
@@ -1082,10 +1088,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     return;
                 }
 
-                CleareFields();
-                UpdateText = !string.IsNullOrEmpty(messageToUpdateText)
-                    ? messageToUpdateText
-                    : $"Пациент не добавлен {ex.Message}";
+                UpdateText = $"Пациент не добавлен {ex.Message}";
             }
             finally
             {
