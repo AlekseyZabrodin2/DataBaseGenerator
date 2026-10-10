@@ -26,9 +26,7 @@
     <Grid ShowGridLines="False">
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -39,21 +37,17 @@
         </Grid.ColumnDefinitions>
 
         <userControls:AddPatientUserControl
-            Grid.RowSpan="3"
             Grid.Column="0"
             Margin="5" />
 
         <userControls:PatientLiteDbTableUserControl
-            Grid.Row="1"
             Grid.Column="1"
             Grid.ColumnSpan="3"
             Margin="5,0"
-            VerticalAlignment="Top"
             Visibility="{Binding ShowPatients, Converter={StaticResource BoolToVisibilityConverter}}" />
 
         <Grid
             Grid.Row="0"
-            Grid.RowSpan="3"
             Grid.Column="0"
             Grid.ColumnSpan="4"
             HorizontalAlignment="Stretch"
@@ -89,11 +83,12 @@
             <Button
                 Width="120"
                 Height="50"
-                Visibility="{Binding CancelButtonIsVisibil, Converter={StaticResource BoolToVisibilityConverter}}"
-                Margin="566,0,0,5"
+                Margin="0,0,0,5"
+                HorizontalAlignment="Center"
                 VerticalAlignment="Bottom"
                 Command="{Binding CancelGenerationCommand}"
-                Content="Cancel" />
+                Content="Cancel"
+                Visibility="{Binding CancelButtonIsVisibil, Converter={StaticResource BoolToVisibilityConverter}}" />
         </Grid>
 
     </Grid>

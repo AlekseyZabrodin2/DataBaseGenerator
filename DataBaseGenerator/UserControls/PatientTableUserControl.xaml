@@ -6,8 +6,7 @@
     xmlns:local="clr-namespace:DataBaseGenerator.UI.Wpf.UserControls"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:viewmodel="clr-namespace:DataBaseGenerator.UI.Wpf.ViewModel"
-    Height="330">
+    xmlns:viewmodel="clr-namespace:DataBaseGenerator.UI.Wpf.ViewModel">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -53,17 +52,51 @@
 
                 <DataGrid.Columns>
                     <DataGridTextColumn
+                        Width="*"
+                        MinWidth="80"
                         Binding="{Binding PatientID}"
                         Header="ID"
                         IsReadOnly="True" />
-                    <DataGridTextColumn Binding="{Binding LastName}" Header="Фамилия" />
-                    <DataGridTextColumn Binding="{Binding FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Имя" />
-                    <DataGridTextColumn Binding="{Binding MiddleName}" Header="Отчество" />
-                    <DataGridTextColumn Binding="{Binding BirthDate, StringFormat='dd.MM.yyyy'}" Header="Дата Рождения" />
-                    <DataGridTextColumn Binding="{Binding Sex}" Header="Пол" />
-                    <DataGridTextColumn Binding="{Binding Address}" Header="Адрес" />
-                    <DataGridTextColumn Binding="{Binding AddInfo}" Header="Доп. информация" />
-                    <DataGridTextColumn Binding="{Binding Occupation}" Header="Место работы" />
+                    <DataGridTextColumn
+                        Width="*"
+                        MinWidth="90"
+                        Binding="{Binding LastName}"
+                        Header="Фамилия" />
+                    <DataGridTextColumn
+                        Width="*"
+                        MinWidth="80"
+                        Binding="{Binding FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Header="Имя" />
+                    <DataGridTextColumn
+                        Width="*"
+                        MinWidth="90"
+                        Binding="{Binding MiddleName}"
+                        Header="Отчество" />
+                    <DataGridTextColumn
+                        Width="*"
+                        MinWidth="110"
+                        Binding="{Binding BirthDate, StringFormat='dd.MM.yyyy'}"
+                        Header="Дата Рождения" />
+                    <DataGridTextColumn
+                        Width="*"
+                        MinWidth="50"
+                        Binding="{Binding Sex}"
+                        Header="Пол" />
+                    <DataGridTextColumn
+                        Width="*"
+                        MinWidth="90"
+                        Binding="{Binding Address}"
+                        Header="Адрес" />
+                    <DataGridTextColumn
+                        Width="*"
+                        MinWidth="120"
+                        Binding="{Binding AddInfo}"
+                        Header="Доп. информация" />
+                    <DataGridTextColumn
+                        Width="*"
+                        MinWidth="110"
+                        Binding="{Binding Occupation}"
+                        Header="Место работы" />
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
@@ -78,7 +111,11 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <Grid Name="BlockCheckBoxes">
+            <Expander
+                Name="BlockCheckBoxes"
+                Header="Параметры генерации"
+                IsExpanded="False">
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />
@@ -187,6 +224,7 @@
                     </StackPanel>
                 </Grid>
             </Grid>
+            </Expander>
 
             <Grid Name="ButtonsBlock" Grid.Row="1">
                 <Grid.ColumnDefinitions>

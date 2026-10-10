@@ -27,8 +27,8 @@
         </Grid.Resources>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
@@ -69,10 +69,8 @@
             Grid.RowSpan="3"
             Grid.Column="0"
             Grid.ColumnSpan="4"
-            Width="1200"
-            Height="780"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
             Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}">
             <Border Background="White" Opacity=".7">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">

@@ -5,8 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:DataBaseGenerator.UI.Wpf.UserControls"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Height="300">
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -56,47 +55,58 @@
 
                 <DataGrid.Columns>
                     <DataGridTextColumn
-                        Width="100"
+                        Width="*"
+                        MinWidth="80"
                         Binding="{Binding ID_Patient}"
                         Header="ID пациента" />
                     <DataGridTextColumn
-                        Width="100"
+                        Width="*"
+                        MinWidth="80"
                         Binding="{Binding Modality}"
                         Header="Модальность" />
                     <DataGridTextColumn
-                        Width="120"
+                        Width="*"
+                        MinWidth="100"
                         Binding="{Binding StationAeTitle}"
                         Header="AE_Title" />
                     <DataGridTextColumn
-                        Width="100"
+                        Width="*"
+                        MinWidth="80"
                         Binding="{Binding State}"
                         Header="Состояние" />
                     <DataGridTextColumn
-                        Width="150"
+                        Width="*"
+                        MinWidth="120"
                         Binding="{Binding StudyDescription}"
                         Header="Описание" />
                     <DataGridTextColumn
-                        Width="120"
+                        Width="*"
+                        MinWidth="100"
                         Binding="{Binding CreateDate, StringFormat='dd.MM.yyyy HH:mm'}"
                         Header="Дата добавления" />
                     <DataGridTextColumn
-                        Width="100"
+                        Width="*"
+                        MinWidth="80"
                         Binding="{Binding CreateTime}"
                         Header="Время добавления" />
                     <DataGridTextColumn
-                        Width="120"
+                        Width="*"
+                        MinWidth="100"
                         Binding="{Binding ProcedureStepStartDateTime, StringFormat='dd.MM.yyyy HH:mm'}"
                         Header="Дата процедуры" />
                     <DataGridTextColumn
-                        Width="150"
+                        Width="*"
+                        MinWidth="120"
                         Binding="{Binding PerformingPhysiciansName}"
                         Header="Исполнит. врач" />
                     <DataGridTextColumn
-                        Width="150"
+                        Width="*"
+                        MinWidth="120"
                         Binding="{Binding ReferringPhysiciansName}"
                         Header="Направ. врач" />
                     <DataGridTextColumn
-                        Width="150"
+                        Width="*"
+                        MinWidth="120"
                         Binding="{Binding RequestingPhysician}"
                         Header="Запрос. врач" />
                 </DataGrid.Columns>

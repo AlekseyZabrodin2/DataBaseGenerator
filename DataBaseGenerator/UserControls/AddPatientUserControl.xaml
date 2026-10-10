@@ -12,15 +12,16 @@
     <Grid Name="AddPatients">
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <Border
             Grid.Row="0"
             BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
             BorderThickness="5">
-            <StackPanel>
+            <DockPanel LastChildFill="True">
+            <StackPanel DockPanel.Dock="Top">
 
                 <TextBlock
                     Margin="5,5,0,0"
@@ -88,30 +89,33 @@
                     Margin="5,5,0,0"
                     FontWeight="DemiBold"
                     Text="Additional information:" />
-                <TextBox
-                    Height="160"
-                    Margin="5"
-                    Text="{Binding AddInfo, Mode=TwoWay}"
-                    TextWrapping="Wrap" />
-
             </StackPanel>
+
+                <TextBox
+                    MinHeight="80"
+                    Margin="5"
+                    AcceptsReturn="True"
+                    Text="{Binding AddInfo, Mode=TwoWay}"
+                    TextWrapping="Wrap"
+                    VerticalContentAlignment="Top"
+                    VerticalScrollBarVisibility="Auto" />
+            </DockPanel>
         </Border>
 
-        <Button
+        <UniformGrid
             Grid.Row="1"
-            Width="70"
-            Height="50"
-            Margin="50,10,0,0"
-            HorizontalAlignment="Left"
-            Command="{Binding AddOnePatientCommand}"
-            Content="Add" />
-        <Button
-            Grid.Row="1"
-            Width="70"
-            Height="50"
-            Margin="0,10,50,0"
-            HorizontalAlignment="Right"
-            Command="{Binding CancelAddPatientCommand}"
-            Content="Cancel" />
+            Margin="0,10,0,0"
+            Columns="2">
+            <Button
+                Height="50"
+                Margin="5,0"
+                Command="{Binding AddOnePatientCommand}"
+                Content="Add" />
+            <Button
+                Height="50"
+                Margin="5,0"
+                Command="{Binding CancelAddPatientCommand}"
+                Content="Cancel" />
+        </UniformGrid>
     </Grid>
 </UserControl>

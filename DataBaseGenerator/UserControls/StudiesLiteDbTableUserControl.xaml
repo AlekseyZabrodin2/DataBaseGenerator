@@ -21,22 +21,23 @@
     <Grid Margin="5,0" ShowGridLines="False">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <userControls:SelectionFileUserControl Height="72" Margin="0,5" />
+        <userControls:SelectionFileUserControl Margin="0,5" />
 
         <Grid
             Name="StudiesTable"
             Grid.Row="1"
-            Height="420"
             Background="{DynamicResource MahApps.Brushes.Accent}">
             <DataGrid
                 Name="ViewAllStudies"
                 Margin="5"
+                ColumnWidth="*"
+                MinColumnWidth="80"
                 AutoGenerateColumns="False"
                 CanUserAddRows="False"
                 CanUserDeleteRows="False"
@@ -79,7 +80,11 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <Grid Name="BlockCheckBoxes">
+            <Expander
+                Name="BlockCheckBoxes"
+                Header="Параметры генерации"
+                IsExpanded="False">
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />
@@ -188,6 +193,7 @@
                     </StackPanel>
                 </Grid>
             </Grid>
+            </Expander>
 
             <Grid
                 Name="ButtonsBlock"
@@ -380,7 +386,6 @@
 
         <userControls:FooterUserControl
             Grid.Row="4"
-            Height="117"
             Margin="0,5" />
 
         <Grid
@@ -421,7 +426,8 @@
             <Button
                 Width="120"
                 Height="50"
-                Margin="380,0,0,5"
+                Margin="0,0,0,5"
+                HorizontalAlignment="Center"
                 VerticalAlignment="Bottom"
                 Command="{Binding CancelGenerationCommand}"
                 Content="Cancel"

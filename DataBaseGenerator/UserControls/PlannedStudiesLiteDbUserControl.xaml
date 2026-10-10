@@ -7,8 +7,7 @@
     xmlns:local="clr-namespace:DataBaseGenerator.UI.Wpf.UserControls"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:userControls="clr-namespace:DataBaseGenerator.UI.Wpf.UserControls"
-    Height="783">
+    xmlns:userControls="clr-namespace:DataBaseGenerator.UI.Wpf.UserControls">
 
 
 
@@ -28,7 +27,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <userControls:SelectionFileUserControl Height="72" Margin="0,5" />
+        <userControls:SelectionFileUserControl Margin="0,5" />
 
         <Grid Grid.Row="1" ShowGridLines="False">
 
@@ -89,6 +88,8 @@
             <DataGrid
                 Name="ViewAllPlannedStudies"
                 Margin="5"
+                ColumnWidth="*"
+                MinColumnWidth="80"
                 AutoGenerateColumns="False"
                 CanUserAddRows="False"
                 CanUserDeleteRows="False"
@@ -253,9 +254,7 @@
 
         <userControls:FooterUserControl
             Grid.Row="4"
-            Height="117"
-            Margin="0,5"
-            VerticalAlignment="Bottom" />
+            Margin="0,5" />
 
         <Grid
             Grid.Row="0"
@@ -295,7 +294,8 @@
             <Button
                 Width="120"
                 Height="50"
-                Margin="380,0,0,5"
+                Margin="0,0,0,5"
+                HorizontalAlignment="Center"
                 VerticalAlignment="Bottom"
                 Command="{Binding CancelGenerationCommand}"
                 Content="Cancel"
