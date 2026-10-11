@@ -14,6 +14,7 @@ using DataBaseGenerator.Core.LiteDbGenerator.Enums;
 using DataBaseGenerator.Core.LiteDbGenerator.LiteDbModels;
 using DataBaseGenerator.Core.LiteDbGenerator.Models;
 using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.PlannedStudy;
+using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Study;
 using LiteDB;
 using Microsoft.Win32;
 using NLog;
@@ -301,7 +302,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     StudyAreas = GenerateRandomStudyAreas(plannedStudyDto),
                     ProjectionPaths = plannedStudyDto.RandomProjectionPaths.Generate(),
                     ImagesCount = plannedStudyDto.RandomImagesCount.Generate(),
-                    StudyDateTime = plannedStudyDto.StudyDateTime,
+                    StudyDateTime = plannedStudyDto.RandomStudyDateTime.Generate(),
                     IsEmergencyPatient = plannedStudyDto.IsEmergencyPatient,
                     EffectiveDosemSv = plannedStudyDto.EffectiveDosemSv,
                     HasDose = plannedStudyDto.HasDose
@@ -841,7 +842,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             return new PlannedStudyLiteDbDto(
                 new RandomBodyPartDataRule(),
                 new RandomProjectionPathsRule(),
-                new RandomImagesCountRule());
+                new RandomImagesCountRule(),
+                new RandomStudyDateTimeRule());
         }
 
         private PlannedStudyArea[] GenerateRandomStudyAreas(PlannedStudyLiteDbDto plannedStudyDto)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DataBaseGenerator.Core.LiteDbGenerator.Enums;
 using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.PlannedStudy;
+using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Study;
 using LiteDB;
 
 namespace DataBaseGenerator.Core.LiteDbGenerator.Models
@@ -11,11 +12,13 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Models
     {
         public PlannedStudyLiteDbDto(RandomBodyPartDataRule randomBodyPart,
             RandomProjectionPathsRule randomProjectionPaths,
-            RandomImagesCountRule randomImagesCount)
+            RandomImagesCountRule randomImagesCount,
+            RandomStudyDateTimeRule randomStudyDateTime)
         {
             RandomBodyPart = randomBodyPart ?? throw new ArgumentNullException(nameof(randomBodyPart));
             RandomProjectionPaths = randomProjectionPaths ?? throw new ArgumentNullException(nameof(randomProjectionPaths));
             RandomImagesCount = randomImagesCount ?? throw new ArgumentNullException(nameof(randomImagesCount));
+            RandomStudyDateTime = randomStudyDateTime ?? throw new ArgumentNullException(nameof(randomStudyDateTime));
         }
 
         public string Id { get; set; }
@@ -55,5 +58,6 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Models
         public RandomBodyPartDataRule RandomBodyPart { get; }
         public RandomProjectionPathsRule RandomProjectionPaths {  get; }
         public RandomImagesCountRule RandomImagesCount { get; }
+        public RandomStudyDateTimeRule RandomStudyDateTime { get; }
     }
 }
