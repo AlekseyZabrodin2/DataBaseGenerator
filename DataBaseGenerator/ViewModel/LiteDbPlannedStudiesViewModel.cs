@@ -35,6 +35,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private readonly int _studyBatchSize = 5000;
         private List<PatientLiteDb> _cachedPatients;
         private readonly Random _random = new Random();
+        private List<LitePlannedStudy> _studies = [];
 
 
         [ObservableProperty]
@@ -615,7 +616,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             await Task.Run(() =>
             {
-                PlannedStudies = _plannedStudyStorage.PlannedStudies.GetAllStudies();
+                _studies = _plannedStudyStorage.PlannedStudies.GetAllStudies().ToList();
+
+                IEnumerable<LitePlannedStudy> plannedStudy = _studies.OrderBy(patient => patient.PatientId);
+
+                PlannedStudies = new ObservableCollection<LitePlannedStudy>(plannedStudy);
             });
 
             UpdateStatistics();
