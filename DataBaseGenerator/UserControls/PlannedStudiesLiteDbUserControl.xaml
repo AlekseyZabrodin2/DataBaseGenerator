@@ -88,7 +88,6 @@
             <DataGrid
                 Name="ViewAllPlannedStudies"
                 Margin="5"
-                MinColumnWidth="80"
                 AutoGenerateColumns="False"
                 CanUserAddRows="False"
                 CanUserDeleteRows="False"
@@ -115,11 +114,17 @@
                     <DataGridTextColumn Binding="{Binding PatientLastName}" Header="Фамилия" />
                     <DataGridTextColumn Binding="{Binding PatientFirstName}" Header="Имя" />
                     <DataGridTextColumn Binding="{Binding PatientMiddleName}" Header="Отчество" />
-                    <DataGridTextColumn Binding="{Binding BirthDate, StringFormat='dd.MM.yyyy'}" Header="Дата рождения" ElementStyle="{StaticResource CenteredCellText}"/>
+                    <DataGridTextColumn
+                        Binding="{Binding BirthDate, StringFormat='dd.MM.yyyy'}"
+                        ElementStyle="{StaticResource CenteredCellText}"
+                        Header="Дата рождения" />
                     <DataGridTextColumn Binding="{Binding Gender}" Header="Пол" />
                     <DataGridTextColumn Binding="{Binding Telephone}" Header="Телефон" />
                     <DataGridTextColumn Binding="{Binding Address}" Header="Адрес" />
-                    <DataGridTextColumn Binding="{Binding Age}" Header="Возраст" ElementStyle="{StaticResource CenteredCellText}"/>
+                    <DataGridTextColumn
+                        Binding="{Binding Age}"
+                        ElementStyle="{StaticResource CenteredCellText}"
+                        Header="Возраст" />
                     <DataGridTextColumn Binding="{Binding Comments}" Header="Комментарии" />
                     <DataGridTextColumn Binding="{Binding StudyID}" Header="ID исследования" />
                     <DataGridTextColumn Binding="{Binding AccessionNumber}" Header="Accession №" />
@@ -140,15 +145,27 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn Binding="{Binding Status}" Header="Статус" />
-                    <DataGridTextColumn Binding="{Binding ImagesCount}" Header="Снимки" ElementStyle="{StaticResource CenteredCellText}"/>
+                    <DataGridTextColumn
+                        Binding="{Binding ImagesCount}"
+                        ElementStyle="{StaticResource CenteredCellText}"
+                        Header="Снимки" />
 
                     <DataGridTextColumn
                         Binding="{Binding StudyDateTime, StringFormat='dd.MM.yyyy HH:mm:ss'}"
                         ElementStyle="{StaticResource CenteredCellText}"
                         Header="Дата и время исследования" />
-                    <DataGridTextColumn Binding="{Binding IsEmergencyPatient}" Header="Экстренный" ElementStyle="{StaticResource CenteredCellText}"/>
-                    <DataGridTextColumn Binding="{Binding EffectiveDosemSv}" Header="Эф. доза" ElementStyle="{StaticResource CenteredCellText}"/>
-                    <DataGridTextColumn Binding="{Binding HasDose}" Header="Доза" ElementStyle="{StaticResource CenteredCellText}" />
+                    <DataGridTextColumn
+                        Binding="{Binding IsEmergencyPatient}"
+                        ElementStyle="{StaticResource CenteredCellText}"
+                        Header="Экстренный" />
+                    <DataGridTextColumn
+                        Binding="{Binding EffectiveDosemSv}"
+                        ElementStyle="{StaticResource CenteredCellText}"
+                        Header="Эф. доза" />
+                    <DataGridTextColumn
+                        Binding="{Binding HasDose}"
+                        ElementStyle="{StaticResource CenteredCellText}"
+                        Header="Доза" />
 
                 </DataGrid.Columns>
             </DataGrid>
@@ -251,9 +268,7 @@
             </Grid>
         </Grid>
 
-        <userControls:FooterUserControl
-            Grid.Row="4"
-            Margin="0,5" />
+        <userControls:FooterUserControl Grid.Row="4" Margin="0,5" />
 
         <Grid
             Grid.Row="0"
@@ -291,10 +306,9 @@
                 </StackPanel>
             </Border>
             <Button
-                Width="120"
                 Height="50"
-                Margin="0,0,0,5"
-                HorizontalAlignment="Center"
+                Margin="5"
+                HorizontalAlignment="Stretch"
                 VerticalAlignment="Bottom"
                 Command="{Binding CancelGenerationCommand}"
                 Content="Cancel"

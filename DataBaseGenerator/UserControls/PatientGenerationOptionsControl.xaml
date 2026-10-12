@@ -58,7 +58,10 @@
                 IsChecked="{Binding UseSpecialChars}" />
         </StackPanel>
 
-        <StackPanel Grid.Column="2" Grid.ColumnSpan="2" Margin="5">
+        <StackPanel
+            Grid.Column="2"
+            Grid.ColumnSpan="2"
+            Margin="5">
             <RadioButton
                 Margin="5"
                 Content="Random birthdate"
