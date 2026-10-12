@@ -222,6 +222,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             IsMySqlMode = true;
             IsLiteDbMode = false;
             IsLiteDbPlannedStudiesMode = false;
+            ShowPatients = false;
+            ShowStudies = false;
         }
         
         [RelayCommand]
@@ -259,6 +261,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             IsMySqlMode = false;
             IsLiteDbMode = false;
             IsLiteDbPlannedStudiesMode = true;
+            ShowPatients = false;
+            ShowStudies = false;
         }
 
         private void ShowTable(string tableName, UserControl control)

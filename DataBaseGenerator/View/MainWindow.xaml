@@ -51,23 +51,28 @@
                 <StackPanel>
                     <Menu x:Name="ContextMenu">
                         <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="DataBases">
-                            <MenuItem Command="{Binding SwitchToMySqlCommand}" Header="MySql Generator" />
-                            <MenuItem Header="LiteDB - Patients">
-                                <MenuItem
-                                    Command="{Binding ShowPatientsTableCommand}"
-                                    Header="Patients"
-                                    IsCheckable="True"
-                                    IsChecked="{Binding ShowPatients}"
-                                    IsEnabled="{Binding SelectedDatabaseTab.HasPatientsTable}" />
-
-                                <MenuItem
-                                    Command="{Binding ShowStudiesTableCommand}"
-                                    Header="Studies"
-                                    IsCheckable="True"
-                                    IsChecked="{Binding ShowStudies}"
-                                    IsEnabled="{Binding SelectedDatabaseTab.HasStudiesTable}" />
-                            </MenuItem>
-                            <MenuItem Command="{Binding SwitchToPlannedStudiesCommand}" Header="Planned studies" />
+                            <MenuItem
+                                Command="{Binding SwitchToMySqlCommand}"
+                                Header="MySql Generator"
+                                IsCheckable="True"
+                                IsChecked="{Binding IsMySqlMode, Mode=OneWay}" />
+                            <MenuItem
+                                Command="{Binding ShowPatientsTableCommand}"
+                                Header="LiteDB - Patients"
+                                IsCheckable="True"
+                                IsChecked="{Binding ShowPatients, Mode=OneWay}"
+                                IsEnabled="{Binding SelectedDatabaseTab.HasPatientsTable}" />
+                            <MenuItem
+                                Command="{Binding ShowStudiesTableCommand}"
+                                Header="LiteDB - Studies"
+                                IsCheckable="True"
+                                IsChecked="{Binding ShowStudies, Mode=OneWay}"
+                                IsEnabled="{Binding SelectedDatabaseTab.HasStudiesTable}" />
+                            <MenuItem
+                                Command="{Binding SwitchToPlannedStudiesCommand}"
+                                Header="LiteDB - Planned studies"
+                                IsCheckable="True"
+                                IsChecked="{Binding IsLiteDbPlannedStudiesMode, Mode=OneWay}" />
                         </MenuItem>
                         <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="File">
                             <MenuItem Header="Новый (Ctrl + N)" />
