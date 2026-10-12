@@ -88,7 +88,6 @@
             <DataGrid
                 Name="ViewAllPlannedStudies"
                 Margin="5"
-                ColumnWidth="*"
                 MinColumnWidth="80"
                 AutoGenerateColumns="False"
                 CanUserAddRows="False"

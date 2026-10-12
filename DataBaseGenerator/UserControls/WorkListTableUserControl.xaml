@@ -55,58 +55,36 @@
 
                 <DataGrid.Columns>
                     <DataGridTextColumn
-                        Width="*"
-                        MinWidth="80"
                         Binding="{Binding ID_Patient}"
                         Header="ID пациента" />
                     <DataGridTextColumn
-                        Width="*"
-                        MinWidth="80"
                         Binding="{Binding Modality}"
                         Header="Модальность" />
                     <DataGridTextColumn
-                        Width="*"
-                        MinWidth="100"
                         Binding="{Binding StationAeTitle}"
                         Header="AE_Title" />
                     <DataGridTextColumn
-                        Width="*"
-                        MinWidth="80"
                         Binding="{Binding State}"
                         Header="Состояние" />
                     <DataGridTextColumn
-                        Width="*"
-                        MinWidth="120"
                         Binding="{Binding StudyDescription}"
                         Header="Описание" />
                     <DataGridTextColumn
-                        Width="*"
-                        MinWidth="100"
                         Binding="{Binding CreateDate, StringFormat='dd.MM.yyyy HH:mm'}"
                         Header="Дата добавления" />
                     <DataGridTextColumn
-                        Width="*"
-                        MinWidth="80"
                         Binding="{Binding CreateTime}"
                         Header="Время добавления" />
                     <DataGridTextColumn
-                        Width="*"
-                        MinWidth="100"
                         Binding="{Binding ProcedureStepStartDateTime, StringFormat='dd.MM.yyyy HH:mm'}"
                         Header="Дата процедуры" />
                     <DataGridTextColumn
-                        Width="*"
-                        MinWidth="120"
                         Binding="{Binding PerformingPhysiciansName}"
                         Header="Исполнит. врач" />
                     <DataGridTextColumn
-                        Width="*"
-                        MinWidth="120"
                         Binding="{Binding ReferringPhysiciansName}"
                         Header="Направ. врач" />
                     <DataGridTextColumn
-                        Width="*"
-                        MinWidth="120"
                         Binding="{Binding RequestingPhysician}"
                         Header="Запрос. врач" />
                 </DataGrid.Columns>

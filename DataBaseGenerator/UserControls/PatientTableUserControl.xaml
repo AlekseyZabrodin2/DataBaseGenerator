@@ -53,49 +53,31 @@
 
                 <DataGrid.Columns>
                     <DataGridTextColumn
-                        Width="*"
-                        MinWidth="80"
                         Binding="{Binding PatientID}"
                         Header="ID"
                         IsReadOnly="True" />
                     <DataGridTextColumn
-                        Width="*"
-                        MinWidth="90"
                         Binding="{Binding LastName}"
                         Header="Фамилия" />
                     <DataGridTextColumn
-                        Width="*"
-                        MinWidth="80"
                         Binding="{Binding FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Header="Имя" />
                     <DataGridTextColumn
-                        Width="*"
-                        MinWidth="90"
                         Binding="{Binding MiddleName}"
                         Header="Отчество" />
                     <DataGridTextColumn
-                        Width="*"
-                        MinWidth="110"
                         Binding="{Binding BirthDate, StringFormat='dd.MM.yyyy'}"
                         Header="Дата Рождения" />
                     <DataGridTextColumn
-                        Width="*"
-                        MinWidth="50"
                         Binding="{Binding Sex}"
                         Header="Пол" />
                     <DataGridTextColumn
-                        Width="*"
-                        MinWidth="90"
                         Binding="{Binding Address}"
                         Header="Адрес" />
                     <DataGridTextColumn
-                        Width="*"
-                        MinWidth="120"
                         Binding="{Binding AddInfo}"
                         Header="Доп. информация" />
                     <DataGridTextColumn
-                        Width="*"
-                        MinWidth="110"
                         Binding="{Binding Occupation}"
                         Header="Место работы" />
                 </DataGrid.Columns>

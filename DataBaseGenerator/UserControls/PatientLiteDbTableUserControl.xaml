@@ -35,8 +35,6 @@
             <DataGrid
                 Name="ViewAllPatient"
                 Margin="5"
-                ColumnWidth="*"
-                MinColumnWidth="80"
                 AutoGenerateColumns="False"
                 CanUserAddRows="False"
                 CanUserDeleteRows="False"
