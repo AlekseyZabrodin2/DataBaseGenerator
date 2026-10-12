@@ -1,0 +1,1 @@
+taskkill /F /IM DataBaseGenerator.Web.exe /T >nul 2>&1
