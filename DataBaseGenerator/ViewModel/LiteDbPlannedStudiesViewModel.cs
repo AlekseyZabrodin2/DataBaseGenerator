@@ -464,10 +464,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 return;
             }
 
-            var previous = _storage;
             try
             {
-                previous?.Dispose();
                 App.UpdatePlannedStorage(DatabasePath, readOnly);
 
                 var anyPlannedStudies = _plannedStudyStorage.PlannedStudies.Any();
