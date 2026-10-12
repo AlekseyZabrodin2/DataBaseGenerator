@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     x:Class="DataBaseGenerator.UI.Wpf.UserControls.StudiesLiteDbTableUserControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -106,7 +106,7 @@
                         Background="{DynamicResource MahApps.Brushes.Button.Border}"
                         BorderBrush="Black"
                         FontWeight="Bold"
-                        Text="{Binding SetStudiesCount, UpdateSourceTrigger=PropertyChanged}" />
+                        Text="{Binding SetStudiesCount, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableIntConverter}}" />
 
                     <TextBlock
                         Margin="5"
@@ -127,7 +127,7 @@
                         Background="{DynamicResource MahApps.Brushes.Button.Border}"
                         BorderBrush="Black"
                         FontWeight="Bold"
-                        Text="{Binding SetSeriesCount, UpdateSourceTrigger=PropertyChanged}" />
+                        Text="{Binding SetSeriesCount, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableIntConverter}}" />
 
                     <TextBlock
                         Margin="5"
@@ -148,7 +148,7 @@
                         Background="{DynamicResource MahApps.Brushes.Button.Border}"
                         BorderBrush="Black"
                         FontWeight="Bold"
-                        Text="{Binding SetImageCount, UpdateSourceTrigger=PropertyChanged}" />
+                        Text="{Binding SetImageCount, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableIntConverter}}" />
 
                 </StackPanel>
 

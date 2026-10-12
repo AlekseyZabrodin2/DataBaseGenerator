@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     x:Class="DataBaseGenerator.UI.Wpf.UserControls.WorkListTableUserControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -126,7 +126,7 @@
                         Background="{DynamicResource MahApps.Brushes.Button.Border}"
                         BorderBrush="Black"
                         FontWeight="Bold"
-                        Text="{Binding SetWorkListCount, UpdateSourceTrigger=PropertyChanged}" />
+                        Text="{Binding SetWorkListCount, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableIntConverter}}" />
                 </Grid>
 
                 <Grid
