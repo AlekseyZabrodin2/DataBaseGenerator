@@ -94,6 +94,7 @@ namespace DataBaseGenerator.UI.Wpf
 
                     services.AddSingleton<IStudyApplicationService, StudyApplicationService>();
                     services.AddSingleton(this);
+                    services.AddSingleton<GenerationOptionsStore>();
                     services.AddSingleton<MainViewModel>();
                     services.AddSingleton<MySqlGeneratorViewModel>();
                     services.AddSingleton<LiteDbGeneratorViewModel>();
@@ -114,8 +115,21 @@ namespace DataBaseGenerator.UI.Wpf
                 });
 
             _host = hostBuilder.Build();
+            ApplySavedLiteDbPaths();
 
             EnsureSingleWebHostProcessRunning();
+        }
+
+        private void ApplySavedLiteDbPaths()
+        {
+            if (_host.Services.GetService(typeof(GenerationOptionsStore)) is not GenerationOptionsStore store)
+                return;
+
+            if (File.Exists(store.PatientsDatabasePath))
+                UpdateSharedStorage(store.PatientsDatabasePath, true);
+
+            if (File.Exists(store.PlannedStudiesDatabasePath))
+                UpdatePlannedStorage(store.PlannedStudiesDatabasePath, false);
         }
 
         private void EnsureSingleWebHostProcessRunning()
