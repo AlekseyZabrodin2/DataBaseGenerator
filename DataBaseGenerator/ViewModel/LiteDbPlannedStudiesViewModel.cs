@@ -32,10 +32,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private PlannedStudyLiteDb _plannedStudyLiteDb;
         private readonly object _dbLock = new object();
         private PatientLiteDb _patientLiteDb;
-        private StudyLiteDb _studyLiteDb;
         private readonly int _studyBatchSize = 5000;
         private List<PatientLiteDb> _cachedPatients;
-        private List<StudyLiteDb> _cachedStudies;
         private readonly Random _random = new Random();
 
 
@@ -162,9 +160,15 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             _cancellationTokenSource = new CancellationTokenSource();
             var generationCancelled = false;
+            var generationFailed = false;
 
             try
             {
+                if (!_storage.Patients.Any())
+                    throw new InvalidOperationException("В базе пациентов нет записей. Сначала добавьте пациентов.");
+
+                _cachedPatients = null;
+
                 StartBusy("Генерация исследований ...");
 
                 var progress = new Progress<int>(percent =>
@@ -187,7 +191,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
             catch (Exception ex)
             {
-                UpdateText = "Исследование не добавлено";
+                generationFailed = true;
+                UpdateText = ex.Message;
                 _logger.Error(ex, "Error in study generation");
                 MessageBox.Show($"{ex.Message}");
             }
@@ -203,7 +208,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 {
                     UpdateText = $"Генерация исследований было прервано! Всего - [{PlannedStudies.Count}]. Время выполнения: {timeString}";
                 }
-                else
+                else if (!generationFailed)
                 {
                     UpdateText = $"Исследование успешно добавлено! Всего - [{PlannedStudies.Count}]. Время выполнения: {timeString}";
                 }
@@ -258,24 +263,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             try
             {
-                GetCachedPatientsAndStudies();
-
-                var now = DateTime.Now;
                 _patientLiteDb = GetRandomPatientFromCache();
 
                 if (_patientLiteDb == null)
-                {
-                    _logger.Warn("GenerateLiteDbStudies: No patient found, creating empty patient");
-                    _patientLiteDb = CreateDefaultPatient();
-                }
-
-                _studyLiteDb = GetRandomStudiesFromPatient(_patientLiteDb);
-
-                if (_studyLiteDb == null)
-                {
-                    _logger.Warn("GenerateLiteDbStudies: No patient found, creating empty study");
-                    _studyLiteDb = CreateDefaultStudy();
-                }
+                    throw new InvalidOperationException("В базе пациентов нет записей. Сначала добавьте пациентов.");
 
                 _plannedStudyLiteDb = new PlannedStudyLiteDb
                 {
@@ -293,12 +284,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     Comments = _patientLiteDb.Comments,
                     PatientIdDataBase = _patientLiteDb.Id,
 
-                    StudyID = _studyLiteDb.StudyId ,
-                    AccessionNumber = _studyLiteDb.AccessionNumber,
-                    StudyInstanceUid = _studyLiteDb.StudyInstanceUid,
-                    Status = Enum.TryParse<PlannedStudyStatus>(_studyLiteDb.Status, out var status)
-                        ? status
-                        : PlannedStudyStatus.Planned,
+                    StudyID = $"STD-{GenerateRandomNumber(12)}t",
+                    AccessionNumber = _random.Next(100000, 999999).ToString(),
+                    StudyInstanceUid = $"2.25.{GenerateRandomNumber(36)}",
+                    Status = PlannedStudyStatus.Planned,
 
                     StudyAreas = GenerateRandomStudyAreas(plannedStudyDto),
                     ProjectionPaths = plannedStudyDto.RandomProjectionPaths.Generate(),
@@ -334,38 +323,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             return patients[index];
         }
 
-        private StudyLiteDb GetRandomStudiesFromPatient(PatientLiteDb patient)
-        {
-            var patientStudies = GetCachedStudies()
-                .Where(s => s.SnapshotPatientId == patient.PatientID)
-                .ToList();
-
-            if (!patientStudies.Any())
-            {
-                _logger.Warn($"No studies found for patient {patient.PatientID}");
-                return null;
-            }
-
-            var index = _random.Next(patientStudies.Count);
-
-            return patientStudies[index];
-        }
-
-        private void GetCachedPatientsAndStudies()
-        {
-            if (_cachedPatients == null || !_cachedPatients.Any())
-            {
-                _cachedPatients = _storage.Patients.GetAllPatients().ToList();
-                _logger.Info($"Cached {_cachedPatients.Count} patients");
-            }
-
-            if (_cachedStudies == null || !_cachedStudies.Any())
-            {
-                _cachedStudies = _storage.Studies.GetAllStudies().ToList();
-                _logger.Info($"Cached {_cachedStudies.Count} studies");
-            }
-        }
-
         private List<PatientLiteDb> GetCachedPatients()
         {
             if (_cachedPatients == null || !_cachedPatients.Any())
@@ -375,51 +332,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
 
             return _cachedPatients;
-        }
-
-        private List<StudyLiteDb> GetCachedStudies()
-        {
-            if (_cachedStudies == null || !_cachedStudies.Any())
-            {
-                _cachedStudies = _storage.Studies.GetAllStudies().ToList();
-                _logger.Info($"Cached {_cachedStudies.Count} studies");
-            }
-
-            return _cachedStudies;
-        }
-
-        private PatientLiteDb CreateDefaultPatient()
-        {
-            var patient = new PatientLiteDb
-            {
-                Id = ObjectId.NewObjectId().ToString(),
-                PatientID = "MXE0000001",
-                LastName = "Неизвестный",
-                FirstName = "Пациент",
-                MiddleName = "Пустой",
-                BirthDate = DateTime.Now.AddYears(-30),
-                Sex = PatientSex.Other,
-                Address = "Не указан",
-                Comments = "Автоматически создан для генерации исследований",
-                Phone = "+344543215",
-                Age = "30"
-            };
-
-            _storage.Patients.Upsert(patient);
-            _logger.Info($"Created and saved default patient: {patient.PatientID}");
-
-            return patient;
-        }
-
-        private StudyLiteDb CreateDefaultStudy()
-        {
-            return new StudyLiteDb
-            {
-                StudyId = $"STD-{GenerateRandomNumber(12)}t",
-                AccessionNumber = _random.Next(100000, 999999).ToString(),
-                StudyInstanceUid = $"2.25.{GenerateRandomNumber(36)}",
-                Status = "Planned"
-            };
         }
 
         [RelayCommand]
@@ -525,9 +437,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 App.UpdateSharedStorage(DatabasePatientPath, false);
 
                 _cachedPatients = null;
-                _cachedStudies = null;
-
-                GetCachedPatientsAndStudies();
+                GetCachedPatients();
 
                 UpdateText = $"БД переключена: {Path.GetFileName(newPath)}";
             }
