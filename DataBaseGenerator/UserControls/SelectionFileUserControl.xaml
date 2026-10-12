@@ -23,7 +23,7 @@
             Grid.Column="1"
             Grid.ColumnSpan="3"
             Margin="0"
-            Padding="5"
+            Padding="5,0,0,0"
             BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
             BorderThickness="5">
 

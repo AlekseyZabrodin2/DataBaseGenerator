@@ -6,6 +6,7 @@
     xmlns:local="clr-namespace:DataBaseGenerator.UI.Wpf.UserControls"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:userControls="clr-namespace:DataBaseGenerator.UI.Wpf.UserControls"
     xmlns:viewmodel="clr-namespace:DataBaseGenerator.UI.Wpf.ViewModel">
 
     <Grid>
@@ -115,115 +116,7 @@
                 Name="BlockCheckBoxes"
                 Header="Параметры генерации"
                 IsExpanded="False">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-
-                <Grid Grid.Column="0" Margin="5">
-                    <StackPanel Orientation="Vertical">
-                        <CheckBox
-                            Margin="5"
-                            Content="Eng Names"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            IsChecked="{Binding UseEngNames}" />
-                        <CheckBox
-                            Margin="5"
-                            Content="Rus Names"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            IsChecked="{Binding UseRusNames}" />
-                        <CheckBox
-                            Margin="5"
-                            Content="China Names"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            IsChecked="{Binding UseChinaNames}" />
-                    </StackPanel>
-                </Grid>
-
-                <Grid Grid.Column="1" Margin="5">
-                    <StackPanel Orientation="Vertical">
-                        <CheckBox
-                            Margin="5"
-                            Content="Empty strings"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            IsChecked="{Binding UseEmptyStrings}" />
-                        <CheckBox
-                            Margin="5"
-                            Content="Long values"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            IsChecked="{Binding UseLongValues}" />
-                        <CheckBox
-                            Margin="5"
-                            Content="Special characters"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            IsChecked="{Binding UseSpecialChars}" />
-                    </StackPanel>
-                </Grid>
-
-                <Grid
-                    Grid.Column="2"
-                    Grid.ColumnSpan="2"
-                    Margin="5">
-                    <StackPanel Orientation="Vertical">
-                        <RadioButton
-                            Margin="5"
-                            Content="Random birthdate"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            GroupName="BirthdateSection"
-                            IsChecked="{Binding UseRandomBirthdate}" />
-                        <RadioButton
-                            Margin="5"
-                            Content="Missing birthdate"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            GroupName="BirthdateSection"
-                            IsChecked="{Binding UseMissingBirthdate}" />
-                        <RadioButton
-                            Margin="5"
-                            Content="Future birthdate"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            GroupName="BirthdateSection"
-                            IsChecked="{Binding UseFutureBirthdate}" />
-                    </StackPanel>
-                </Grid>
-
-                <Grid Grid.Column="3" Margin="5">
-                    <StackPanel Orientation="Vertical">
-                        <RadioButton
-                            Margin="5"
-                            Content="0 - 17 years"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            GroupName="BirthdateSection"
-                            IsChecked="{Binding UseAge0_17}" />
-                        <RadioButton
-                            Margin="5"
-                            Content="18 - 60 years"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            GroupName="BirthdateSection"
-                            IsChecked="{Binding UseAge18_60}" />
-                        <RadioButton
-                            Margin="5"
-                            Content="61 - 120 years"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            GroupName="BirthdateSection"
-                            IsChecked="{Binding UseAge61_120}" />
-                    </StackPanel>
-                </Grid>
-            </Grid>
+                <userControls:PatientGenerationOptionsControl DataContext="{Binding GenerationOptions}" />
             </Expander>
 
             <Grid Name="ButtonsBlock" Grid.Row="1">
