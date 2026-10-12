@@ -60,7 +60,7 @@ namespace DataBaseGenerator.UI.Wpf
             var plannedDbPath = Path.Combine(dataDirectory, "planned_studies.db");
 
             SharedStorage = new LiteDbStudyStorageModule(dbPath, true);
-            PlannedStorage = new LiteDbPlannedStudyStorageModule(plannedDbPath, false);
+            PlannedStorage = new LiteDbPlannedStudyStorageModule(plannedDbPath, true);
 
             var hostBuilder = Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration((context, config) =>
@@ -129,7 +129,7 @@ namespace DataBaseGenerator.UI.Wpf
                 UpdateSharedStorage(store.PatientsDatabasePath, true);
 
             if (File.Exists(store.PlannedStudiesDatabasePath))
-                UpdatePlannedStorage(store.PlannedStudiesDatabasePath, false);
+                UpdatePlannedStorage(store.PlannedStudiesDatabasePath, true);
         }
 
         private void EnsureSingleWebHostProcessRunning()

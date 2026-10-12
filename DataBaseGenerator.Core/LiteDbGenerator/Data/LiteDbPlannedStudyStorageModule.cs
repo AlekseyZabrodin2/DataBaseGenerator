@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using DataBaseGenerator.Core.LiteDbGenerator.Contracts;
 using DataBaseGenerator.Core.LiteDbGenerator.DbContext;
@@ -20,6 +21,16 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Data
         public LiteDbPlannedStudyStorageModule(string path, bool readOnly = false)
         {
             DatabasePath = path;
+
+            if (!File.Exists(path))
+            {
+                var dir = Path.GetDirectoryName(path);
+                if (!string.IsNullOrEmpty(dir))
+                    Directory.CreateDirectory(dir);
+
+                using var created = new LiteDatabase(path);
+            }
+
             var connectionString = new ConnectionString(path)
             {
                 ReadOnly = readOnly,
