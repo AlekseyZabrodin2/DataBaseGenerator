@@ -36,15 +36,15 @@
             <DataGrid
                 Name="ViewAllStudies"
                 Margin="5"
-                ColumnWidth="*"
-                MinColumnWidth="80"
                 AutoGenerateColumns="False"
                 CanUserAddRows="False"
                 CanUserDeleteRows="False"
+                ColumnWidth="*"
                 EnableColumnVirtualization="True"
                 EnableRowVirtualization="True"
                 IsReadOnly="False"
                 ItemsSource="{Binding AllStudies}"
+                MinColumnWidth="80"
                 ScrollViewer.IsDeferredScrollingEnabled="True"
                 SelectedItem="{Binding SelectedStudy, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 VirtualizingPanel.IsVirtualizingWhenGrouping="True"
@@ -75,130 +75,8 @@
             Grid.RowSpan="2"
             Grid.Column="1"
             Grid.ColumnSpan="3">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
 
-            <Expander
-                Name="BlockCheckBoxes"
-                Header="Параметры генерации"
-                IsExpanded="False">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-
-                <Grid Grid.Column="0" Margin="5">
-                    <StackPanel Orientation="Vertical">
-                        <CheckBox
-                            Margin="5"
-                            Content="Eng Names"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            IsChecked="{Binding UseEngNames}" />
-                        <CheckBox
-                            Margin="5"
-                            Content="Rus Names"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            IsChecked="{Binding UseRusNames}" />
-                        <CheckBox
-                            Margin="5"
-                            Content="China Names"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            IsChecked="{Binding UseChinaNames}" />
-                    </StackPanel>
-                </Grid>
-
-                <Grid Grid.Column="1" Margin="5">
-                    <StackPanel Orientation="Vertical">
-                        <CheckBox
-                            Margin="5"
-                            Content="Empty strings"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            IsChecked="{Binding UseEmptyStrings}" />
-                        <CheckBox
-                            Margin="5"
-                            Content="Long values"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            IsChecked="{Binding UseLongValues}" />
-                        <CheckBox
-                            Margin="5"
-                            Content="Special characters"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            IsChecked="{Binding UseSpecialChars}" />
-                    </StackPanel>
-                </Grid>
-
-                <Grid
-                    Grid.Column="2"
-                    Grid.ColumnSpan="2"
-                    Margin="5">
-                    <StackPanel Orientation="Vertical">
-                        <RadioButton
-                            Margin="5"
-                            Content="Random birthdate"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            GroupName="BirthdateSection"
-                            IsChecked="{Binding UseRandomBirthdate}" />
-                        <RadioButton
-                            Margin="5"
-                            Content="Missing birthdate"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            GroupName="BirthdateSection"
-                            IsChecked="{Binding UseMissingBirthdate}" />
-                        <RadioButton
-                            Margin="5"
-                            Content="Future birthdate"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            GroupName="BirthdateSection"
-                            IsChecked="{Binding UseFutureBirthdate}" />
-                    </StackPanel>
-                </Grid>
-
-                <Grid Grid.Column="3" Margin="5">
-                    <StackPanel Orientation="Vertical">
-                        <RadioButton
-                            Margin="5"
-                            Content="0 - 17 years"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            GroupName="BirthdateSection"
-                            IsChecked="{Binding UseAge0_17}" />
-                        <RadioButton
-                            Margin="5"
-                            Content="18 - 60 years"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            GroupName="BirthdateSection"
-                            IsChecked="{Binding UseAge18_60}" />
-                        <RadioButton
-                            Margin="5"
-                            Content="61 - 120 years"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            GroupName="BirthdateSection"
-                            IsChecked="{Binding UseAge61_120}" />
-                    </StackPanel>
-                </Grid>
-            </Grid>
-            </Expander>
-
-            <Grid
-                Name="ButtonsBlock"
-                Grid.Row="1"
-                IsEnabled="{Binding IsReadOnlyMode, Mode=TwoWay, Converter={StaticResource BoolToInverseBoolConverter}}">
+            <Grid Name="ButtonsBlock" IsEnabled="{Binding IsReadOnlyMode, Mode=TwoWay, Converter={StaticResource BoolToInverseBoolConverter}}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />
@@ -384,9 +262,7 @@
             </Grid>
         </Grid>
 
-        <userControls:FooterUserControl
-            Grid.Row="4"
-            Margin="0,5" />
+        <userControls:FooterUserControl Grid.Row="4" Margin="0,5" />
 
         <Grid
             Grid.Row="0"
