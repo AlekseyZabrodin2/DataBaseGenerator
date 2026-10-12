@@ -40,8 +40,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private string _workListPatientIdFilter = string.Empty;
         private string _patientIdFilter = string.Empty;
         private string _updateText;
-        private int _setPatientCount;
-        private int _setWorkListCount;
+        private int? _setPatientCount = 0;
+        private int? _setWorkListCount = 0;
         private string _aeTitle;
         private string _gender = string.Empty;
         private string _addIdPatient = string.Empty;
@@ -97,7 +97,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
         }
 
-        public int SetPatientCount
+        public int? SetPatientCount
         {
             get
             {
@@ -110,7 +110,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
         }
 
-        public int SetWorkListCount
+        public int? SetWorkListCount
         {
             get
             {
@@ -417,6 +417,13 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             _logger.Info(">>> AddPatientAsync: START");
 
+            if (SetPatientCount is not > 0)
+            {
+                UpdateText = "Укажите количество пациентов больше нуля.";
+                _logger.Info("<<< AddPatientAsync: END");
+                return;
+            }
+
             var stopwatch = Stopwatch.StartNew();
 
             _cancellationTokenSource = new CancellationTokenSource();
@@ -441,14 +448,14 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     new RandomAddInfoRule(),
                     new RandomOccupationRule())
                 {
-                    PatientCount = SetPatientCount
+                    PatientCount = SetPatientCount.Value
                 };
 
                 GenerationOptions.ApplyTo(newPatient);
 
                 if (SetPatientCount is 404 or 500 or 777)
                 {
-                    StopGenerateMessage(SetPatientCount);
+                    StopGenerateMessage(SetPatientCount.Value);
                     SetPatientCount = 0;
                     generationSkipped = true;
 
@@ -684,6 +691,13 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             _logger.Info(">>> AddWorkListAsync: START");
 
+            if (SetWorkListCount is not > 0)
+            {
+                UpdateText = "Укажите количество записей рабочего списка больше нуля.";
+                _logger.Info("<<< AddWorkListAsync: END");
+                return;
+            }
+
             var stopwatch = Stopwatch.StartNew();
             _cancellationTokenSource = new CancellationTokenSource();
             var generationCancelled = false;
@@ -719,7 +733,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     new RandomReferringPhysiciansNameRule(),
                     new RandomRequestingPhysicianRule())
                 {
-                    WorkListCount = SetWorkListCount
+                    WorkListCount = SetWorkListCount.Value
                 };
 
                 _logger.Info("AddWorkListAsync: Calling WorklistService.GenerateAsync...");
@@ -1048,7 +1062,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     AddInfo,
                     AddWorkPlase)
                 {
-                    PatientCount = SetPatientCount
+                    PatientCount = SetPatientCount ?? 0
                 };
                 _logger.Info("AddOnePatientAsync: Calling PatientService.AddOneAsync...");
 

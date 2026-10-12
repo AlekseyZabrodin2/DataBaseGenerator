@@ -42,7 +42,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         public partial ObservableCollection<LitePlannedStudy> PlannedStudies { get; set; }
 
         [ObservableProperty]
-        public partial PlannedStudyLiteDb SelectedPlannedStudy { get; set; }
+        public partial LitePlannedStudy SelectedPlannedStudy { get; set; }
 
         [ObservableProperty]
         public partial bool IsBusy { get; set; }
@@ -89,7 +89,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
         [ObservableProperty]
-        public partial int SetStudiesCount { get; set; }
+        public partial int? SetStudiesCount { get; set; } = 0;
 
         [ObservableProperty]
         public partial bool OptimisationIsEnabled { get; set; } = true;
@@ -157,6 +157,18 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         public async Task AddStudiesAsync()
         {
+            if (SetStudiesCount is not > 0)
+            {
+                UpdateText = "Укажите количество исследований больше нуля.";
+                return;
+            }
+
+            if (!_storage.Patients.Any())
+            {
+                UpdateText = "В базе пациентов нет записей. Сначала добавьте пациентов.";
+                return;
+            }
+
             var stopwatch = Stopwatch.StartNew();
 
             _cancellationTokenSource = new CancellationTokenSource();
@@ -165,9 +177,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             try
             {
-                if (!_storage.Patients.Any())
-                    throw new InvalidOperationException("В базе пациентов нет записей. Сначала добавьте пациентов.");
-
                 _cachedPatients = null;
 
                 StartBusy("Генерация исследований ...");
@@ -223,7 +232,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             try
             {
-                var totalStudies = SetStudiesCount;
+                var totalStudies = SetStudiesCount ?? 0;
                 var studyCounter = 0;
                 var studiesBatch = new List<PlannedStudyLiteDb>(_studyBatchSize);
 
@@ -292,7 +301,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                     StudyAreas = GenerateRandomStudyAreas(plannedStudyDto),
                     ProjectionPaths = plannedStudyDto.RandomProjectionPaths.Generate(),
-                    ImagesCount = plannedStudyDto.RandomImagesCount.Generate(),
+                    ImagesCount = 0,
                     StudyDateTime = plannedStudyDto.RandomStudyDateTime.Generate(),
                     IsEmergencyPatient = plannedStudyDto.IsEmergencyPatient,
                     EffectiveDosemSv = plannedStudyDto.EffectiveDosemSv,

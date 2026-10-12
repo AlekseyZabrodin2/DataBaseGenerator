@@ -144,13 +144,13 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         public partial PatientLiteDb SelectedPatient { get; set; }
 
         [ObservableProperty]
-        public partial int SetStudiesCount { get; set; }
+        public partial int? SetStudiesCount { get; set; } = 0;
 
         [ObservableProperty]
-        public partial int SetSeriesCount { get; set; } = 1;
+        public partial int? SetSeriesCount { get; set; } = 0;
 
         [ObservableProperty]
-        public partial int SetImageCount { get; set; } = 1;
+        public partial int? SetImageCount { get; set; } = 0;
 
         public string DatabasePath
         {
@@ -202,6 +202,24 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         public async Task AddStudiesAsync()
         {
+            if (SetStudiesCount is not > 0)
+            {
+                UpdateText = "Укажите количество исследований больше нуля.";
+                return;
+            }
+
+            if (SetSeriesCount is not > 0)
+            {
+                UpdateText = "Укажите количество серий больше нуля.";
+                return;
+            }
+
+            if (SetImageCount is not > 0)
+            {
+                UpdateText = "Укажите количество изображений больше нуля.";
+                return;
+            }
+
             var stopwatch = Stopwatch.StartNew();
 
             _cancellationTokenSource = new CancellationTokenSource();
@@ -261,9 +279,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             try
             {
-                var totalStudies = SetStudiesCount;
-                var totalSeries = SetSeriesCount;
-                var totalImages = SetImageCount;
+                var totalStudies = SetStudiesCount ?? 0;
+                var totalSeries = SetSeriesCount ?? 0;
+                var totalImages = SetImageCount ?? 0;
                 var studyCounter = 0;
                 var studiesBatch = new List<StudyLiteDb>(_studyBatchSize);                
 
@@ -352,7 +370,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             try
             {
-                var total = SetSeriesCount;
+                var total = SetSeriesCount ?? 0;
                 var random = new Random();
                 var seriesCounter = 0;
 
@@ -402,7 +420,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             try
             {
-                var total = SetImageCount;
+                var total = SetImageCount ?? 0;
                 var imageCounter = 0;
 
                 for (int imageIndex = 0; imageIndex < total; imageIndex++)

@@ -119,7 +119,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         public PatientGenerationOptions GenerationOptions { get; }
 
         [ObservableProperty]
-        public partial int SetPatientCount { get; set; }
+        public partial int? SetPatientCount { get; set; } = 0;
 
         [ObservableProperty]
         public partial ObservableCollection<PatientLiteDb> AllPatients { get; set; }
@@ -308,6 +308,12 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         public async Task AddPatientAsync()
         {
+            if (SetPatientCount is not > 0)
+            {
+                UpdateText = "Укажите количество пациентов больше нуля.";
+                return;
+            }
+
             var stopwatch = Stopwatch.StartNew();
 
             _cancellationTokenSource = new CancellationTokenSource();
@@ -330,7 +336,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     new RandomAddInfoRule(),
                     new RandomOccupationRule())
                 {
-                    PatientCount = SetPatientCount
+                    PatientCount = SetPatientCount ?? 0
                 };
 
                 GenerationOptions.ApplyTo(newPatient);
@@ -430,7 +436,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                    new RandomAddInfoRule(),
                    new RandomOccupationRule())
                 {
-                    PatientCount = SetPatientCount
+                    PatientCount = SetPatientCount ?? 0
                 };
 
                 //_studyStorageModule.Patients.Delete(patient);
@@ -913,7 +919,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 new RandomAddInfoRule(),
                 new RandomOccupationRule())
             {
-                PatientCount = SetPatientCount
+                PatientCount = SetPatientCount ?? 0
             };
 
             GenerationOptions.ApplyTo(patient);
