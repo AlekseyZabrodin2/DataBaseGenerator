@@ -24,8 +24,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private MediaPlayer _mediaPlayer = new MediaPlayer();
         private SpecificationWindow _specificationWindow = new SpecificationWindow(); 
         private readonly IServiceProvider _serviceProvider;
-        private LiteDbGeneratorUserControl _patientUserControl;
-        private StudiesLiteDbTableUserControl _studyUserControl;
 
 
         [ObservableProperty]
@@ -210,10 +208,16 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
 
+        private MySqlGeneratorUserControl _mySqlPage;
+        private LiteDbGeneratorUserControl _patientsPage;
+        private StudiesLiteDbTableUserControl _studiesPage;
+        private PlannedStudiesLiteDbUserControl _plannedPage;
+
         [RelayCommand]
         private void SwitchToMySql()
         {
-            CurrentPage = new MySqlGeneratorUserControl();
+            _mySqlPage ??= new MySqlGeneratorUserControl();
+            CurrentPage = _mySqlPage;
             CurrentPageName = "MySql Generator";
             IsMySqlMode = true;
             IsLiteDbMode = false;
@@ -223,33 +227,34 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         private void ShowPatientsTable()
         {
-            _patientUserControl = new LiteDbGeneratorUserControl();
+            _patientsPage ??= new LiteDbGeneratorUserControl();
 
             ShowPatients = true;
             ShowStudies = false;
             ShowSeries = false;
             ShowImages = false;
 
-            ShowTable("Patients", _patientUserControl);
+            ShowTable("Patients", _patientsPage);
         }
 
         [RelayCommand]
         private void ShowStudiesTable()
         {
-            _studyUserControl = new StudiesLiteDbTableUserControl();
+            _studiesPage ??= new StudiesLiteDbTableUserControl();
 
             ShowPatients = false;
             ShowStudies = true;
             ShowSeries = false;
             ShowImages = false;
 
-            ShowTable("Studies", _studyUserControl);
+            ShowTable("Studies", _studiesPage);
         }        
 
         [RelayCommand]
         private void SwitchToPlannedStudies()
         {
-            CurrentPage = new PlannedStudiesLiteDbUserControl();
+            _plannedPage ??= new PlannedStudiesLiteDbUserControl();
+            CurrentPage = _plannedPage;
             CurrentPageName = "LiteDb - Planned Studies";
             IsMySqlMode = false;
             IsLiteDbMode = false;

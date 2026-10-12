@@ -116,41 +116,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [ObservableProperty]
         public partial PatientLiteDb SelectedPatient { get; set; }
 
-        [ObservableProperty]
-        public partial bool UseEngNames { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseRusNames { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseChinaNames { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseAge0_17 { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseAge18_60 { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseAge61_120 { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseRandomBirthdate { get; set; } = true;
-
-        [ObservableProperty]
-        public partial bool UseMissingBirthdate { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseFutureBirthdate { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseEmptyStrings { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseLongValues { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseSpecialChars { get; set; }
+        public PatientGenerationOptions GenerationOptions { get; }
 
         [ObservableProperty]
         public partial int SetPatientCount { get; set; }
@@ -223,9 +189,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
 
 
-        public LiteDbGeneratorViewModel(IServiceProvider serviceProvider)
+        public LiteDbGeneratorViewModel(IServiceProvider serviceProvider, GenerationOptionsStore optionsStore)
         {
             _serviceProvider = serviceProvider;
+            GenerationOptions = optionsStore.LiteDb;
             
             Gender = new List<string> { "Man", "Female", "Other" };
 
@@ -363,23 +330,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     new RandomAddInfoRule(),
                     new RandomOccupationRule())
                 {
-                    PatientCount = SetPatientCount,
-
-                    NamesRusGeneratorRule = UseRusNames,
-                    NamesEngGeneratorRule = UseEngNames,
-                    NamesChinaGeneratorRule = UseChinaNames,
-
-                    RandomBirthdateGeneratorRule = UseRandomBirthdate,
-                    MissingBirthdateGeneratorRule = UseMissingBirthdate,
-                    FutureBirthdateGeneratorRule = UseFutureBirthdate,
-                    Age0_17_GeneratorRule = UseAge0_17,
-                    Age18_60_GeneratorRule = UseAge18_60,
-                    Age61_120_GeneratorRule = UseAge61_120,
-
-                    EmptyStringsGeneratorRule = UseEmptyStrings,
-                    LongValuesGeneratorRule = UseLongValues,
-                    SpecialCharsGeneratorRule = UseSpecialChars
+                    PatientCount = SetPatientCount
                 };
+
+                GenerationOptions.ApplyTo(newPatient);
 
                 var progress = new Progress<int>(percent =>
                 {
@@ -455,18 +409,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         public void CleanCheckboxes()
         {
-            UseEngNames = false;
-            UseRusNames = false;
-            UseChinaNames = false;
-            UseAge0_17 = false;
-            UseAge18_60 = false;
-            UseAge61_120 = false;
-            UseRandomBirthdate = true;
-            UseMissingBirthdate = false;
-            UseFutureBirthdate = false;
-            UseEmptyStrings = false;
-            UseLongValues = false;
-            UseSpecialChars = false;
+            GenerationOptions.Reset();
         }
 
         [RelayCommand]
@@ -957,7 +900,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         private PatientGeneratorDto CreatePatientDto()
         {
-            return new PatientGeneratorDto(
+            var patient = new PatientGeneratorDto(
                 new OrderIdPatientRule(),
                 new RandomLastNameRule(),
                 new RandomFirstNameRule(),
@@ -970,20 +913,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 new RandomAddInfoRule(),
                 new RandomOccupationRule())
             {
-                PatientCount = SetPatientCount,
-                NamesRusGeneratorRule = UseRusNames,
-                NamesEngGeneratorRule = UseEngNames,
-                NamesChinaGeneratorRule = UseChinaNames,
-                RandomBirthdateGeneratorRule = UseRandomBirthdate,
-                MissingBirthdateGeneratorRule = UseMissingBirthdate,
-                FutureBirthdateGeneratorRule = UseFutureBirthdate,
-                Age0_17_GeneratorRule = UseAge0_17,
-                Age18_60_GeneratorRule = UseAge18_60,
-                Age61_120_GeneratorRule = UseAge61_120,
-                EmptyStringsGeneratorRule = UseEmptyStrings,
-                LongValuesGeneratorRule = UseLongValues,
-                SpecialCharsGeneratorRule = UseSpecialChars
+                PatientCount = SetPatientCount
             };
+
+            GenerationOptions.ApplyTo(patient);
+            return patient;
         }
 
         private string BuildShortPath(string fullPath, int keepFolders = 3)
@@ -1024,6 +958,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             if (dialog.ShowDialog() == true)
             {
                 DatabasePath = dialog.FileName;
+                App.GetService<GenerationOptionsStore>().SetPatientsDatabasePath(DatabasePath);
                 _ = RefreshDataBaseAsync();
             }
         }

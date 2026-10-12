@@ -144,42 +144,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         public partial PatientLiteDb SelectedPatient { get; set; }
 
         [ObservableProperty]
-        public partial bool UseEngNames { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseRusNames { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseChinaNames { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseAge0_17 { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseAge18_60 { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseAge61_120 { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseRandomBirthdate { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseMissingBirthdate { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseFutureBirthdate { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseEmptyStrings { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseLongValues { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseSpecialChars { get; set; }
-
-        [ObservableProperty]
         public partial int SetStudiesCount { get; set; }
 
         [ObservableProperty]
@@ -675,6 +639,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             if (dialog.ShowDialog() == true)
             {
                 DatabasePath = dialog.FileName;
+                App.GetService<GenerationOptionsStore>().SetPatientsDatabasePath(DatabasePath);
                 _ = RefreshDataBaseAsync();
             }
         }

@@ -112,6 +112,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             PlannedStudies = new();
 
+            DatabasePath = _plannedStudyStorage.DatabasePath;
             DatabasePatientPath = _storage.DatabasePath;
 
             await GetDataFromDbAsync();
@@ -491,6 +492,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             if (dialog.ShowDialog() == true)
             {
                 DatabasePath = dialog.FileName;
+                App.GetService<GenerationOptionsStore>().SetPlannedStudiesDatabasePath(DatabasePath);
                 _ = RefreshDataBaseAsync();
             }
         }
@@ -518,6 +520,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 }
 
                 DatabasePatientPath = newPath;
+                App.GetService<GenerationOptionsStore>().SetPatientsDatabasePath(DatabasePatientPath);
 
                 App.UpdateSharedStorage(DatabasePatientPath, false);
 

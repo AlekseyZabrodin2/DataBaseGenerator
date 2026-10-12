@@ -320,41 +320,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [ObservableProperty]
         public partial Patient SelectedPatient {  get; set; }
 
-        [ObservableProperty]
-        public partial bool UseEngNames { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseRusNames { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseChinaNames { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseAge0_17 { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseAge18_60 { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseAge61_120 { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseRandomBirthdate { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseMissingBirthdate { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseFutureBirthdate { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseEmptyStrings { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseLongValues { get; set; }
-
-        [ObservableProperty]
-        public partial bool UseSpecialChars { get; set; }
+        public PatientGenerationOptions GenerationOptions { get; }
 
         [ObservableProperty]
         public partial string BusyMessage { get; set; }
@@ -380,10 +346,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
 
 
-        public MySqlGeneratorViewModel(BaseGenerateContext context, IHttpClientFactory clientFactory)
+        public MySqlGeneratorViewModel(BaseGenerateContext context, IHttpClientFactory clientFactory, GenerationOptionsStore optionsStore)
         {
             _context = context;
             _httpClient = clientFactory;
+            GenerationOptions = optionsStore.MySql;
 
             var defaultAeTitle = new RandomModalityRule("DX");
             ModalityRules = new ObservableCollection<RandomModalityRule>
@@ -431,8 +398,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         private async Task InitializeAsync()
         {
-            UseRandomBirthdate = true;
-
             var refreshPat = await RefreshPatientsAsync();
             var patientsText = UpdateText;
 
@@ -476,23 +441,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     new RandomAddInfoRule(),
                     new RandomOccupationRule())
                 {
-                    PatientCount = SetPatientCount,
-
-                    NamesRusGeneratorRule = UseRusNames,
-                    NamesEngGeneratorRule = UseEngNames,
-                    NamesChinaGeneratorRule = UseChinaNames,
-
-                    RandomBirthdateGeneratorRule = UseRandomBirthdate,
-                    MissingBirthdateGeneratorRule = UseMissingBirthdate,
-                    FutureBirthdateGeneratorRule = UseFutureBirthdate,
-                    Age0_17_GeneratorRule = UseAge0_17,
-                    Age18_60_GeneratorRule = UseAge18_60,
-                    Age61_120_GeneratorRule = UseAge61_120,
-
-                    EmptyStringsGeneratorRule = UseEmptyStrings,
-                    LongValuesGeneratorRule = UseLongValues,
-                    SpecialCharsGeneratorRule = UseSpecialChars
+                    PatientCount = SetPatientCount
                 };
+
+                GenerationOptions.ApplyTo(newPatient);
 
                 if (SetPatientCount is 404 or 500 or 777)
                 {
@@ -651,18 +603,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         public void CleanCheckboxes()
         {
-            UseEngNames = false;
-            UseRusNames = false;
-            UseChinaNames = false;
-            UseAge0_17 = false;
-            UseAge18_60 = false;
-            UseAge61_120 = false;
-            UseRandomBirthdate = true;
-            UseMissingBirthdate = false;
-            UseFutureBirthdate = false;
-            UseEmptyStrings = false;
-            UseLongValues = false;
-            UseSpecialChars = false;
+            GenerationOptions.Reset();
         }
 
         [RelayCommand]
