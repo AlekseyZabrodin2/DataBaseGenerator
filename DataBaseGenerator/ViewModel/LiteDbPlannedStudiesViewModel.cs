@@ -14,7 +14,6 @@ using DataBaseGenerator.Core.LiteDbGenerator.Enums;
 using DataBaseGenerator.Core.LiteDbGenerator.LiteDbModels;
 using DataBaseGenerator.Core.LiteDbGenerator.Models;
 using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.PlannedStudy;
-using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Study;
 using LiteDB;
 using Microsoft.Win32;
 using NLog;
@@ -834,10 +833,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private PlannedStudyLiteDbDto CreatePlannedStudyDto()
         {
             return new PlannedStudyLiteDbDto(
-                new RandomBodyPartDataRule(),
-                new RandomProjectionPathsRule(),
-                new RandomImagesCountRule(),
-                new RandomStudyDateTimeRule());
+                new RandomBodyPartDataRule());
         }
 
         private PlannedStudyArea[] GenerateRandomStudyAreas(PlannedStudyLiteDbDto plannedStudyDto)
