@@ -335,9 +335,14 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             return patients[index];
         }
 
+        public void InvalidatePatientsCache()
+        {
+            _cachedPatients = null;
+        }
+
         private List<PatientLiteDb> GetCachedPatients()
         {
-            if (_cachedPatients == null || !_cachedPatients.Any())
+            if (_cachedPatients == null)
             {
                 _cachedPatients = _storage.Patients.GetAllPatients().ToList();
                 _logger.Info($"Cached {_cachedPatients.Count} patients");
@@ -510,7 +515,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                 App.UpdateSharedStorage(DatabasePatientPath, false);
 
-                _cachedPatients = null;
+                InvalidatePatientsCache();
                 GetCachedPatients();
 
                 UpdateText = $"БД переключена: {Path.GetFileName(newPath)}";

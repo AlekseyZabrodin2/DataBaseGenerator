@@ -638,6 +638,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 });
 
                 UpdateText = $"База обновлена. Найдено пациентов: {AllPatients.Count}";
+                NotifyStudiesPatientCacheInvalidated();
                 return true;
             }
             catch (Exception ex)
@@ -650,6 +651,12 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 StopBusy();
             }
+        }
+
+        private static void NotifyStudiesPatientCacheInvalidated()
+        {
+            App.GetService<LiteDbStudiesTableViewModel>().InvalidatePatientsCache();
+            App.GetService<LiteDbPlannedStudiesViewModel>().InvalidatePatientsCache();
         }
 
         private void CleareFields()

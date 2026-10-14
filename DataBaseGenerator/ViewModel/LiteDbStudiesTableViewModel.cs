@@ -229,6 +229,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 StartBusy("Генерация исследований ...");
 
+                InvalidatePatientsCache();
+
                 var progress = new Progress<int>(percent =>
                 {
                     CurrentProgress = percent;
@@ -491,10 +493,15 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             var index = _random.Next(patients.Count);
             return patients[index];
         }
+        
+        public void InvalidatePatientsCache()
+        {
+            _cachedPatients = null;
+        }
 
         private List<PatientLiteDb> GetCachedPatients()
         {
-            if (_cachedPatients == null || !_cachedPatients.Any())
+            if (_cachedPatients == null)
             {
                 _cachedPatients = _storage.Patients.GetAllPatients().ToList();
                 _logger.Info($"Cached {_cachedPatients.Count} patients");
@@ -567,6 +574,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     _storage?.Dispose();
                     App.UpdateSharedStorage(DatabasePath, IsReadOnlyMode);
                 });
+
+                InvalidatePatientsCache();
 
                 await GetDataFromAllDbAsync();
                 UpdateStatistics();
@@ -683,6 +692,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 previous?.Dispose();
                 App.UpdateSharedStorage(DatabasePath, readOnly);
+                InvalidatePatientsCache();
 
                 var anyStudies = _storage.Studies.Any();
 
@@ -893,7 +903,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 CancelButtonIsVisibil = false;
 
                 _storage?.Dispose();
-                _cachedPatients = null;
+                InvalidatePatientsCache();
 
                 AllStudies = new ObservableCollection<StudyLiteDb>();
                 AllSeries = new ObservableCollection<SeriesLiteDb>();
