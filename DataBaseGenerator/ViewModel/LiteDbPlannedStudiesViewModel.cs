@@ -278,9 +278,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 if (_patientLiteDb == null)
                     throw new InvalidOperationException("В базе пациентов нет записей. Сначала добавьте пациентов.");
 
+                var studyInstanceUid = $"2.25.{GenerateRandomNumber(36)}";
+
                 _plannedStudyLiteDb = new PlannedStudyLiteDb
                 {
-                    Id = $"2.25.{GenerateRandomNumber(36)}",
+                    Id = studyInstanceUid,
 
                     PatientLastName = _patientLiteDb.LastName,
                     PatientFirstName = _patientLiteDb.FirstName,
@@ -296,13 +298,13 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                     StudyID = $"STD-{GenerateRandomNumber(12)}t",
                     AccessionNumber = _random.Next(100000, 999999).ToString(),
-                    StudyInstanceUid = $"2.25.{GenerateRandomNumber(36)}",
+                    StudyInstanceUid = studyInstanceUid,
                     Status = PlannedStudyStatus.Planned,
 
                     StudyAreas = GenerateRandomStudyAreas(plannedStudyDto),
-                    ProjectionPaths = plannedStudyDto.RandomProjectionPaths.Generate(),
+                    ProjectionPaths = Array.Empty<string>(),
                     ImagesCount = 0,
-                    StudyDateTime = plannedStudyDto.RandomStudyDateTime.Generate(),
+                    StudyDateTime = null,
                     IsEmergencyPatient = plannedStudyDto.IsEmergencyPatient,
                     EffectiveDosemSv = plannedStudyDto.EffectiveDosemSv,
                     HasDose = plannedStudyDto.HasDose
@@ -342,6 +344,68 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
 
             return _cachedPatients;
+        }
+
+        [RelayCommand]
+        public async Task DeleteFirst()
+        {
+            var id = PlannedStudies?.FirstOrDefault()?.Id;
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                UpdateText = "В списке нет исследований.";
+                return;
+            }
+
+            await DeletePlannedStudyAsync(id, "Удаление первого исследования...");
+        }
+
+        [RelayCommand]
+        public async Task DeleteSelected()
+        {
+            var id = SelectedPlannedStudy?.Id;
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                UpdateText = "Выберите исследование для удаления.";
+                return;
+            }
+
+            await DeletePlannedStudyAsync(id, "Удаление исследования...");
+        }
+
+        private async Task DeletePlannedStudyAsync(string id, string busyMessage)
+        {
+            if (IsReadOnlyMode)
+            {
+                UpdateText = "База открыта только для чтения.";
+                return;
+            }
+
+            var stopwatch = Stopwatch.StartNew();
+
+            try
+            {
+                StartBusy(busyMessage, false);
+
+                await Task.Run(() =>
+                {
+                    _plannedStudyStorage.PlannedStudies.Delete(id);
+                });
+
+                await RefreshDataBaseAsync();
+                UpdateText = $"Исследование удалено. Всего - [{PlannedStudies.Count}].";
+            }
+            catch (Exception ex)
+            {
+                UpdateText = $"Ошибка удаления: {ex.Message}";
+                _logger.Error(ex, "Error deleting planned study");
+                MessageBox.Show($"Ошибка удаления: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                stopwatch.Stop();
+                UpdateText += $" Время выполнения: {FormatTimeSpan(stopwatch.Elapsed)}";
+                StopBusy();
+            }
         }
 
         [RelayCommand]
