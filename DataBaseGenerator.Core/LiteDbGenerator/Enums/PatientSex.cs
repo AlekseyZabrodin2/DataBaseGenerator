@@ -2,8 +2,8 @@
 {
     public enum PatientSex
     {
-        Other = 0,
-        Male = 1,
-        Female = 2
+        Other = 1,
+        Male = 2,
+        Female = 3
     }
 }
