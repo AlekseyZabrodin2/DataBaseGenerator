@@ -227,26 +227,29 @@
                     </Button>
 
                     <Button
-                        Name="DeleteFirstPatient"
+                        Name="DeleteFirst"
                         Width="80"
                         Height="50"
-                        Margin="5,0">
+                        Margin="5,0"
+                        Command="{Binding DeleteFirstCommand}">
                         <TextBlock
+                            Margin="5,0"
                             FontSize="10"
-                            Text="CLEAN CHECKBOX"
+                            Text="DELETE FIRST"
                             TextAlignment="Center"
                             TextWrapping="Wrap" />
                     </Button>
 
                     <Button
-                        Name="CleanCheckbox"
+                        Name="DeleteSelected"
                         Width="80"
                         Height="50"
-                        Margin="5,0">
+                        Margin="5,0"
+                        Command="{Binding DeleteSelectedCommand}">
                         <TextBlock
                             Margin="5,0"
                             FontSize="10"
-                            Text="DELETE FIRST"
+                            Text="DELETE SELECTED"
                             TextAlignment="Center"
                             TextWrapping="Wrap" />
                     </Button>
