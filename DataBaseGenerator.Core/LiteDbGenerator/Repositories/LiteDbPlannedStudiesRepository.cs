@@ -6,7 +6,6 @@ using DataBaseGenerator.Core.LiteDbGenerator.Contracts;
 using DataBaseGenerator.Core.LiteDbGenerator.DbContext;
 using DataBaseGenerator.Core.LiteDbGenerator.LiteDbModels;
 using DataBaseGenerator.Core.LiteDbGenerator.Models;
-using LiteDB;
 using NLog;
 
 namespace DataBaseGenerator.Core.LiteDbGenerator.Repositories
@@ -26,7 +25,7 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Repositories
 
         public PlannedStudyLiteDb GetById(string id)
         {
-            return _context.PlannedStudies.FindById(new ObjectId(id));
+            return _context.PlannedStudies.FindById(id);
         }
 
         public void Insert(PlannedStudyLiteDb study)
@@ -46,7 +45,7 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Repositories
 
         public void Delete(string id)
         {
-            _context.PlannedStudies.Delete(new ObjectId(id));
+            _context.PlannedStudies.Delete(id);
         }
 
         public void DeleteAll()
