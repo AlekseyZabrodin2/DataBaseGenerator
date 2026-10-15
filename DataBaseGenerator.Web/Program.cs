@@ -121,9 +121,47 @@ try
 
     logger.Info("WebHost is started");
 
+    try
+    {
+        await using var scope = app.Services.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<BaseGenerateContext>();
+        await LogDatabaseTriggersAsync(context, logger);
+    }
+    catch (Exception ex)
+    {
+        logger.Error(ex, "Не удалось прочитать триггеры базы");
+    }
+
     app.Run();
 }
 catch (Exception ex)
 {
     logger.Fatal(ex, "WebHost can`t started");
+}
+
+static async Task LogDatabaseTriggersAsync(BaseGenerateContext context, Logger logger)
+{
+    var connection = context.Database.GetDbConnection();
+    if (connection.State != System.Data.ConnectionState.Open)
+        await connection.OpenAsync();
+
+    await using var command = connection.CreateCommand();
+    command.CommandText = """
+        SELECT TRIGGER_NAME, EVENT_OBJECT_TABLE, ACTION_TIMING, EVENT_MANIPULATION, ACTION_STATEMENT
+        FROM information_schema.TRIGGERS
+        WHERE TRIGGER_SCHEMA = DATABASE()
+        """;
+
+    var found = false;
+    await using var reader = await command.ExecuteReaderAsync();
+    while (await reader.ReadAsync())
+    {
+        found = true;
+        var statement = reader.GetString(4).Replace("\r", " ").Replace("\n", " ");
+        logger.Warn(
+            $"В базе найден триггер {reader.GetString(0)} на таблице {reader.GetString(1)}: {reader.GetString(2)} {reader.GetString(3)}. {statement}");
+    }
+
+    if (!found)
+        logger.Info("Триггеров в базе нет.");
 }
