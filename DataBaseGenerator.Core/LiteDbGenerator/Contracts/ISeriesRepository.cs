@@ -23,7 +23,8 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Contracts
 
         void DeleteAll();
         void DeleteById(string id);
-        void DeleteBySeriesInstanceUid(string seriesInstanceUid); 
+        void DeleteBySeriesInstanceUid(string seriesInstanceUid);
+        void DeleteByStudyInstanceUid(string studyInstanceUid); 
         bool Any();
     }
 }

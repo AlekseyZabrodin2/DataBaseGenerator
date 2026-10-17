@@ -108,6 +108,14 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Repositories
             throw new NotImplementedException();
         }
 
+        public void DeleteByStudyInstanceUid(string studyInstanceUid)
+        {
+            if (string.IsNullOrWhiteSpace(studyInstanceUid))
+                return;
+
+            _context.Series.DeleteMany(series => series.StudyInstanceUid == studyInstanceUid);
+        }
+
         public IEnumerable<SeriesLiteDb> FindByModality(string modality, int limit)
         {
             throw new NotImplementedException();

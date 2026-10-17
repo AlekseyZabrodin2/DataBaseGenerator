@@ -113,6 +113,14 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Repositories
             throw new NotImplementedException();
         }
 
+        public void DeleteByStudyInstanceUid(string studyInstanceUid)
+        {
+            if (string.IsNullOrWhiteSpace(studyInstanceUid))
+                return;
+
+            _context.Images.DeleteMany(image => image.StudyInstanceUid == studyInstanceUid);
+        }
+
         public IEnumerable<ImageLiteDb> FindByAcquisitionDateRange(DateTime? from, DateTime? to, int limit)
         {
             throw new NotImplementedException();

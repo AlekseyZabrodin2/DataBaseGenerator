@@ -144,7 +144,18 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Repositories
 
         public void DeleteById(string id)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(id))
+                return;
+
+            try
+            {
+                _context.Studies.Delete(new ObjectId(id));
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Не удалось удалить исследование {Id}", id);
+                throw;
+            }
         }
 
         public void DeleteByStudyInstanceUid(string uid)
