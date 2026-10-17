@@ -750,6 +750,59 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
         [RelayCommand]
+        public async Task DeleteSelected()
+        {
+            if (IsReadOnlyMode)
+            {
+                UpdateText = "База открыта только для чтения.";
+                return;
+            }
+
+            var study = SelectedStudy;
+            if (study?.Id == null || study.Id == ObjectId.Empty)
+            {
+                UpdateText = "Выберите исследование для удаления.";
+                return;
+            }
+
+            var stopwatch = Stopwatch.StartNew();
+
+            try
+            {
+                StartBusy("Удаление исследования...", false);
+
+                var studyId = study.Id.ToString();
+                var studyInstanceUid = study.StudyInstanceUid;
+
+                await Task.Run(() =>
+                {
+                    _storage.Images.DeleteByStudyInstanceUid(studyInstanceUid);
+                    _storage.Series.DeleteByStudyInstanceUid(studyInstanceUid);
+                    _storage.Studies.DeleteById(studyId);
+                });
+
+                SelectedStudy = null;
+                await RefreshDataBaseAsync();
+            }
+            catch (Exception ex)
+            {
+                UpdateText = $"Ошибка удаления: {ex.Message}";
+                _logger.Error(ex, "Error deleting selected study");
+                MessageBox.Show($"Ошибка удаления: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                stopwatch.Stop();
+                StopBusy();
+
+                if (UpdateText?.Contains("Ошибка") != true)
+                {
+                    UpdateText = $"Исследование удалено. Всего - [{AllStudies?.Count ?? 0}]. Время выполнения: {FormatTimeSpan(stopwatch.Elapsed)}";
+                }
+            }
+        }
+
+        [RelayCommand]
         public async Task DeleteAll()
         {
             var stopwatch = Stopwatch.StartNew();
