@@ -196,17 +196,24 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             
             Gender = new List<string> { "Man", "Female", "Other" };
 
+            App.SharedStorageModeChanged += OnSharedStorageModeChanged;
+
             _ = InitializeAsync();
         }
 
         private async Task InitializeAsync()
         {
             AllPatients = new();
-            IsReadOnlyMode = true;
+            IsReadOnlyMode = App.IsSharedStorageReadOnly;
 
             DatabasePath = _storage.DatabasePath;
 
             await GetAllPatientsAsync();
+        }
+
+        private void OnSharedStorageModeChanged(bool readOnly)
+        {
+            IsReadOnlyMode = readOnly;
         }
 
         public async Task GetAllPatientsAsync()

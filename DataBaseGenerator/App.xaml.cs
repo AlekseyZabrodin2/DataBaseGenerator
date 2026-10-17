@@ -33,6 +33,8 @@ namespace DataBaseGenerator.UI.Wpf
 
         public static IStudyStorageModule SharedStorage { get; set; }
         public static IPlannedStudyStorageModule PlannedStorage { get; private set; }
+        public static bool IsSharedStorageReadOnly { get; private set; } = true;
+        public static event Action<bool>? SharedStorageModeChanged;
 
 
         public static T GetService<T>()
@@ -259,7 +261,10 @@ namespace DataBaseGenerator.UI.Wpf
         {
             SharedStorage?.Dispose();
             SharedStorage = new LiteDbStudyStorageModule(dbPath, readOnly);
+            IsSharedStorageReadOnly = readOnly;
             _logger.Info($"SharedStorage updated: {dbPath}, ReadOnly: {readOnly}");
+
+            SharedStorageModeChanged?.Invoke(readOnly);
         }
 
         public static IStudyStorageModule GetSharedStorage()

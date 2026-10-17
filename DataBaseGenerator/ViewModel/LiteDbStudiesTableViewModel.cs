@@ -182,6 +182,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         public LiteDbStudiesTableViewModel()
         {
+            App.SharedStorageModeChanged += OnSharedStorageModeChanged;
+
             _ = InitializeAsync();
         }
 
@@ -191,11 +193,17 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             AllSeries = new();
             AllImages = new();
 
+            IsReadOnlyMode = App.IsSharedStorageReadOnly;
             DatabasePath = _storage.DatabasePath;
 
             await GetDataFromAllDbAsync();
 
             _ = Task.Run(() => GetCachedPatients());            
+        }
+
+        private void OnSharedStorageModeChanged(bool readOnly)
+        {
+            IsReadOnlyMode = readOnly;
         }
 
 
