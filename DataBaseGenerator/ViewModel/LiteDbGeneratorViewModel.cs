@@ -446,7 +446,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     PatientCount = SetPatientCount ?? 0
                 };
 
-                //_studyStorageModule.Patients.Delete(patient);
+                var firstId = AllPatients?.FirstOrDefault()?.Id;
+                if (!string.IsNullOrWhiteSpace(firstId))
+                    _storage.Patients.Delete(firstId);
+
                 _ = RefreshDataBaseAsync();
 
                 UpdateText = "First Patient is Delete";
@@ -456,6 +459,52 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 UpdateText = "Patient is not Deleted";
                 _logger.Error(ex, "Patient is not Deleted");
                 MessageBox.Show($"{ex.Message}");
+            }
+        }
+
+        [RelayCommand]
+        public async Task DeleteSelectedPatient()
+        {
+            if (IsReadOnlyMode)
+            {
+                UpdateText = "База открыта только для чтения.";
+                return;
+            }
+
+            var patient = SelectedPatient;
+            if (patient == null || string.IsNullOrWhiteSpace(patient.Id))
+            {
+                UpdateText = "Выберите пациента для удаления.";
+                return;
+            }
+
+            var stopwatch = Stopwatch.StartNew();
+
+            try
+            {
+                StartBusy("Удаление пациента...", false);
+
+                var patientId = patient.Id;
+                await Task.Run(() => _storage.Patients.Delete(patientId));
+
+                SelectedPatient = null;
+                await RefreshDataBaseAsync();
+            }
+            catch (Exception ex)
+            {
+                UpdateText = $"Ошибка удаления: {ex.Message}";
+                _logger.Error(ex, "Error deleting selected patient");
+                MessageBox.Show($"Ошибка удаления: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                stopwatch.Stop();
+                StopBusy();
+
+                if (UpdateText?.Contains("Ошибка") != true)
+                {
+                    UpdateText = $"Пациент удалён. Всего - [{AllPatients?.Count ?? 0}]. Время выполнения: {FormatTimeSpan(stopwatch.Elapsed)}";
+                }
             }
         }
 
