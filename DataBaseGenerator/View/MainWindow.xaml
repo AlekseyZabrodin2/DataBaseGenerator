@@ -122,13 +122,105 @@
                     </Menu>
                 </StackPanel>
             </Border>
-            <TextBlock
+            <StackPanel
                 Margin="20,0"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
-                FontSize="14"
-                FontWeight="Bold"
-                Text="{Binding CurrentPageName}" />
+                Orientation="Horizontal">
+
+                <Border
+                    Margin="0,0,8,0"
+                    Padding="5,2"
+                    BorderThickness="1.5"
+                    CornerRadius="3">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="BorderBrush" Value="Gray" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsWebHostOnline}" Value="True">
+                                    <Setter Property="BorderBrush" Value="#2E7D32  " />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsWebHostOnline}" Value="False">
+                                    <Setter Property="BorderBrush" Value="#C62828" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <TextBlock
+                        Width="50"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="14"
+                        FontWeight="Bold"
+                        Text="Web"
+                        TextAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="Gray" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsWebHostOnline}" Value="True">
+                                        <Setter Property="Foreground" Value="#2E7D32" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsWebHostOnline}" Value="False">
+                                        <Setter Property="Foreground" Value="#C62828" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Border>
+
+                <Border
+                    Padding="5,2"
+                    BorderThickness="1.5"
+                    CornerRadius="3">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="BorderBrush" Value="Gray" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsMySqlOnline}" Value="True">
+                                    <Setter Property="BorderBrush" Value="#2E7D32" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsMySqlOnline}" Value="False">
+                                    <Setter Property="BorderBrush" Value="#C62828" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <TextBlock
+                        Width="50"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="14"
+                        FontWeight="Bold"
+                        Text="MySQL"
+                        TextAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="Gray" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsMySqlOnline}" Value="True">
+                                        <Setter Property="Foreground" Value="#2E7D32" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsMySqlOnline}" Value="False">
+                                        <Setter Property="Foreground" Value="#C62828" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Border>
+
+                <TextBlock
+                    Width="200"
+                    Margin="16,0,0,0"
+                    VerticalAlignment="Center"
+                    FontSize="14"
+                    FontWeight="Bold"
+                    Text="{Binding CurrentPageName}"
+                    TextAlignment="Right"
+                    TextTrimming="CharacterEllipsis" />
+            </StackPanel>
         </Grid>
 
         <ContentControl Grid.Row="1" Content="{Binding CurrentPage}" />

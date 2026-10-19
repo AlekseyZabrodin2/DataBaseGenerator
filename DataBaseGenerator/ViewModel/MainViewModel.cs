@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,6 +14,8 @@ using DataBaseGenerator.Core.LiteDbGenerator.Data;
 using DataBaseGenerator.UI.Wpf.UserControls;
 using DataBaseGenerator.UI.Wpf.View;
 using DataBaseGenerator.UI.Wpf.ViewModel.LiteDbTabs;
+using Microsoft.Extensions.Configuration;
+using MySqlConnector;
 using NLog;
 
 namespace DataBaseGenerator.UI.Wpf.ViewModel
@@ -83,6 +86,16 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [ObservableProperty]
         public partial string PathToIcon { get; set; }
 
+        [ObservableProperty]
+        public partial bool? IsWebHostOnline { get; set; }
+
+        [ObservableProperty]
+        public partial bool? IsMySqlOnline { get; set; }
+
+        private readonly IConfiguration _configuration;
+        private int _statusCheckRunning;
+        private bool _startupCheckPending = true;
+
         private string _resourceAudioDir = "MySqlGenerator\\Resources\\NoNo.mp3";
         private string _godFatherAudioDir = "MySqlGenerator\\Resources\\GodFatherAudio.mp3";
         private string _dialogMessageDir = "MySqlGenerator\\Resources\\333.jpg";
@@ -91,9 +104,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
 
 
-        public MainViewModel(IServiceProvider serviceProvider)
+        public MainViewModel(IServiceProvider serviceProvider, IConfiguration configuration)
         {
             _serviceProvider = serviceProvider;
+            _configuration = configuration;
 
             DatabaseTabs = new();
             _ = InitializeDatabaseAsync();
@@ -101,6 +115,76 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             SwitchToMySql();
 
             InitializeDirectories();
+        }
+
+        private void RequestServiceStatus()
+        {
+            var retryWebHost = _startupCheckPending;
+            _startupCheckPending = false;
+            _ = RefreshStatusAsync(retryWebHost);
+        }
+
+        private async Task RefreshStatusAsync(bool retryWebHost)
+        {
+            if (Interlocked.Exchange(ref _statusCheckRunning, 1) == 1)
+                return;
+
+            try
+            {
+                IsWebHostOnline = null;
+                IsMySqlOnline = null;
+
+                var webHostTask = WebHostRespondsAsync(retryWebHost);
+                var mySqlTask = MySqlRespondsAsync();
+                await Task.WhenAll(webHostTask, mySqlTask);
+
+                IsWebHostOnline = await webHostTask;
+                IsMySqlOnline = await mySqlTask;
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _statusCheckRunning, 0);
+            }
+        }
+
+        private async Task<bool> WebHostRespondsAsync(bool retry)
+        {
+            var attempts = retry ? 4 : 1;
+
+            for (var attempt = 1; attempt <= attempts; attempt++)
+            {
+                if (Process.GetProcessesByName("DataBaseGenerator.Web").Length > 0)
+                    return true;
+
+                if (attempt < attempts)
+                    await Task.Delay(1000);
+            }
+
+            return false;
+        }
+
+        private async Task<bool> MySqlRespondsAsync()
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+            if (string.IsNullOrWhiteSpace(connectionString))
+                return false;
+
+            try
+            {
+                var builder = new MySqlConnectionStringBuilder(connectionString)
+                {
+                    ConnectionTimeout = 2
+                };
+
+                await using var connection = new MySqlConnection(builder.ConnectionString);
+                await connection.OpenAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.Debug(ex, "MySQL status check failed");
+                return false;
+            }
         }
 
 
@@ -224,6 +308,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             IsLiteDbPlannedStudiesMode = false;
             ShowPatients = false;
             ShowStudies = false;
+            RequestServiceStatus();
         }
         
         [RelayCommand]
@@ -263,6 +348,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             IsLiteDbPlannedStudiesMode = true;
             ShowPatients = false;
             ShowStudies = false;
+            RequestServiceStatus();
         }
 
         private void ShowTable(string tableName, UserControl control)
@@ -272,6 +358,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             IsMySqlMode = false;
             IsLiteDbMode = true;
             IsLiteDbPlannedStudiesMode = false;
+            RequestServiceStatus();
         }
 
     }
