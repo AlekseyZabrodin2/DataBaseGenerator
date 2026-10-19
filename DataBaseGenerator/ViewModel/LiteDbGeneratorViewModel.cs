@@ -430,25 +430,14 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             try
             {
-                var patient = new PatientGeneratorParameters(
-                   new OrderIdPatientRule(),
-                   new RandomLastNameRule(),
-                   new RandomFirstNameRule(),
-                   new RandomMiddleNameRule(),
-                   new OrderPatientIdRule(),
-                   new RandomBirthDateRule(new DateTime()),
-                   new RandomSexRule(),
-                   new RandomAddressRule(),
-                   new RandomPhoneRule(),
-                   new RandomAddInfoRule(),
-                   new RandomOccupationRule())
-                {
-                    PatientCount = SetPatientCount ?? 0
-                };
-
                 var firstId = AllPatients?.FirstOrDefault()?.Id;
-                if (!string.IsNullOrWhiteSpace(firstId))
-                    _storage.Patients.Delete(firstId);
+                if (string.IsNullOrWhiteSpace(firstId))
+                {
+                    UpdateText = "В списке нет пациентов.";
+                    return;
+                }
+                
+                _storage.Patients.Delete(firstId);
 
                 _ = RefreshDataBaseAsync();
 
