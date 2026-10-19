@@ -220,7 +220,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             try
             {
-                StartBusy("Обновление списка пациентов...");
+                StartBusy("Обновление списка пациентов...", false);
 
                 await Task.Run(() =>
                 {
