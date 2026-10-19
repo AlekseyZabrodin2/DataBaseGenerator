@@ -750,7 +750,32 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
         [RelayCommand]
+        public async Task DeleteFirst()
+        {
+            var study = AllStudies?.FirstOrDefault();
+            if (study == null)
+            {
+                UpdateText = "В списке нет исследований.";
+                return;
+            }
+
+            await DeleteStudyAsync(study, "Удаление первого исследования...");
+        }
+
+        [RelayCommand]
         public async Task DeleteSelected()
+        {
+            var study = SelectedStudy;
+            if (study == null)
+            {
+                UpdateText = "Выберите исследование для удаления.";
+                return;
+            }
+
+            await DeleteStudyAsync(study, "Удаление исследования...");
+        }
+
+        private async Task DeleteStudyAsync(StudyLiteDb study, string busyMessage)
         {
             if (IsReadOnlyMode)
             {
@@ -758,10 +783,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 return;
             }
 
-            var study = SelectedStudy;
             if (study?.Id == null || study.Id == ObjectId.Empty)
             {
-                UpdateText = "Выберите исследование для удаления.";
+                UpdateText = "У исследования нет идентификатора.";
                 return;
             }
 
@@ -769,7 +793,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             try
             {
-                StartBusy("Удаление исследования...", false);
+                StartBusy(busyMessage, false);
 
                 var studyId = study.Id.ToString();
                 var studyInstanceUid = study.StudyInstanceUid;
@@ -787,7 +811,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             catch (Exception ex)
             {
                 UpdateText = $"Ошибка удаления: {ex.Message}";
-                _logger.Error(ex, "Error deleting selected study");
+                _logger.Error(ex, "Error deleting study");
                 MessageBox.Show($"Ошибка удаления: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
