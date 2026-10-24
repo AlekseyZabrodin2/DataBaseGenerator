@@ -72,6 +72,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         public partial bool IsLiteDbPlannedStudiesMode { get; set; }
 
         [ObservableProperty]
+        public partial bool IsLiteDbViewerMode { get; set; }
+
+        [ObservableProperty]
         public partial bool ShowPatients { get; set; } = true;
 
         [ObservableProperty]
@@ -296,10 +299,12 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private LiteDbGeneratorUserControl _patientsPage;
         private StudiesLiteDbTableUserControl _studiesPage;
         private PlannedStudiesLiteDbUserControl _plannedPage;
+        private LiteDbViewerUserControl _viewerPage;
 
         [RelayCommand]
         private void SwitchToMySql()
         {
+            LeaveLiteDbViewer();
             _mySqlPage ??= new MySqlGeneratorUserControl();
             CurrentPage = _mySqlPage;
             CurrentPageName = "MySql Generator";
@@ -340,6 +345,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         private void SwitchToPlannedStudies()
         {
+            LeaveLiteDbViewer();
             _plannedPage ??= new PlannedStudiesLiteDbUserControl();
             CurrentPage = _plannedPage;
             CurrentPageName = "LiteDb - Planned Studies";
@@ -351,14 +357,82 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             RequestServiceStatus();
         }
 
+        [RelayCommand]
+        private void ShowLiteDbViewer()
+        {
+            if (IsLiteDbOperationRunning())
+            {
+                MessageBox.Show(
+                    "Сейчас идёт генерация или другая операция с LiteDB. Просмотр можно открыть, когда она закончится.",
+                    "Просмотр LiteDB",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                return;
+            }
+
+            try
+            {
+                SwitchOpenDatabasesToReadOnly();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Не удалось перевести LiteDB в режим только для чтения");
+                MessageBox.Show(
+                    $"Не удалось перевести базы в режим только для чтения.\r\n{ex.Message}",
+                    "Просмотр LiteDB",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            _viewerPage ??= new LiteDbViewerUserControl();
+            _viewerPage.ViewModel.LoadOpenFiles();
+            CurrentPage = _viewerPage;
+            CurrentPageName = "Просмотр LiteDB";
+            IsMySqlMode = false;
+            IsLiteDbMode = false;
+            IsLiteDbPlannedStudiesMode = false;
+            ShowPatients = false;
+            ShowStudies = false;
+            IsLiteDbViewerMode = true;
+            RequestServiceStatus();
+        }
+
         private void ShowTable(string tableName, UserControl control)
         {
+            LeaveLiteDbViewer();
             CurrentPage = control;
             CurrentPageName = $"LiteDb - {tableName}";
             IsMySqlMode = false;
             IsLiteDbMode = true;
             IsLiteDbPlannedStudiesMode = false;
             RequestServiceStatus();
+        }
+
+        private bool IsLiteDbOperationRunning()
+        {
+            return _patientsPage?.ViewModel.IsBusy == true
+                || _studiesPage?.ViewModel.IsBusy == true
+                || _plannedPage?.ViewModel.IsBusy == true;
+        }
+
+        private void SwitchOpenDatabasesToReadOnly()
+        {
+            if (!App.IsSharedStorageReadOnly && App.SharedStorage != null)
+                App.UpdateSharedStorage(App.SharedStorage.DatabasePath, true);
+
+            var planned = _plannedPage?.ViewModel;
+            if (planned != null && !planned.IsReadOnlyMode && App.PlannedStorage != null)
+            {
+                App.UpdatePlannedStorage(App.PlannedStorage.DatabasePath, true);
+                planned.IsReadOnlyMode = true;
+            }
+        }
+
+        private void LeaveLiteDbViewer()
+        {
+            _viewerPage?.ViewModel.ReleaseExternal();
+            IsLiteDbViewerMode = false;
         }
 
     }

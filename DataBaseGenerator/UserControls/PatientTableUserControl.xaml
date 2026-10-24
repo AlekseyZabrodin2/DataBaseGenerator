@@ -31,6 +31,7 @@
                 <TextBox
                     Width="120"
                     VerticalContentAlignment="Center"
+                    BorderBrush="Black"
                     Text="{Binding PatientIdFilter, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
 
@@ -56,30 +57,14 @@
                         Binding="{Binding PatientID}"
                         Header="ID"
                         IsReadOnly="True" />
-                    <DataGridTextColumn
-                        Binding="{Binding LastName}"
-                        Header="Фамилия" />
-                    <DataGridTextColumn
-                        Binding="{Binding FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Header="Имя" />
-                    <DataGridTextColumn
-                        Binding="{Binding MiddleName}"
-                        Header="Отчество" />
-                    <DataGridTextColumn
-                        Binding="{Binding BirthDate, StringFormat='dd.MM.yyyy'}"
-                        Header="Дата Рождения" />
-                    <DataGridTextColumn
-                        Binding="{Binding Sex}"
-                        Header="Пол" />
-                    <DataGridTextColumn
-                        Binding="{Binding Address}"
-                        Header="Адрес" />
-                    <DataGridTextColumn
-                        Binding="{Binding AddInfo}"
-                        Header="Доп. информация" />
-                    <DataGridTextColumn
-                        Binding="{Binding Occupation}"
-                        Header="Место работы" />
+                    <DataGridTextColumn Binding="{Binding LastName}" Header="Фамилия" />
+                    <DataGridTextColumn Binding="{Binding FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Имя" />
+                    <DataGridTextColumn Binding="{Binding MiddleName}" Header="Отчество" />
+                    <DataGridTextColumn Binding="{Binding BirthDate, StringFormat='dd.MM.yyyy'}" Header="Дата Рождения" />
+                    <DataGridTextColumn Binding="{Binding Sex}" Header="Пол" />
+                    <DataGridTextColumn Binding="{Binding Address}" Header="Адрес" />
+                    <DataGridTextColumn Binding="{Binding AddInfo}" Header="Доп. информация" />
+                    <DataGridTextColumn Binding="{Binding Occupation}" Header="Место работы" />
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
@@ -101,14 +86,14 @@
                 <userControls:PatientGenerationOptionsControl DataContext="{Binding GenerationOptions}" />
             </Expander>
 
-            <Grid Name="ButtonsBlock" Grid.Row="1">
+            <Grid Name="ButtonsBlock" Grid.Row="1" Margin="5,2,5,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
 
-                <Grid Name="TextBoxPatientCount" Margin="5">
+                <Grid Name="TextBoxPatientCount" >
 
                     <TextBlock
                         Name="PatCount"
@@ -181,10 +166,7 @@
                     </Button>
                 </Grid>
 
-                <Grid
-                    Name="ButtonDeleteFirstPatient"
-                    Grid.Column="2"
-                    Margin="5">
+                <Grid Name="ButtonDeleteFirstPatient" Grid.Column="2">
                     <Button
                         Name="DeleteFirstPatient"
                         Width="80"

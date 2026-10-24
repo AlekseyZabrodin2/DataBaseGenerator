@@ -43,12 +43,12 @@
         <userControls:AddPatientUserControl
             Grid.RowSpan="3"
             Grid.Column="0"
-            Margin="5,5,5,5" />
+            Margin="5" />
 
         <userControls:PatientTableUserControl
             Grid.Column="1"
             Grid.ColumnSpan="3"
-            Margin="5"
+            Margin="5,5,5,2"
             AllPatients="{Binding AllPatients}"
             SelectedPatient="{Binding SelectedPatient}" />
 
@@ -56,13 +56,13 @@
             Grid.Row="1"
             Grid.Column="1"
             Grid.ColumnSpan="3"
-            Margin="5" />
+            Margin="5,2" />
 
         <userControls:FooterUserControl
             Grid.Row="2"
             Grid.Column="1"
             Grid.ColumnSpan="3"
-            Margin="5" />
+            Margin="5,0,5,5" />
 
         <Grid
             Grid.Row="0"

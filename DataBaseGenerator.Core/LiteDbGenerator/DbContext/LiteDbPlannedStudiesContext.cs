@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DataBaseGenerator.Core.LiteDbGenerator.Data;
 using DataBaseGenerator.Core.LiteDbGenerator.Models;
 using LiteDB;
 
@@ -23,6 +24,11 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.DbContext
         public List<string> GetCollectionNames()
         {
             return _database.GetCollectionNames().ToList();
+        }
+
+        public IReadOnlyList<IReadOnlyDictionary<string, string>> ReadCollection(string collectionName)
+        {
+            return LiteDbDocumentReader.Read(_database.GetCollection(collectionName).FindAll());
         }
 
         public ILiteCollection<PlannedStudyLiteDb> PlannedStudies =>

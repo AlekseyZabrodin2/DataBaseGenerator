@@ -42,6 +42,11 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Data
 
         public List<string> GetCollectionNames() => _database.GetCollectionNames().ToList();
 
+        public IReadOnlyList<IReadOnlyDictionary<string, string>> ReadCollection(string collectionName)
+        {
+            return _database.ReadCollection(collectionName);
+        }
+
         public void Dispose() => _database?.Dispose();
     }
 }

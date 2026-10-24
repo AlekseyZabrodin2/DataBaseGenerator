@@ -33,6 +33,7 @@
                     Text="ID пациента" />
                 <TextBox
                     Width="120"
+                        BorderBrush="Black"
                     VerticalContentAlignment="Center"
                     Text="{Binding WorkListPatientIdFilter, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
@@ -91,7 +92,7 @@
             </DataGrid>
         </Grid>
 
-        <Grid Grid.Row="1" Grid.RowSpan="2">
+        <Grid Grid.Row="1" Grid.RowSpan="2" Margin="5,5,5,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -104,7 +105,7 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
 
-                <Grid Name="TextBoxWorkListCount" Margin="5">
+                <Grid Name="TextBoxWorkListCount" >
 
                     <TextBlock
                         Name="WlCount"
@@ -132,7 +133,7 @@
                 <Grid
                     Name="TextBoxModality"
                     Grid.Column="1"
-                    Margin="5">
+                    >
 
                     <TextBlock
                         Name="Modality"
@@ -186,7 +187,7 @@
                         Text="{Binding SetAeTitle, UpdateSourceTrigger=PropertyChanged}" />
                 </Grid>
             </Grid>
-            <Grid Grid.Row="1">
+            <Grid Grid.Row="1" Margin="0,2,5,5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />
@@ -196,13 +197,12 @@
                 <Grid
                     Name="ButtonAddWorkList"
                     Grid.Column="0"
-                    Margin="5">
+                    Margin="0,5,5,0">
 
                     <Button
                         Name="AddWorkList"
                         Width="120"
                         Height="50"
-                        Margin="5,0,0,0"
                         HorizontalAlignment="Left"
                         Command="{Binding AddWorkListCommand}"
                         Content="Add WorkList" />
@@ -212,7 +212,7 @@
                         Grid.Column="0"
                         Width="120"
                         Height="50"
-                        Margin="0,0,10,0"
+                        Margin="0,0,20,0"
                         HorizontalAlignment="Right"
                         Command="{Binding RefreshWorkListCommand}"
                         Content="Update WorkList" />
@@ -221,7 +221,7 @@
                 <Grid
                     Name="ButtonDeleteFirstWorkList"
                     Grid.Column="2"
-                    Margin="5,0,10,0">
+                    Margin="5,5,5,0">
 
                     <Button
                         Name="DeleteFirstWorkList"

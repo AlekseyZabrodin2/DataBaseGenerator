@@ -102,6 +102,7 @@ namespace DataBaseGenerator.UI.Wpf
                     services.AddSingleton<LiteDbGeneratorViewModel>();
                     services.AddSingleton<LiteDbStudiesTableViewModel>();
                     services.AddSingleton<LiteDbPlannedStudiesViewModel>();
+                    services.AddSingleton<LiteDbViewerViewModel>();
                     services.AddTransient<DialogMessageWindow>();
                     services.AddTransient<MainWindow>();
                     services.AddTransient<SpecificationWindow>();

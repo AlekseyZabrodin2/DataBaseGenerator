@@ -73,6 +73,12 @@
                                 Header="LiteDB - Planned studies"
                                 IsCheckable="True"
                                 IsChecked="{Binding IsLiteDbPlannedStudiesMode, Mode=OneWay}" />
+                            <Separator />
+                            <MenuItem
+                                Command="{Binding ShowLiteDbViewerCommand}"
+                                Header="Просмотр LiteDB"
+                                IsCheckable="True"
+                                IsChecked="{Binding IsLiteDbViewerMode, Mode=OneWay}" />
                         </MenuItem>
                         <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="File">
                             <MenuItem Header="Новый (Ctrl + N)" />
