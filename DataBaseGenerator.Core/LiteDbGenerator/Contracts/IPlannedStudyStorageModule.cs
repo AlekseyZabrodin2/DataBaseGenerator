@@ -11,6 +11,8 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Contracts
 
         List<string> GetCollectionNames();
 
+        IReadOnlyList<IReadOnlyDictionary<string, string>> ReadCollection(string collectionName);
+
         IPlannedStudiesRepository PlannedStudies { get; }
     }
 }
