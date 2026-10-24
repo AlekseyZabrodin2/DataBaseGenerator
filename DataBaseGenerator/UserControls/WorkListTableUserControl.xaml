@@ -33,8 +33,8 @@
                     Text="ID пациента" />
                 <TextBox
                     Width="120"
-                        BorderBrush="Black"
                     VerticalContentAlignment="Center"
+                    BorderBrush="Black"
                     Text="{Binding WorkListPatientIdFilter, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
 
@@ -55,44 +55,25 @@
                 VirtualizingPanel.VirtualizationMode="Recycling">
 
                 <DataGrid.Columns>
-                    <DataGridTextColumn
-                        Binding="{Binding ID_Patient}"
-                        Header="ID пациента" />
-                    <DataGridTextColumn
-                        Binding="{Binding Modality}"
-                        Header="Модальность" />
-                    <DataGridTextColumn
-                        Binding="{Binding StationAeTitle}"
-                        Header="AE_Title" />
-                    <DataGridTextColumn
-                        Binding="{Binding State}"
-                        Header="Состояние" />
-                    <DataGridTextColumn
-                        Binding="{Binding StudyDescription}"
-                        Header="Описание" />
-                    <DataGridTextColumn
-                        Binding="{Binding CreateDate, StringFormat='dd.MM.yyyy HH:mm'}"
-                        Header="Дата добавления" />
-                    <DataGridTextColumn
-                        Binding="{Binding CreateTime}"
-                        Header="Время добавления" />
-                    <DataGridTextColumn
-                        Binding="{Binding ProcedureStepStartDateTime, StringFormat='dd.MM.yyyy HH:mm'}"
-                        Header="Дата процедуры" />
-                    <DataGridTextColumn
-                        Binding="{Binding PerformingPhysiciansName}"
-                        Header="Исполнит. врач" />
-                    <DataGridTextColumn
-                        Binding="{Binding ReferringPhysiciansName}"
-                        Header="Направ. врач" />
-                    <DataGridTextColumn
-                        Binding="{Binding RequestingPhysician}"
-                        Header="Запрос. врач" />
+                    <DataGridTextColumn Binding="{Binding ID_Patient}" Header="ID пациента" />
+                    <DataGridTextColumn Binding="{Binding Modality}" Header="Модальность" />
+                    <DataGridTextColumn Binding="{Binding StationAeTitle}" Header="AE_Title" />
+                    <DataGridTextColumn Binding="{Binding State}" Header="Состояние" />
+                    <DataGridTextColumn Binding="{Binding StudyDescription}" Header="Описание" />
+                    <DataGridTextColumn Binding="{Binding CreateDate, StringFormat='dd.MM.yyyy HH:mm'}" Header="Дата добавления" />
+                    <DataGridTextColumn Binding="{Binding CreateTime}" Header="Время добавления" />
+                    <DataGridTextColumn Binding="{Binding ProcedureStepStartDateTime, StringFormat='dd.MM.yyyy HH:mm'}" Header="Дата процедуры" />
+                    <DataGridTextColumn Binding="{Binding PerformingPhysiciansName}" Header="Исполнит. врач" />
+                    <DataGridTextColumn Binding="{Binding ReferringPhysiciansName}" Header="Направ. врач" />
+                    <DataGridTextColumn Binding="{Binding RequestingPhysician}" Header="Запрос. врач" />
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
 
-        <Grid Grid.Row="1" Grid.RowSpan="2" Margin="5,5,5,0">
+        <Grid
+            Grid.Row="1"
+            Grid.RowSpan="2"
+            Margin="5,5,5,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -105,7 +86,7 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
 
-                <Grid Name="TextBoxWorkListCount" >
+                <Grid Name="TextBoxWorkListCount">
 
                     <TextBlock
                         Name="WlCount"
@@ -130,10 +111,7 @@
                         Text="{Binding SetWorkListCount, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableIntConverter}}" />
                 </Grid>
 
-                <Grid
-                    Name="TextBoxModality"
-                    Grid.Column="1"
-                    >
+                <Grid Name="TextBoxModality" Grid.Column="1">
 
                     <TextBlock
                         Name="Modality"
@@ -162,7 +140,7 @@
                 <Grid
                     Name="TextBoxAeTitle"
                     Grid.Column="2"
-                    Margin="5,0,10,0">
+                    Margin="5,0,5,0">
 
                     <TextBlock
                         Name="AeTitle"
@@ -221,7 +199,7 @@
                 <Grid
                     Name="ButtonDeleteFirstWorkList"
                     Grid.Column="2"
-                    Margin="5,5,5,0">
+                    Margin="5,5,0,0">
 
                     <Button
                         Name="DeleteFirstWorkList"

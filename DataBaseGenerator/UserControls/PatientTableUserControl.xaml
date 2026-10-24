@@ -86,14 +86,17 @@
                 <userControls:PatientGenerationOptionsControl DataContext="{Binding GenerationOptions}" />
             </Expander>
 
-            <Grid Name="ButtonsBlock" Grid.Row="1" Margin="5,2,5,0">
+            <Grid
+                Name="ButtonsBlock"
+                Grid.Row="1"
+                Margin="5,2,5,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
 
-                <Grid Name="TextBoxPatientCount" >
+                <Grid Name="TextBoxPatientCount">
 
                     <TextBlock
                         Name="PatCount"
