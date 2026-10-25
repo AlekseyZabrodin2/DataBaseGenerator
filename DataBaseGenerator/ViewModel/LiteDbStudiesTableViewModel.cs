@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DataBaseGenerator.Core.LiteDbGenerator.Contracts;
@@ -42,6 +43,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         [ObservableProperty]
         public partial ObservableCollection<StudyLiteDb> AllStudies { get; set; }
+
+        [ObservableProperty]
+        public partial string PatientIdFilter { get; set; } = string.Empty;
+
+        partial void OnPatientIdFilterChanged(string value) => ApplyPatientFilter();
 
         [ObservableProperty]
         public partial ObservableCollection<SeriesLiteDb> AllSeries { get; set; }
@@ -616,10 +622,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             try
             {
-                await Task.Run(() =>
-                {
-                    AllStudies = _storage.Studies.GetAllStudies();
-                });
+                var studies = await Task.Run(() => _storage.Studies.GetAllStudies());
+                AllStudies = studies;
+                ApplyPatientFilter();
             }
             catch (Exception ex)
             {
@@ -660,6 +665,23 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private void UpdateStatistics()
         {
             UpdateText = $"Всего - [{AllStudies.Count}] исследований, [{AllSeries.Count}] серий, [{AllImages.Count}] изображений.";
+        }
+
+        private void ApplyPatientFilter()
+        {
+            if (AllStudies == null)
+                return;
+
+            var view = CollectionViewSource.GetDefaultView(AllStudies);
+            var filter = PatientIdFilter?.Trim();
+            if (string.IsNullOrEmpty(filter))
+            {
+                view.Filter = null;
+                return;
+            }
+
+            view.Filter = item =>
+                ((StudyLiteDb)item).SnapshotPatientId?.Contains(filter, StringComparison.OrdinalIgnoreCase) == true;
         }
 
         [RelayCommand]
@@ -739,6 +761,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 var studies = _storage.Studies.GetAllStudies();
                 AllStudies = new ObservableCollection<StudyLiteDb>(studies);
+                ApplyPatientFilter();
                 UpdateText = $"Исследований: {AllStudies.Count}";
                 _logger.Info($"Loaded {AllStudies.Count} studies");
             }

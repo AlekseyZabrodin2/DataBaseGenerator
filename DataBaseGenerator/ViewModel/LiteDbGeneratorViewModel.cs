@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DataBaseGenerator.Core.LiteDbGenerator.Contracts;
@@ -124,6 +125,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [ObservableProperty]
         public partial ObservableCollection<PatientLiteDb> AllPatients { get; set; }
 
+        [ObservableProperty]
+        public partial string PatientIdFilter { get; set; } = string.Empty;
+
+        partial void OnPatientIdFilterChanged(string value) => ApplyPatientFilter();
+
         public string DatabasePath
         {
             get => _databasePath;
@@ -222,11 +228,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 StartBusy("Обновление списка пациентов...", false);
 
-                await Task.Run(() =>
-                {
-                    AllPatients = _storage.Patients.GetAllPatients();
-                });
-
+                var patients = await Task.Run(() => _storage.Patients.GetAllPatients());
+                AllPatients = patients;
+                ApplyPatientFilter();
                 UpdateStatistics();
             }
             catch (Exception ex)
@@ -243,6 +247,23 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private void UpdateStatistics()
         {
             UpdateText = $"Всего - [{AllPatients.Count}] пациентов.";
+        }
+
+        private void ApplyPatientFilter()
+        {
+            if (AllPatients == null)
+                return;
+
+            var view = CollectionViewSource.GetDefaultView(AllPatients);
+            var filter = PatientIdFilter?.Trim();
+            if (string.IsNullOrEmpty(filter))
+            {
+                view.Filter = null;
+                return;
+            }
+
+            view.Filter = item =>
+                ((PatientLiteDb)item).PatientID?.Contains(filter, StringComparison.OrdinalIgnoreCase) == true;
         }
 
 
@@ -677,11 +698,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 _storage?.Dispose();
                 App.UpdateSharedStorage(DatabasePath, IsReadOnlyMode);                              
 
-                await Task.Run(() =>
-                {
-                    AllPatients = _storage.Patients.GetAllPatients();
-                });
-
+                var patients = await Task.Run(() => _storage.Patients.GetAllPatients());
+                AllPatients = patients;
+                ApplyPatientFilter();
                 UpdateText = $"База обновлена. Найдено пациентов: {AllPatients.Count}";
                 NotifyStudiesPatientCacheInvalidated();
                 return true;

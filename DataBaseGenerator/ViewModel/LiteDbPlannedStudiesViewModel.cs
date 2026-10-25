@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DataBaseGenerator.Core.LiteDbGenerator.Contracts;
@@ -39,6 +40,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         [ObservableProperty]
         public partial ObservableCollection<LitePlannedStudy> PlannedStudies { get; set; }
+
+        [ObservableProperty]
+        public partial string PatientIdFilter { get; set; } = string.Empty;
+
+        partial void OnPatientIdFilterChanged(string value) => ApplyPatientFilter();
 
         [ObservableProperty]
         public partial LitePlannedStudy SelectedPlannedStudy { get; set; }
@@ -127,13 +133,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 StartBusy("Загрузка запланированных исследований...");
 
-                await Task.Run(() =>
-                {
-                    // Загрузка данных из БД или другого источника
-                    var studies = GetPlannedStudiesFromDatabase();
-                    PlannedStudies = new ObservableCollection<LitePlannedStudy>(studies);
-                });
-
+                var studies = await Task.Run(GetPlannedStudiesFromDatabase);
+                PlannedStudies = new ObservableCollection<LitePlannedStudy>(studies);
+                ApplyPatientFilter();
                 UpdateText = $"Загружено: {PlannedStudies.Count} исследований";
             }
             catch (Exception ex)
@@ -691,15 +693,14 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             StartBusy("Получение данных ...", false);
 
-            await Task.Run(() =>
+            var plannedStudy = await Task.Run(() =>
             {
                 _studies = _plannedStudyStorage.PlannedStudies.GetAllStudies().ToList();
-
-                IEnumerable<LitePlannedStudy> plannedStudy = _studies.OrderBy(patient => patient.PatientId);
-
-                PlannedStudies = new ObservableCollection<LitePlannedStudy>(plannedStudy);
+                return _studies.OrderBy(study => study.PatientId).ToList();
             });
 
+            PlannedStudies = new ObservableCollection<LitePlannedStudy>(plannedStudy);
+            ApplyPatientFilter();
             UpdateStatistics();
 
             StopBusy();
@@ -812,6 +813,23 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private void UpdateStatistics()
         {
             UpdateText = $"Всего - [{PlannedStudies.Count}] исследований.";
+        }
+
+        private void ApplyPatientFilter()
+        {
+            if (PlannedStudies == null)
+                return;
+
+            var view = CollectionViewSource.GetDefaultView(PlannedStudies);
+            var filter = PatientIdFilter?.Trim();
+            if (string.IsNullOrEmpty(filter))
+            {
+                view.Filter = null;
+                return;
+            }
+
+            view.Filter = item =>
+                ((LitePlannedStudy)item).PatientId?.Contains(filter, StringComparison.OrdinalIgnoreCase) == true;
         }
 
         private void StartBusy(string message = "Загрузка...", bool percentShow = true)

@@ -33,8 +33,27 @@
             Name="StudiesTable"
             Grid.Row="1"
             Background="{DynamicResource MahApps.Brushes.Accent}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Margin="5,5,5,0" Orientation="Horizontal">
+                <TextBlock
+                    Margin="10,0,8,0"
+                    VerticalAlignment="Center"
+                    FontWeight="Bold"
+                    Text="ID пациента" />
+                <TextBox
+                    Width="120"
+                    VerticalContentAlignment="Center"
+                    BorderBrush="Black"
+                    Text="{Binding PatientIdFilter, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+
             <DataGrid
                 Name="ViewAllStudies"
+                Grid.Row="1"
                 Margin="5"
                 AutoGenerateColumns="False"
                 CanUserAddRows="False"
