@@ -60,7 +60,7 @@
                 CanUserDeleteRows="False"
                 EnableColumnVirtualization="True"
                 EnableRowVirtualization="True"
-                IsReadOnly="False"
+                IsReadOnly="True"
                 ItemsSource="{Binding AllStudies}"
                 ScrollViewer.IsDeferredScrollingEnabled="True"
                 SelectedItem="{Binding SelectedStudy, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"

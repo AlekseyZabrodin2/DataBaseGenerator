@@ -33,6 +33,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private PatientLiteDb _patientLiteDb;
         private string _databasePath = string.Empty;
         private readonly object _dbLock = new object();
+        private readonly Dictionary<string, PatientEditSnapshot> _savedPatients = new();
 
 
         [ObservableProperty]
@@ -231,6 +232,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 var patients = await Task.Run(() => _storage.Patients.GetAllPatients());
                 AllPatients = patients;
                 ApplyPatientFilter();
+                RememberLoadedPatients();
                 UpdateStatistics();
             }
             catch (Exception ex)
@@ -420,24 +422,85 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         public void SavePatients()
         {
+            if (IsReadOnlyMode)
+            {
+                UpdateText = "База открыта только для чтения.";
+                return;
+            }
+
+            if (AllPatients == null)
+                return;
+
             try
             {
-                var updatePatients = new ObservableCollection<PatientLiteDb>();
-                foreach (var patient in AllPatients)
+                var saved = 0;
+                foreach (var patient in AllPatients.Where(HasPatientChanges).ToList())
                 {
-                    updatePatients.Add(patient);
+                    patient.FullName = $"{patient.LastName} {patient.FirstName} {patient.MiddleName}";
+                    _storage.Patients.Upsert(patient);
+                    _savedPatients[patient.Id] = PatientEditSnapshot.From(patient);
+
+                    var index = AllPatients.IndexOf(patient);
+                    if (index >= 0)
+                        AllPatients[index] = patient;
+
+                    saved++;
                 }
 
-                //await _patientService.EditeAsync(updatePatients);
-                _logger.Info("All changes saved to database");
-                UpdateText = "All changes saved to database";
+                UpdateText = saved == 0
+                    ? "Нет изменений для сохранения."
+                    : $"Сохранено пациентов: {saved}.";
+                _logger.Info(UpdateText);
             }
             catch (Exception ex)
             {
-                UpdateText = "Error saving changes";
-                _logger.Error(ex, "Error saving changes");
+                UpdateText = $"Ошибка сохранения: {ex.Message}";
+                _logger.Error(ex, "Error saving patient changes");
                 MessageBox.Show($"{ex.Message}");
             }
+        }
+
+        private void RememberLoadedPatients()
+        {
+            _savedPatients.Clear();
+            if (AllPatients == null)
+                return;
+
+            foreach (var patient in AllPatients)
+            {
+                if (!string.IsNullOrWhiteSpace(patient.Id))
+                    _savedPatients[patient.Id] = PatientEditSnapshot.From(patient);
+            }
+        }
+
+        private bool HasPatientChanges(PatientLiteDb patient)
+        {
+            if (string.IsNullOrWhiteSpace(patient.Id))
+                return false;
+
+            return !_savedPatients.TryGetValue(patient.Id, out var saved)
+                || saved != PatientEditSnapshot.From(patient);
+        }
+
+        private readonly record struct PatientEditSnapshot(
+            string LastName,
+            string FirstName,
+            string MiddleName,
+            PatientSex Sex,
+            DateTime? BirthDate,
+            string Address,
+            string Phone,
+            string Comments)
+        {
+            public static PatientEditSnapshot From(PatientLiteDb patient) => new(
+                patient.LastName ?? string.Empty,
+                patient.FirstName ?? string.Empty,
+                patient.MiddleName ?? string.Empty,
+                patient.Sex,
+                patient.BirthDate,
+                patient.Address ?? string.Empty,
+                patient.Phone ?? string.Empty,
+                patient.Comments ?? string.Empty);
         }
 
         [RelayCommand]
@@ -701,6 +764,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 var patients = await Task.Run(() => _storage.Patients.GetAllPatients());
                 AllPatients = patients;
                 ApplyPatientFilter();
+                RememberLoadedPatients();
                 UpdateText = $"База обновлена. Найдено пациентов: {AllPatients.Count}";
                 NotifyStudiesPatientCacheInvalidated();
                 return true;

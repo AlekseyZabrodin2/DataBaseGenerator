@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:convert="clr-namespace:DataBaseGenerator.UI.Wpf.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="clr-namespace:DataBaseGenerator.Core.LiteDbGenerator.Enums;assembly=DataBaseGenerator.Core"
     xmlns:local="clr-namespace:DataBaseGenerator.UI.Wpf.UserControls"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -14,6 +15,11 @@
 
     <UserControl.Resources>
         <convert:BoolToInverseBoolConverter x:Key="BoolToInverseBoolConverter" />
+        <x:Array x:Key="PatientSexValues" Type="{x:Type enums:PatientSex}">
+            <enums:PatientSex>Male</enums:PatientSex>
+            <enums:PatientSex>Female</enums:PatientSex>
+            <enums:PatientSex>Other</enums:PatientSex>
+        </x:Array>
     </UserControl.Resources>
 
 
@@ -59,7 +65,7 @@
                 CanUserDeleteRows="False"
                 EnableColumnVirtualization="True"
                 EnableRowVirtualization="True"
-                IsReadOnly="False"
+                IsReadOnly="{Binding IsReadOnlyMode}"
                 ItemsSource="{Binding AllPatients}"
                 ScrollViewer.IsDeferredScrollingEnabled="True"
                 SelectedItem="{Binding SelectedPatient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -68,20 +74,29 @@
                 VirtualizingPanel.VirtualizationMode="Recycling">
 
                 <DataGrid.Columns>
-                    <DataGridTextColumn Binding="{Binding Id}" Header="Id DB" />
+                    <DataGridTextColumn
+                        Binding="{Binding Id}"
+                        Header="Id DB"
+                        IsReadOnly="True" />
                     <DataGridTextColumn
                         Binding="{Binding PatientID}"
                         Header="ID"
                         IsReadOnly="True" />
-                    <DataGridTextColumn Binding="{Binding LastName}" Header="Фамилия" />
+                    <DataGridTextColumn Binding="{Binding LastName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Фамилия" />
                     <DataGridTextColumn Binding="{Binding FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Имя" />
-                    <DataGridTextColumn Binding="{Binding MiddleName}" Header="Отчество" />
-                    <DataGridTextColumn Binding="{Binding FullName}" Header="Полное имя" />
-                    <DataGridTextColumn Binding="{Binding Sex}" Header="Пол" />
-                    <DataGridTextColumn Binding="{Binding BirthDate, StringFormat='dd.MM.yyyy'}" Header="Дата Рождения" />
-                    <DataGridTextColumn Binding="{Binding Address}" Header="Адрес" />
-                    <DataGridTextColumn Binding="{Binding Phone}" Header="Телефон" />
-                    <DataGridTextColumn Binding="{Binding Comments}" Header="Комментарий" />
+                    <DataGridTextColumn Binding="{Binding MiddleName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Отчество" />
+                    <DataGridTextColumn
+                        Binding="{Binding FullName}"
+                        Header="Полное имя"
+                        IsReadOnly="True" />
+                    <DataGridComboBoxColumn
+                        Header="Пол"
+                        ItemsSource="{Binding Source={StaticResource PatientSexValues}}"
+                        SelectedItemBinding="{Binding Sex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <DataGridTextColumn Binding="{Binding BirthDate, Mode=TwoWay, StringFormat='dd.MM.yyyy'}" Header="Дата Рождения" />
+                    <DataGridTextColumn Binding="{Binding Address, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Адрес" />
+                    <DataGridTextColumn Binding="{Binding Phone, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Телефон" />
+                    <DataGridTextColumn Binding="{Binding Comments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Комментарий" />
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
