@@ -4,7 +4,9 @@ using System.Collections.ObjectModel;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DataBaseGenerator.Core.LiteDbGenerator.Data;
@@ -14,10 +16,17 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 {
     public partial class LiteDbViewerViewModel : ObservableObject, IDisposable
     {
+        private static readonly TimeSpan AutoRefreshInterval = TimeSpan.FromSeconds(10);
+
         private readonly object _readLock = new();
+        private readonly DispatcherTimer _autoRefreshTimer;
         private LiteDbReadOnlyBrowser _external;
         private string _externalPath;
         private int _loadVersion;
+        private int _refreshRunning;
+        private int _slowOperations;
+        private int _busyStamp;
+        private bool _pageActive;
 
         [ObservableProperty]
         public partial ObservableCollection<LiteDbViewerFile> Files { get; set; }
@@ -37,10 +46,55 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [ObservableProperty]
         public partial string StatusText { get; set; }
 
+        [ObservableProperty]
+        public partial bool AutoRefresh { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsBusy { get; set; }
+
+        [ObservableProperty]
+        public partial string BusyMessage { get; set; }
+
         public LiteDbViewerViewModel()
         {
             Files = new ObservableCollection<LiteDbViewerFile>();
             Collections = new ObservableCollection<string>();
+            _autoRefreshTimer = new DispatcherTimer { Interval = AutoRefreshInterval };
+            _autoRefreshTimer.Tick += (_, _) => _ = RefreshFromTimerAsync();
+        }
+
+        public void SetPageActive(bool active)
+        {
+            _pageActive = active;
+            if (!active)
+                AutoRefresh = false;
+
+            UpdateAutoRefreshTimer();
+        }
+
+        partial void OnAutoRefreshChanged(bool value)
+        {
+            UpdateAutoRefreshTimer();
+        }
+
+        private void UpdateAutoRefreshTimer()
+        {
+            if (_pageActive && AutoRefresh)
+            {
+                if (!_autoRefreshTimer.IsEnabled)
+                    _autoRefreshTimer.Start();
+                return;
+            }
+
+            _autoRefreshTimer.Stop();
+        }
+
+        private async Task RefreshFromTimerAsync()
+        {
+            if (!_pageActive || !AutoRefresh)
+                return;
+
+            await RefreshAsync();
         }
 
         public void LoadOpenFiles()
@@ -93,7 +147,43 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         partial void OnSelectedFileChanged(LiteDbViewerFile value)
         {
-            _ = LoadCollectionsAsync(value);
+            _ = LoadCollectionsAsync(value, null);
+        }
+
+        [RelayCommand]
+        private async Task RefreshAsync()
+        {
+            if (Interlocked.Exchange(ref _refreshRunning, 1) == 1)
+                return;
+
+            try
+            {
+                var file = SelectedFile;
+                if (file == null)
+                {
+                    LoadOpenFiles();
+                    return;
+                }
+
+                var collection = SelectedCollection;
+                _loadVersion++;
+
+                try
+                {
+                    Reopen(file);
+                }
+                catch (Exception ex)
+                {
+                    StatusText = ex.Message;
+                    return;
+                }
+
+                await LoadCollectionsAsync(file, collection);
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _refreshRunning, 0);
+            }
         }
 
         partial void OnSelectedCollectionChanged(string value)
@@ -137,7 +227,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             SelectedFile = item;
         }
 
-        private async Task LoadCollectionsAsync(LiteDbViewerFile file)
+        private async Task LoadCollectionsAsync(LiteDbViewerFile file, string keepCollection)
         {
             var version = ++_loadVersion;
             Collections.Clear();
@@ -148,6 +238,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 return;
 
             StatusText = "Чтение коллекций...";
+            BeginSlowOperation();
 
             try
             {
@@ -162,8 +253,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     ? "В файле нет коллекций."
                     : file.Path;
 
-                if (Collections.Count > 0)
-                    SelectedCollection = Collections[0];
+                var next = names.FirstOrDefault(name => string.Equals(name, keepCollection, StringComparison.OrdinalIgnoreCase))
+                    ?? names.FirstOrDefault();
+
+                if (next != null)
+                    SelectedCollection = next;
             }
             catch (Exception ex)
             {
@@ -171,6 +265,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     return;
 
                 StatusText = ex.Message;
+            }
+            finally
+            {
+                EndSlowOperation();
             }
         }
 
@@ -183,6 +281,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 return;
 
             StatusText = "Чтение таблицы...";
+            BeginSlowOperation();
 
             try
             {
@@ -200,6 +299,44 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                 StatusText = ex.Message;
             }
+            finally
+            {
+                EndSlowOperation();
+            }
+        }
+
+        private void BeginSlowOperation()
+        {
+            if (Interlocked.Increment(ref _slowOperations) != 1)
+                return;
+
+            var stamp = Volatile.Read(ref _busyStamp);
+            _ = ShowBusyIfSlowAsync(stamp);
+        }
+
+        private void EndSlowOperation()
+        {
+            if (Interlocked.Decrement(ref _slowOperations) > 0)
+                return;
+
+            Interlocked.Exchange(ref _slowOperations, 0);
+            Interlocked.Increment(ref _busyStamp);
+            IsBusy = false;
+            BusyMessage = string.Empty;
+        }
+
+        private async Task ShowBusyIfSlowAsync(int stamp)
+        {
+            await Task.Delay(400);
+
+            if (stamp != Volatile.Read(ref _busyStamp))
+                return;
+
+            if (Volatile.Read(ref _slowOperations) <= 0)
+                return;
+
+            BusyMessage = "Обновление...";
+            IsBusy = true;
         }
 
         private List<string> ReadCollectionNames(LiteDbViewerFile file)
@@ -229,6 +366,30 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     LiteDbViewerFileKind.Planned => App.PlannedStorage.ReadCollection(collectionName),
                     _ => External(file.Path).ReadCollection(collectionName)
                 };
+            }
+        }
+
+        private void Reopen(LiteDbViewerFile file)
+        {
+            if (!File.Exists(file.Path))
+                throw new FileNotFoundException("Файл не найден. Новый файл не создаётся.", file.Path);
+
+            lock (_readLock)
+            {
+                switch (file.Kind)
+                {
+                    case LiteDbViewerFileKind.Shared:
+                        App.UpdateSharedStorage(file.Path, true);
+                        break;
+                    case LiteDbViewerFileKind.Planned:
+                        App.UpdatePlannedStorage(file.Path, true);
+                        break;
+                    default:
+                        _external?.Dispose();
+                        _external = null;
+                        _externalPath = null;
+                        break;
+                }
             }
         }
 

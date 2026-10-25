@@ -2,11 +2,22 @@
     x:Class="DataBaseGenerator.UI.Wpf.UserControls.LiteDbViewerUserControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:convert="clr-namespace:DataBaseGenerator.UI.Wpf.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodel="clr-namespace:DataBaseGenerator.UI.Wpf.ViewModel"
     d:DataContext="{d:DesignInstance Type=viewmodel:LiteDbViewerViewModel}"
     mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Styles/Style.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <convert:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+
     <Grid Margin="5,0" ShowGridLines="False">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -22,6 +33,9 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
@@ -60,6 +74,38 @@
                     Content="📁"
                     FontSize="20"
                     ToolTip="Выбрать файл базы данных" />
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <TextBlock
+                        Margin="5,0,0,0"
+                        VerticalAlignment="Center"
+                        FontWeight="SemiBold"
+                        Text="Режим:" />
+                    <ToggleButton
+                        Margin="0,0,5,0"
+                        IsChecked="True"
+                        IsHitTestVisible="False"
+                        Focusable="False"
+                        Style="{StaticResource ToggleButtonStyle}"
+                        ToolTip="Просмотр только для чтения" />
+                </StackPanel>
+
+                <Button
+                    Grid.Column="3"
+                    Height="35"
+                    Margin="5,0,0,0"
+                    Command="{Binding RefreshCommand}"
+                    Content="Update data"
+                    ToolTip="Обновить данные из файла" />
+
+                <CheckBox
+                    Grid.Column="4"
+                    Margin="8,0,4,0"
+                    VerticalAlignment="Center"
+                    Content="Автообновление"
+                    FontWeight="SemiBold"
+                    IsChecked="{Binding AutoRefresh}"
+                    ToolTip="Перечитывать файл каждые 10 секунд" />
             </Grid>
         </Border>
 
@@ -148,5 +194,28 @@
                 IsReadOnly="True"
                 Text="{Binding StatusText}" />
         </Border>
+
+        <Grid
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Border Background="White" Opacity=".7">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <mah:ProgressRing
+                        Width="100"
+                        Height="100"
+                        Foreground="{DynamicResource MahApps.Brushes.AccentBase}"
+                        IsActive="{Binding IsBusy}" />
+                    <TextBlock
+                        Margin="0,16,0,0"
+                        HorizontalAlignment="Center"
+                        FontSize="18"
+                        Foreground="Black"
+                        Text="{Binding BusyMessage}" />
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

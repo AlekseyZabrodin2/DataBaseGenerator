@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -387,6 +387,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             _viewerPage ??= new LiteDbViewerUserControl();
             _viewerPage.ViewModel.LoadOpenFiles();
+            _viewerPage.ViewModel.SetPageActive(true);
             CurrentPage = _viewerPage;
             CurrentPageName = "Просмотр LiteDB";
             IsMySqlMode = false;
@@ -431,6 +432,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         private void LeaveLiteDbViewer()
         {
+            _viewerPage?.ViewModel.SetPageActive(false);
             _viewerPage?.ViewModel.ReleaseExternal();
             IsLiteDbViewerMode = false;
         }
