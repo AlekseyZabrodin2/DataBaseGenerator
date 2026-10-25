@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
@@ -27,6 +28,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private int _slowOperations;
         private int _busyStamp;
         private bool _pageActive;
+        private string _statusCollection;
+        private int _statusTotal;
 
         [ObservableProperty]
         public partial ObservableCollection<LiteDbViewerFile> Files { get; set; }
@@ -54,6 +57,14 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         [ObservableProperty]
         public partial string BusyMessage { get; set; }
+
+        [ObservableProperty]
+        public partial string FilterText { get; set; }
+
+        partial void OnFilterTextChanged(string value)
+        {
+            ApplyFilter();
+        }
 
         public LiteDbViewerViewModel()
         {
@@ -289,8 +300,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 if (version != _loadVersion || SelectedCollection != collectionName)
                     return;
 
+                _statusCollection = collectionName;
+                _statusTotal = rows.Count;
                 Rows = ToView(rows);
-                StatusText = $"{collectionName}: {rows.Count}";
+                ApplyFilter();
             }
             catch (Exception ex)
             {
@@ -413,6 +426,73 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 Path.GetFullPath(left),
                 Path.GetFullPath(right),
                 StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void ApplyFilter()
+        {
+            if (Rows?.Table == null)
+                return;
+
+            try
+            {
+                Rows.RowFilter = BuildRowFilter(Rows.Table, FilterText);
+            }
+            catch (Exception)
+            {
+                Rows.RowFilter = string.Empty;
+            }
+
+            if (string.IsNullOrEmpty(_statusCollection))
+                return;
+
+            var visible = Rows.Count;
+            StatusText = string.IsNullOrWhiteSpace(FilterText) || visible == _statusTotal
+                ? $"{_statusCollection}: {_statusTotal}"
+                : $"{_statusCollection}: {visible} из {_statusTotal}";
+        }
+
+        private static string BuildRowFilter(DataTable table, string text)
+        {
+            var filter = text?.Trim();
+            if (string.IsNullOrEmpty(filter) || table.Columns.Count == 0)
+                return string.Empty;
+
+            var escaped = EscapeLike(filter);
+            var parts = new List<string>(table.Columns.Count);
+
+            foreach (DataColumn column in table.Columns)
+            {
+                var name = column.ColumnName.Replace("]", "]]");
+                parts.Add($"Convert([{name}], 'System.String') LIKE '%{escaped}%'");
+            }
+
+            return string.Join(" OR ", parts);
+        }
+
+        private static string EscapeLike(string value)
+        {
+            var builder = new StringBuilder(value.Length);
+
+            foreach (var ch in value)
+            {
+                switch (ch)
+                {
+                    case '\'':
+                        builder.Append("''");
+                        break;
+                    case '%':
+                    case '*':
+                    case '[':
+                    case ']':
+                        builder.Append('[').Append(ch).Append(']');
+                        break;
+                    default:
+                        builder.Append(ch);
+                        break;
+                }
+            }
+
+            return builder.ToString();
         }
 
         private static DataView ToView(IReadOnlyList<IReadOnlyDictionary<string, string>> rows)

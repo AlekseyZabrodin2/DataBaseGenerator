@@ -125,9 +125,28 @@
                     ItemsSource="{Binding Collections}"
                     SelectedItem="{Binding SelectedCollection}" />
 
+                <Grid Grid.Column="1" Margin="5,0,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Margin="0,0,0,5" Orientation="Horizontal">
+                        <TextBlock
+                            Margin="0,0,8,0"
+                            VerticalAlignment="Center"
+                            FontWeight="SemiBold"
+                            Text="Поиск" />
+                        <TextBox
+                            Width="240"
+                            Height="28"
+                            VerticalContentAlignment="Center"
+                            Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
+                            ToolTip="Оставляет строки, где текст есть в любой колонке" />
+                    </StackPanel>
+
                 <DataGrid
-                    Grid.Column="1"
-                    Margin="5,0,0,0"
+                    Grid.Row="1"
                     AutoGenerateColumns="True"
                     CanUserAddRows="False"
                     CanUserDeleteRows="False"
@@ -179,6 +198,7 @@
                         </Style>
                     </DataGrid.CellStyle>
                 </DataGrid>
+                </Grid>
             </Grid>
         </Grid>
 
