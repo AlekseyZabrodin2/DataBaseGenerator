@@ -248,7 +248,27 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         private void UpdateStatistics()
         {
-            UpdateText = $"Всего - [{AllPatients.Count}] пациентов.";
+            UpdateText = DescribePatients();
+        }
+
+        private string DescribePatients()
+        {
+            var total = AllPatients?.Count ?? 0;
+            var visible = VisibleRowCount(AllPatients);
+            if (string.IsNullOrWhiteSpace(PatientIdFilter) || visible == total)
+                return $"Всего - [{total}] пациентов.";
+
+            return $"Пациентов: {visible} из {total}.";
+        }
+
+        private static int VisibleRowCount(object source)
+        {
+            if (source == null)
+                return 0;
+
+            return CollectionViewSource.GetDefaultView(source) is CollectionView view
+                ? view.Count
+                : 0;
         }
 
         private void ApplyPatientFilter()
@@ -259,13 +279,12 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             var view = CollectionViewSource.GetDefaultView(AllPatients);
             var filter = PatientIdFilter?.Trim();
             if (string.IsNullOrEmpty(filter))
-            {
                 view.Filter = null;
-                return;
-            }
+            else
+                view.Filter = item =>
+                    ((PatientLiteDb)item).PatientID?.Contains(filter, StringComparison.OrdinalIgnoreCase) == true;
 
-            view.Filter = item =>
-                ((PatientLiteDb)item).PatientID?.Contains(filter, StringComparison.OrdinalIgnoreCase) == true;
+            UpdateStatistics();
         }
 
 
@@ -765,7 +784,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 AllPatients = patients;
                 ApplyPatientFilter();
                 RememberLoadedPatients();
-                UpdateText = $"База обновлена. Найдено пациентов: {AllPatients.Count}";
+                UpdateText = $"База обновлена. {DescribePatients()}";
                 NotifyStudiesPatientCacheInvalidated();
                 return true;
             }

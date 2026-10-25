@@ -136,7 +136,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 var studies = await Task.Run(GetPlannedStudiesFromDatabase);
                 PlannedStudies = new ObservableCollection<LitePlannedStudy>(studies);
                 ApplyPatientFilter();
-                UpdateText = $"Загружено: {PlannedStudies.Count} исследований";
             }
             catch (Exception ex)
             {
@@ -812,7 +811,27 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         private void UpdateStatistics()
         {
-            UpdateText = $"Всего - [{PlannedStudies.Count}] исследований.";
+            UpdateText = DescribePlannedStudies();
+        }
+
+        private string DescribePlannedStudies()
+        {
+            var total = PlannedStudies?.Count ?? 0;
+            var visible = VisibleRowCount(PlannedStudies);
+            if (string.IsNullOrWhiteSpace(PatientIdFilter) || visible == total)
+                return $"Всего - [{total}] исследований.";
+
+            return $"Исследований: {visible} из {total}.";
+        }
+
+        private static int VisibleRowCount(object source)
+        {
+            if (source == null)
+                return 0;
+
+            return CollectionViewSource.GetDefaultView(source) is CollectionView view
+                ? view.Count
+                : 0;
         }
 
         private void ApplyPatientFilter()
@@ -823,13 +842,12 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             var view = CollectionViewSource.GetDefaultView(PlannedStudies);
             var filter = PatientIdFilter?.Trim();
             if (string.IsNullOrEmpty(filter))
-            {
                 view.Filter = null;
-                return;
-            }
+            else
+                view.Filter = item =>
+                    ((LitePlannedStudy)item).PatientId?.Contains(filter, StringComparison.OrdinalIgnoreCase) == true;
 
-            view.Filter = item =>
-                ((LitePlannedStudy)item).PatientId?.Contains(filter, StringComparison.OrdinalIgnoreCase) == true;
+            UpdateStatistics();
         }
 
         private void StartBusy(string message = "Загрузка...", bool percentShow = true)

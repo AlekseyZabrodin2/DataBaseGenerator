@@ -624,7 +624,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 var studies = await Task.Run(() => _storage.Studies.GetAllStudies());
                 AllStudies = studies;
-                ApplyPatientFilter();
+                ApplyPatientFilter(updateStatus: false);
             }
             catch (Exception ex)
             {
@@ -664,10 +664,32 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         private void UpdateStatistics()
         {
-            UpdateText = $"Всего - [{AllStudies.Count}] исследований, [{AllSeries.Count}] серий, [{AllImages.Count}] изображений.";
+            UpdateText = DescribeStudies();
         }
 
-        private void ApplyPatientFilter()
+        private string DescribeStudies()
+        {
+            var total = AllStudies?.Count ?? 0;
+            var series = AllSeries?.Count ?? 0;
+            var images = AllImages?.Count ?? 0;
+            var visible = VisibleRowCount(AllStudies);
+            if (string.IsNullOrWhiteSpace(PatientIdFilter) || visible == total)
+                return $"Всего - [{total}] исследований, [{series}] серий, [{images}] изображений.";
+
+            return $"Исследований: {visible} из {total}, серий — [{series}], изображений — [{images}].";
+        }
+
+        private static int VisibleRowCount(object source)
+        {
+            if (source == null)
+                return 0;
+
+            return CollectionViewSource.GetDefaultView(source) is CollectionView view
+                ? view.Count
+                : 0;
+        }
+
+        private void ApplyPatientFilter(bool updateStatus = true)
         {
             if (AllStudies == null)
                 return;
@@ -675,13 +697,13 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             var view = CollectionViewSource.GetDefaultView(AllStudies);
             var filter = PatientIdFilter?.Trim();
             if (string.IsNullOrEmpty(filter))
-            {
                 view.Filter = null;
-                return;
-            }
+            else
+                view.Filter = item =>
+                    ((StudyLiteDb)item).SnapshotPatientId?.Contains(filter, StringComparison.OrdinalIgnoreCase) == true;
 
-            view.Filter = item =>
-                ((StudyLiteDb)item).SnapshotPatientId?.Contains(filter, StringComparison.OrdinalIgnoreCase) == true;
+            if (updateStatus)
+                UpdateStatistics();
         }
 
         [RelayCommand]
@@ -762,7 +784,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 var studies = _storage.Studies.GetAllStudies();
                 AllStudies = new ObservableCollection<StudyLiteDb>(studies);
                 ApplyPatientFilter();
-                UpdateText = $"Исследований: {AllStudies.Count}";
                 _logger.Info($"Loaded {AllStudies.Count} studies");
             }
             catch (Exception ex)
