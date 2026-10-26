@@ -83,9 +83,9 @@
                         Text="Режим:" />
                     <ToggleButton
                         Margin="0,0,5,0"
+                        Focusable="False"
                         IsChecked="True"
                         IsHitTestVisible="False"
-                        Focusable="False"
                         Style="{StaticResource ToggleButtonStyle}"
                         ToolTip="Просмотр только для чтения" />
                 </StackPanel>
@@ -120,8 +120,8 @@
                 </Grid.ColumnDefinitions>
 
                 <ListBox
-                    FontWeight="SemiBold"
                     Padding="5"
+                    FontWeight="SemiBold"
                     ItemsSource="{Binding Collections}"
                     SelectedItem="{Binding SelectedCollection}" />
 
@@ -145,59 +145,59 @@
                             ToolTip="Оставляет строки, где текст есть в любой колонке" />
                     </StackPanel>
 
-                <DataGrid
-                    Grid.Row="1"
-                    AutoGenerateColumns="True"
-                    CanUserAddRows="False"
-                    CanUserDeleteRows="False"
-                    EnableColumnVirtualization="True"
-                    EnableRowVirtualization="True"
-                    GridLinesVisibility="All"
-                    HorizontalGridLinesBrush="#FF8A8A8A"
-                    IsReadOnly="True"
-                    ItemsSource="{Binding Rows}"
-                    ScrollViewer.IsDeferredScrollingEnabled="True"
-                    VerticalGridLinesBrush="#FF8A8A8A"
-                    VirtualizingPanel.IsVirtualizingWhenGrouping="True"
-                    VirtualizingPanel.ScrollUnit="Pixel"
-                    VirtualizingPanel.VirtualizationMode="Recycling">
-                    <DataGrid.Resources>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="VerticalAlignment" Value="Center" />
-                        </Style>
-                    </DataGrid.Resources>
-                    <DataGrid.ColumnHeaderStyle>
-                        <Style BasedOn="{StaticResource {x:Type DataGridColumnHeader}}" TargetType="DataGridColumnHeader">
-                            <Setter Property="Padding" Value="12,8" />
-                            <Setter Property="HorizontalContentAlignment" Value="Center" />
-                            <Setter Property="VerticalContentAlignment" Value="Center" />
-                            <Setter Property="BorderBrush" Value="#FF8A8A8A" />
-                            <Setter Property="BorderThickness" Value="0,0,1,1" />
-                            <Setter Property="FontWeight" Value="Bold" />
-                        </Style>
-                    </DataGrid.ColumnHeaderStyle>
-                    <DataGrid.CellStyle>
-                        <Style BasedOn="{StaticResource {x:Type DataGridCell}}" TargetType="DataGridCell">
-                            <Setter Property="Padding" Value="5,6" />
-                            <Setter Property="VerticalContentAlignment" Value="Center" />
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="DataGridCell">
-                                        <Border
-                                            Padding="{TemplateBinding Padding}"
-                                            BorderThickness="{TemplateBinding BorderThickness}"
-                                            SnapsToDevicePixels="True">
-                                            <ContentPresenter
-                                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </DataGrid.CellStyle>
-                </DataGrid>
+                    <DataGrid
+                        Grid.Row="1"
+                        AutoGenerateColumns="True"
+                        CanUserAddRows="False"
+                        CanUserDeleteRows="False"
+                        EnableColumnVirtualization="True"
+                        EnableRowVirtualization="True"
+                        GridLinesVisibility="All"
+                        HorizontalGridLinesBrush="#FF8A8A8A"
+                        IsReadOnly="True"
+                        ItemsSource="{Binding Rows}"
+                        ScrollViewer.IsDeferredScrollingEnabled="True"
+                        VerticalGridLinesBrush="#FF8A8A8A"
+                        VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                        VirtualizingPanel.ScrollUnit="Pixel"
+                        VirtualizingPanel.VirtualizationMode="Recycling">
+                        <DataGrid.Resources>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                            </Style>
+                        </DataGrid.Resources>
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style BasedOn="{StaticResource {x:Type DataGridColumnHeader}}" TargetType="DataGridColumnHeader">
+                                <Setter Property="Padding" Value="12,6" />
+                                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                <Setter Property="VerticalContentAlignment" Value="Center" />
+                                <Setter Property="BorderBrush" Value="#FF8A8A8A" />
+                                <Setter Property="BorderThickness" Value="0,0,2,2" />
+                                <Setter Property="FontWeight" Value="Bold" />
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+                        <DataGrid.CellStyle>
+                            <Style BasedOn="{StaticResource {x:Type DataGridCell}}" TargetType="DataGridCell">
+                                <Setter Property="Padding" Value="5,2" />
+                                <Setter Property="VerticalContentAlignment" Value="Center" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="DataGridCell">
+                                            <Border
+                                                Padding="{TemplateBinding Padding}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                SnapsToDevicePixels="True">
+                                                <ContentPresenter
+                                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                    SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </DataGrid.CellStyle>
+                    </DataGrid>
                 </Grid>
             </Grid>
         </Grid>
