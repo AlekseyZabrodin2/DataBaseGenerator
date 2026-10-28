@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DataBaseGenerator.UI.Wpf.Model;
 using DataBaseGenerator.UI.Wpf.ViewModel.Options;
 using FellowOakDicom;
 using FellowOakDicom.Network;
@@ -19,7 +23,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
     {
         private string _folderPathFull = string.Empty;
         private CancellationTokenSource _cancellationTokenSource;
-
+        private bool _isUpdatingSelection;
+        private bool _areAllStudiesSelected;
 
         [ObservableProperty]
         public partial string ServerIp { get; set; } = string.Empty;
@@ -48,15 +53,59 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [ObservableProperty]
         public partial int CurrentProgress { get; set; }
 
+        public ObservableCollection<DicomStudyPreview> PreviewStudies { get; } = [];
+
+        [ObservableProperty]
+        public partial int PreviewStudyCount { get; set; }
+
+        [ObservableProperty]
+        public partial int PreviewFileCount { get; set; }
+
+        [ObservableProperty]
+        public partial int SelectedFileCount { get; set; }
+
         public string FolderPathFull
         {
             get => _folderPathFull;
             set
             {
-                SetProperty(ref _folderPathFull, value);
-                BuildShortPath(_folderPathFull);
+                if (SetProperty(ref _folderPathFull, value))
+                {
+                    BuildShortPath(_folderPathFull);
+                    PreviewStudies.Clear();
+                    PreviewStudyCount = 0;
+                    PreviewFileCount = 0;
+                    AreAllStudiesSelected = false;
+                }
             }
         }
+
+        public bool AreAllStudiesSelected
+        {
+            get => _areAllStudiesSelected;
+            set
+            {
+                if (!SetProperty(ref _areAllStudiesSelected, value))
+                    return;
+
+                try
+                {
+                    _isUpdatingSelection = true;
+
+                    foreach (var study in PreviewStudies)
+                        study.IsSelected = value;
+                }
+                finally
+                {
+                    _isUpdatingSelection = false;
+
+                    SelectedFileCount = PreviewStudies
+                        .Where(study => study.IsSelected)
+                        .Sum(study => study.FileCount);
+                }
+            }
+        }
+
 
         private readonly GenerationOptionsStore _optionsStore;
 
@@ -98,7 +147,24 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             var client = DicomClientFactory.Create(ServerIp, port, false, CallingAe, CalledAe);
             client.ClientOptions.MaximumNumberOfRequestsPerAssociation = 500;
 
-            var dicomFiles = Directory.GetFiles(FolderPathFull, "*.*");
+            //var dicomFiles = Directory.GetFiles(FolderPathFull, "*.*");
+
+            if (PreviewStudies.Count == 0)
+            {
+                ServerOutputText = "Сначала выполните предпросмотр исследований.";
+                return;
+            }
+
+            var dicomFiles = PreviewStudies
+                .Where(study => study.IsSelected)
+                .SelectMany(study => study.FilePaths)
+                .ToArray();
+
+            if (dicomFiles.Length == 0)
+            {
+                ServerOutputText = "Выберите хотя бы одно исследование.";
+                return;
+            }
 
             var fileCount = 0;
 
@@ -107,6 +173,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 ServerOutputText = "Файлов не найдено.";
                 return;
             }
+
+            var completed = false;
 
             try
             {
@@ -121,7 +189,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     cancellationToken.ThrowIfCancellationRequested();
 
                     var batch = dicomFiles.Skip(i).Take(batchSize);
-
                     var requests = new List<DicomRequest>();
 
                     foreach (var filePath in batch)
@@ -129,47 +196,184 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                         cancellationToken.ThrowIfCancellationRequested();
 
                         var dicomFile = await DicomFile.OpenAsync(filePath);
-
                         var storeRequest = new DicomCStoreRequest(dicomFile);
 
                         storeRequest.OnResponseReceived += (_, response) =>
                         {
                             if (response.Status.State == DicomState.Success)
                             {
-                                Interlocked.Increment(ref fileCount);
+                                var count = Interlocked.Increment(ref fileCount);
+                                var percent = count * 100 / dicomFiles.Length;
 
-                                var percent = fileCount * 100 / dicomFiles.Length;
-                                scanProgress.Report((percent, $"DICOM файл {fileCount} из {dicomFiles.Length} отправлен успешно."));
+                                scanProgress.Report((
+                                    percent,
+                                    $"Отправлено {count} из {dicomFiles.Length} файлов."));
                             }
                         };
 
                         requests.Add(storeRequest);
                     }
+
                     await client.AddRequestsAsync(requests);
-                    await client.SendAsync(cancellationToken, cancellationMode: DicomClientCancellationMode.ImmediatelyReleaseAssociation);
+                    await client.SendAsync(
+                        cancellationToken,
+                        cancellationMode: DicomClientCancellationMode.ImmediatelyReleaseAssociation);
                 }
+
+                completed = true;
             }
             catch (OperationCanceledException)
             {
-                ServerOutputText = $"Отправка DICOM файла {fileCount} была отменена.";
+                ServerOutputText = $"Отправка отменена. Успешно отправлено файлов: {fileCount}.";
                 return;
             }
             catch (Exception ex)
             {
-                ServerOutputText = $"Ошибка: {ex.Message}";
+                ServerOutputText = $"Ошибка отправки: {ex.Message}";
                 return;
             }
             finally
             {
                 stopwatch.Stop();
-                var elapsedTime = stopwatch.Elapsed;
-                var timeString = FormatTimeSpan(elapsedTime);
-
                 IsBusy = false;
 
-                ServerOutputText = $"DICOM файл {fileCount} отправлен успешно. Время выполнения: {timeString}";
+                if (completed)
+                {
+                    ServerOutputText =
+                        $"Отправлено файлов: {fileCount} из {dicomFiles.Length}. " +
+                        $"Время выполнения: {FormatTimeSpan(stopwatch.Elapsed)}";
+                }
             }
         }
+
+
+        [RelayCommand]
+        private async Task PreviewStudiesAsync()
+        {
+            if (string.IsNullOrWhiteSpace(FolderPathFull) ||
+                !Directory.Exists(FolderPathFull))
+            {
+                ServerOutputText = "Выберите существующую директорию.";
+                return;
+            }
+
+            IsBusy = true;
+            BusyMessage = "Сканирование DICOM-файлов...";
+            PreviewStudies.Clear();
+            PreviewStudyCount = 0;
+            PreviewFileCount = 0;
+            AreAllStudiesSelected = false;
+
+            try
+            {
+                var files = await Task.Run(() =>
+                    Directory.GetFiles(
+                        FolderPathFull,
+                        "*",
+                        SearchOption.AllDirectories));
+
+                var studies = new Dictionary<string, DicomStudyPreview>();
+                var invalidFileCount = 0;
+
+                foreach (var filePath in files)
+                {
+                    try
+                    {
+                        var dicomFile = await DicomFile.OpenAsync(filePath);
+                        var dataset = dicomFile.Dataset;
+
+                        var studyUid = dataset.GetSingleValueOrDefault<string>(
+                            DicomTag.StudyInstanceUID, string.Empty);
+
+                        // Файл без StudyInstanceUID не объединяем с другими.
+                        var key = string.IsNullOrWhiteSpace(studyUid)
+                            ? $"__NO_UID__{filePath}"
+                            : studyUid;
+
+                        if (studies.TryGetValue(key, out var existingStudy))
+                        {
+                            existingStudy.FilePaths.Add(filePath);
+                            continue;
+                        }
+
+                        var patientName = dataset
+                            .GetSingleValueOrDefault(DicomTag.PatientName, string.Empty)
+                            .Replace('^', ' ')
+                            .Trim();
+
+                        var studyDate = dataset.GetSingleValueOrDefault(DicomTag.StudyDate, string.Empty);
+                        studyDate = DateTime.TryParseExact(studyDate, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date)
+                                ? date.ToString("dd.MM.yyyy")
+                                : studyDate;
+
+                        studies[key] = new DicomStudyPreview
+                        {
+                            StudyInstanceUid = studyUid,
+                            PatientName = patientName,
+                            PatientId = dataset.GetSingleValueOrDefault<string>(DicomTag.PatientID, string.Empty),
+                            StudyDate = studyDate,
+                            StudyDescription = dataset.GetSingleValueOrDefault<string>(DicomTag.StudyDescription, string.Empty),
+                            FilePaths = [filePath],
+                            IsSelected = true
+                        };
+                    }
+                    catch
+                    {
+                        invalidFileCount++;
+                    }
+                }
+
+                foreach (var study in studies.Values)
+                {
+                    study.PropertyChanged += PreviewStudy_PropertyChanged;
+                    PreviewStudies.Add(study);
+                }
+
+                PreviewStudyCount = PreviewStudies.Count;
+                PreviewFileCount = PreviewStudies.Sum(study => study.FileCount);
+                AreAllStudiesSelected = PreviewStudies.Count > 0;
+
+                SelectedFileCount = PreviewStudies
+                    .Where(study => study.IsSelected)
+                    .Sum(study => study.FileCount);
+
+                ServerOutputText =
+                    $"Найдено исследований: {PreviewStudyCount}. " +
+                    $"DICOM-файлов: {PreviewFileCount}. " +
+                    $"Пропущено файлов: {invalidFileCount}.";
+            }
+            catch (Exception ex)
+            {
+                ServerOutputText = $"Ошибка предпросмотра: {ex.Message}";
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private void PreviewStudy_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != nameof(DicomStudyPreview.IsSelected) ||
+                _isUpdatingSelection)
+            {
+                return;
+            }
+            if (e.PropertyName == nameof(DicomStudyPreview.IsSelected))
+            {
+                if (!_isUpdatingSelection)
+                    AreAllStudiesSelected = PreviewStudies.All(study => study.IsSelected);
+
+                SelectedFileCount = PreviewStudies
+                    .Where(study => study.IsSelected)
+                    .Sum(study => study.FileCount);
+            }
+
+            AreAllStudiesSelected =
+                PreviewStudies.Count > 0 &&
+                PreviewStudies.All(study => study.IsSelected);
+        }
+
 
         [RelayCommand]
         private void CancaelSendingImage()
