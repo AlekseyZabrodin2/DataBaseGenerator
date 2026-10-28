@@ -11,6 +11,7 @@ using DataBaseGenerator.Core.MySqlGenerator;
 using DataBaseGenerator.Core.MySqlGenerator.Data;
 using DataBaseGenerator.UI.Wpf.View;
 using DataBaseGenerator.UI.Wpf.ViewModel;
+using DataBaseGenerator.UI.Wpf.ViewModel.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -103,6 +104,8 @@ namespace DataBaseGenerator.UI.Wpf
                     services.AddSingleton<LiteDbStudiesTableViewModel>();
                     services.AddSingleton<LiteDbPlannedStudiesViewModel>();
                     services.AddSingleton<LiteDbViewerViewModel>();
+                    services.AddSingleton<FileGeneratorViewModel>();
+                    services.AddSingleton<DicomReaderViewModel>();
                     services.AddTransient<DialogMessageWindow>();
                     services.AddTransient<MainWindow>();
                     services.AddTransient<SpecificationWindow>();
