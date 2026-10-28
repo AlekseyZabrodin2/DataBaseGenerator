@@ -20,5 +20,6 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.LiteDbModels
         public string Address { get; set; } = string.Empty;
         public string Phone { get; set; } = string.Empty;
         public string Comments { get; set; } = string.Empty;
+        public string Occupation { get; set; } = string.Empty;
     }
 }
