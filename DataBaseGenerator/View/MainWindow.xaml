@@ -80,6 +80,28 @@
                                 IsCheckable="True"
                                 IsChecked="{Binding IsLiteDbViewerMode, Mode=OneWay}" />
                         </MenuItem>
+                        <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Dicom Generator">
+                            <MenuItem
+                                Command="{Binding SwitchToDicomGenerateCommand}"
+                                Header="Generate"
+                                IsCheckable="True"
+                                IsChecked="{Binding IsDicomGenerateMode, Mode=OneWay}" />
+                            <MenuItem
+                                Command="{Binding SwitchToDicomReaderCommand}"
+                                Header="Reader"
+                                IsCheckable="True"
+                                IsChecked="{Binding IsDicomReaderMode, Mode=OneWay}" />
+                            <MenuItem
+                                Command="{Binding SwitchToDicomPacsCommand}"
+                                Header="PACS"
+                                IsCheckable="True"
+                                IsChecked="{Binding IsDicomPacsMode, Mode=OneWay}" />
+                            <MenuItem
+                                Command="{Binding SwitchToDicomParseCommand}"
+                                Header="Парсинг DICOM"
+                                IsCheckable="True"
+                                IsChecked="{Binding IsDicomParseMode, Mode=OneWay}" />
+                        </MenuItem>
                         <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="File">
                             <MenuItem Header="Новый (Ctrl + N)" />
                             <MenuItem Header="Открыть (Ctrl + Open)" />
