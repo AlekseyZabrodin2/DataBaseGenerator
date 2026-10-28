@@ -4,7 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using NLog;
 
-namespace DataBaseGenerator.UI.Wpf.ViewModel
+namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
 {
     public sealed class GenerationOptionsStore
     {
@@ -27,6 +27,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             LiteDb = Create("BirthdateLiteDb", document?.LiteDb);
             PatientsDatabasePath = document?.PatientsDatabasePath ?? string.Empty;
             PlannedStudiesDatabasePath = document?.PlannedStudiesDatabasePath ?? string.Empty;
+            DicomTestDataFolderPath = document?.DicomTestDataFolderPath ?? string.Empty;
+            DicomSaveFolderPath = document?.DicomSaveFolderPath ?? string.Empty;
         }
 
         public PatientGenerationOptions MySql { get; }
@@ -36,6 +38,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         public string PatientsDatabasePath { get; private set; }
 
         public string PlannedStudiesDatabasePath { get; private set; }
+
+        public string DicomTestDataFolderPath { get; private set; }
+
+        public string DicomSaveFolderPath { get; private set; }
 
         public void SetPatientsDatabasePath(string path)
         {
@@ -52,6 +58,24 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 return;
 
             PlannedStudiesDatabasePath = path;
+            Save();
+        }
+
+        public void SetDicomTestDataFolderPath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path) || string.Equals(DicomTestDataFolderPath, path, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            DicomTestDataFolderPath = path;
+            Save();
+        }
+
+        public void SetDicomSaveFolderPath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path) || string.Equals(DicomSaveFolderPath, path, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            DicomSaveFolderPath = path;
             Save();
         }
 
@@ -97,7 +121,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     MySql = MySql.ToData(),
                     LiteDb = LiteDb.ToData(),
                     PatientsDatabasePath = PatientsDatabasePath,
-                    PlannedStudiesDatabasePath = PlannedStudiesDatabasePath
+                    PlannedStudiesDatabasePath = PlannedStudiesDatabasePath,
+                    DicomTestDataFolderPath = DicomTestDataFolderPath,
+                    DicomSaveFolderPath = DicomSaveFolderPath
                 };
 
                 File.WriteAllText(_path, JsonSerializer.Serialize(document, JsonOptions));
@@ -114,6 +140,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             public GenerationOptionsData LiteDb { get; set; }
             public string PatientsDatabasePath { get; set; }
             public string PlannedStudiesDatabasePath { get; set; }
+            public string DicomTestDataFolderPath { get; set; }
+            public string DicomSaveFolderPath { get; set; }
         }
     }
 }

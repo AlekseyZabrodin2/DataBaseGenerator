@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DataBaseGenerator.Core.MySqlGenerator;
+using DataBaseGenerator.UI.Wpf.ViewModel.Options;
 
 namespace DataBaseGenerator.UI.Wpf.ViewModel
 {

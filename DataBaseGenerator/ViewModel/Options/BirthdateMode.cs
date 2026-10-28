@@ -1,4 +1,4 @@
-namespace DataBaseGenerator.UI.Wpf.ViewModel
+namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
 {
     public enum BirthdateMode
     {
