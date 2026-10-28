@@ -208,9 +208,14 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         private void ReadPatientInfo(DicomDataset dataset)
         {
+            var patientName = dataset
+                            .GetSingleValueOrDefault(DicomTag.PatientName, string.Empty)
+                            .Replace('^', ' ')
+                            .Trim();
+
             PatientInfo = new DicomPatientInfo
             {
-                PatientName = GetTagValue(dataset, DicomTag.PatientName),
+                PatientName = patientName,
                 PatientId = GetTagValue(dataset, DicomTag.PatientID),
                 BirthDate = FormatDate(GetTagValue(dataset, DicomTag.PatientBirthDate)),
                 Sex = GetTagValue(dataset, DicomTag.PatientSex),
@@ -243,7 +248,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 System.Globalization.CultureInfo.InvariantCulture,
                 System.Globalization.DateTimeStyles.None,
                 out var date)
-                ? date.ToString("dd-MMMM-yyyy", System.Globalization.CultureInfo.InvariantCulture)
+                ? date.ToString("dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture)
                 : value;
         }
 
