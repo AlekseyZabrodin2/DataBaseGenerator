@@ -75,6 +75,17 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         public partial bool IsLiteDbViewerMode { get; set; }
 
         [ObservableProperty]
+        public partial bool IsDicomGenerateMode { get; set; }
+        [ObservableProperty]
+        public partial bool IsDicomReaderMode { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsDicomPacsMode { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsDicomParseMode { get; set; }
+
+        [ObservableProperty]
         public partial bool ShowPatients { get; set; } = true;
 
         [ObservableProperty]
@@ -300,6 +311,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private StudiesLiteDbTableUserControl _studiesPage;
         private PlannedStudiesLiteDbUserControl _plannedPage;
         private LiteDbViewerUserControl _viewerPage;
+        private DicomGenerateUserControl _dicomGeneratePage;
+        private DicomReaderUserControl _dicomReaderPage;
+        private DicomPacsUserControl _dicomPacsPage;
+        private DicomParseUserControl _dicomParsePage;
 
         [RelayCommand]
         private void SwitchToMySql()
@@ -313,6 +328,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             IsLiteDbPlannedStudiesMode = false;
             ShowPatients = false;
             ShowStudies = false;
+            ClearDicomMode();
             RequestServiceStatus();
         }
         
@@ -354,6 +370,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             IsLiteDbPlannedStudiesMode = true;
             ShowPatients = false;
             ShowStudies = false;
+            ClearDicomMode();
             RequestServiceStatus();
         }
 
@@ -396,6 +413,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             ShowPatients = false;
             ShowStudies = false;
             IsLiteDbViewerMode = true;
+            ClearDicomMode();
             RequestServiceStatus();
         }
 
@@ -407,6 +425,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             IsMySqlMode = false;
             IsLiteDbMode = true;
             IsLiteDbPlannedStudiesMode = false;
+            ClearDicomMode();
             RequestServiceStatus();
         }
 
@@ -428,6 +447,58 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 App.UpdatePlannedStorage(App.PlannedStorage.DatabasePath, true);
                 planned.IsReadOnlyMode = true;
             }
+        }
+
+        [RelayCommand]
+        private void SwitchToDicomGenerate()
+        {
+            _dicomGeneratePage ??= new DicomGenerateUserControl();
+            ShowDicomSection("Generate", _dicomGeneratePage);
+        }
+
+        [RelayCommand]
+        private void SwitchToDicomReader()
+        {
+            _dicomReaderPage ??= new DicomReaderUserControl();
+            ShowDicomSection("Reader", _dicomReaderPage);
+        }
+
+        [RelayCommand]
+        private void SwitchToDicomPacs()
+        {
+            _dicomPacsPage ??= new DicomPacsUserControl();
+            ShowDicomSection("PACS", _dicomPacsPage);
+        }
+
+        [RelayCommand]
+        private void SwitchToDicomParse()
+        {
+            _dicomParsePage ??= new DicomParseUserControl();
+            ShowDicomSection("Парсинг DICOM", _dicomParsePage);
+        }
+
+        private void ShowDicomSection(string sectionName, UserControl control)
+        {
+            LeaveLiteDbViewer();
+            CurrentPage = control;
+            CurrentPageName = $"DICOM - {sectionName}";
+            IsMySqlMode = false;
+            IsLiteDbMode = false;
+            IsLiteDbPlannedStudiesMode = false;
+            ShowPatients = false;
+            ShowStudies = false;
+            IsDicomGenerateMode = sectionName == "Generate";
+            IsDicomReaderMode = sectionName == "Reader";
+            IsDicomPacsMode = sectionName == "PACS";
+            IsDicomParseMode = sectionName == "Парсинг DICOM";
+        }
+
+        private void ClearDicomMode()
+        {
+            IsDicomGenerateMode = false;
+            IsDicomReaderMode = false;
+            IsDicomPacsMode = false;
+            IsDicomParseMode = false;
         }
 
         private void LeaveLiteDbViewer()
