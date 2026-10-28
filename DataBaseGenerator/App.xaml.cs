@@ -106,6 +106,7 @@ namespace DataBaseGenerator.UI.Wpf
                     services.AddSingleton<LiteDbViewerViewModel>();
                     services.AddSingleton<FileGeneratorViewModel>();
                     services.AddSingleton<DicomReaderViewModel>();
+                    services.AddSingleton<DicomPacsViewModel>();
                     services.AddTransient<DialogMessageWindow>();
                     services.AddTransient<MainWindow>();
                     services.AddTransient<SpecificationWindow>();
