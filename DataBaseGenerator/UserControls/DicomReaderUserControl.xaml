@@ -51,7 +51,7 @@
             Margin="0,5,0,0"
             Padding="5"
             BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
-            BorderThickness="5">
+            BorderThickness="4">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -98,9 +98,9 @@
 
         <Grid
             Grid.Row="1"
-            Margin="0,5,0,5"
+            Margin="0,5"
             Background="{DynamicResource MahApps.Brushes.Accent}">
-            <Grid Margin="5">
+            <Grid Margin="4">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
@@ -127,11 +127,11 @@
                         HorizontalAlignment="Left"
                         FontSize="14"
                         FontWeight="SemiBold"
-                        Text="{Binding DicomFilesCollection.Count, StringFormat=Файлов: {0}}" />
+                        Text="{Binding DicomFilesCollection.Count, StringFormat='Файлов: {0}'}" />
                 </Grid>
 
 
-                <Grid Grid.Column="1" Margin="5,0,0,0">
+                <Grid Grid.Column="1" Margin="3,0,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
@@ -139,8 +139,8 @@
 
                     <TextBox
                         Grid.Row="0"
-                        Margin="0,0,0,5"
-                        Padding="6,4"
+                        Margin="0,0,0,3"
+                        Padding="4,3"
                         mah:TextBoxHelper.ClearTextButton="True"
                         mah:TextBoxHelper.Watermark="Поиск по тегам, номерам и значениям"
                         FontSize="13"
@@ -186,7 +186,6 @@
                                 </DataGrid.Columns>
                             </DataGrid>
                         </TabItem>
-
 
                         <TabItem Margin="2,4,0,0">
                             <TabItem.Header>
