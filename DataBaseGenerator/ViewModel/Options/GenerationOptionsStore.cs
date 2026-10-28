@@ -29,6 +29,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
             PlannedStudiesDatabasePath = document?.PlannedStudiesDatabasePath ?? string.Empty;
             DicomTestDataFolderPath = document?.DicomTestDataFolderPath ?? string.Empty;
             DicomSaveFolderPath = document?.DicomSaveFolderPath ?? string.Empty;
+            PacsServerIp = document?.PacsServerIp ?? string.Empty;
+            PacsServerPort = document?.PacsServerPort ?? string.Empty;
+            PacsCallingAe = document?.PacsCallingAe ?? string.Empty;
+            PacsCalledAe = document?.PacsCalledAe ?? string.Empty;
+            PacsFolderPath = document?.PacsFolderPath ?? string.Empty;
         }
 
         public PatientGenerationOptions MySql { get; }
@@ -42,6 +47,17 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
         public string DicomTestDataFolderPath { get; private set; }
 
         public string DicomSaveFolderPath { get; private set; }
+
+        public string PacsServerIp { get; private set; }
+
+        public string PacsServerPort { get; private set; }
+
+        public string PacsCallingAe { get; private set; }
+
+        public string PacsCalledAe { get; private set; }
+
+        public string PacsFolderPath { get; private set; }
+
 
         public void SetPatientsDatabasePath(string path)
         {
@@ -76,6 +92,51 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
                 return;
 
             DicomSaveFolderPath = path;
+            Save();
+        }
+
+        public void SetPacsServerIp(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path) || string.Equals(PacsServerIp, path, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            PacsServerIp = path;
+            Save();
+        }
+
+        public void SetPacsServerPort(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path) || string.Equals(PacsServerPort, path, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            PacsServerPort = path;
+            Save();
+        }
+
+        public void SetPacsCallingAe(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path) || string.Equals(PacsCallingAe, path, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            PacsCallingAe = path;
+            Save();
+        }
+
+        public void SetPacsCalledAe(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path) || string.Equals(PacsCalledAe, path, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            PacsCalledAe = path;
+            Save();
+        }
+
+        public void SetPacsFolderPath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path) || string.Equals(PacsFolderPath, path, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            PacsFolderPath = path;
             Save();
         }
 
@@ -123,7 +184,12 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
                     PatientsDatabasePath = PatientsDatabasePath,
                     PlannedStudiesDatabasePath = PlannedStudiesDatabasePath,
                     DicomTestDataFolderPath = DicomTestDataFolderPath,
-                    DicomSaveFolderPath = DicomSaveFolderPath
+                    DicomSaveFolderPath = DicomSaveFolderPath,
+                    PacsServerIp = PacsServerIp,
+                    PacsServerPort = PacsServerPort,
+                    PacsCallingAe = PacsCallingAe,
+                    PacsCalledAe = PacsCalledAe,
+                    PacsFolderPath = PacsFolderPath
                 };
 
                 File.WriteAllText(_path, JsonSerializer.Serialize(document, JsonOptions));
@@ -142,6 +208,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
             public string PlannedStudiesDatabasePath { get; set; }
             public string DicomTestDataFolderPath { get; set; }
             public string DicomSaveFolderPath { get; set; }
+            public string PacsServerIp { get; set; }
+            public string PacsServerPort { get; set; }
+            public string PacsCallingAe { get; set; }
+            public string PacsCalledAe { get; set; }
+            public string PacsFolderPath { get; set; }
         }
     }
 }
