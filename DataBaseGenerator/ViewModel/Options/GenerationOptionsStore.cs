@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using NLog;
 
 namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
@@ -34,6 +35,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
             PacsCallingAe = document?.PacsCallingAe ?? string.Empty;
             PacsCalledAe = document?.PacsCalledAe ?? string.Empty;
             PacsFolderPath = document?.PacsFolderPath ?? string.Empty;
+            ParserConfig = NormalizeParserConfig(document?.Parser);
         }
 
         public PatientGenerationOptions MySql { get; }
@@ -58,6 +60,19 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
 
         public string PacsFolderPath { get; private set; }
 
+        public ParserAppConfig ParserConfig { get; private set; }
+
+        public Task<ParserAppConfig> LoadParserConfigAsync()
+        {
+            return Task.FromResult(ParserConfig);
+        }
+
+        public Task SaveParserConfigAsync(ParserAppConfig config)
+        {
+            ParserConfig = NormalizeParserConfig(config);
+            Save();
+            return Task.CompletedTask;
+        }
 
         public void SetPatientsDatabasePath(string path)
         {
@@ -189,7 +204,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
                     PacsServerPort = PacsServerPort,
                     PacsCallingAe = PacsCallingAe,
                     PacsCalledAe = PacsCalledAe,
-                    PacsFolderPath = PacsFolderPath
+                    PacsFolderPath = PacsFolderPath,
+                    Parser = ParserConfig
                 };
 
                 File.WriteAllText(_path, JsonSerializer.Serialize(document, JsonOptions));
@@ -213,6 +229,16 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
             public string PacsCallingAe { get; set; }
             public string PacsCalledAe { get; set; }
             public string PacsFolderPath { get; set; }
+            public ParserAppConfig Parser { get; set; }
+        }
+
+        private static ParserAppConfig NormalizeParserConfig(ParserAppConfig config)
+        {
+            config ??= new ParserAppConfig();
+            config.Sources ??= new ParserSourcesConfig();
+            config.Sources.Folders ??= [];
+            config.Sources.Pacs ??= [];
+            return config;
         }
     }
 }
