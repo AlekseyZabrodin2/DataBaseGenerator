@@ -1,5 +1,5 @@
-﻿using System;
-using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Patient;
+using System;
+using DataBaseGenerator.Core.GeneratorRules.Patient;
 
 namespace DataBaseGenerator.Core.MySqlGenerator
 {

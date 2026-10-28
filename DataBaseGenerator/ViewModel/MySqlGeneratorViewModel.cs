@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -13,11 +13,12 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DataBaseGenerator.Core.MySqlGenerator;
 using DataBaseGenerator.Core.MySqlGenerator.Data;
-using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Patient;
-using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.WorkList;
+using DataBaseGenerator.Core.GeneratorRules.Patient;
+using DataBaseGenerator.Core.GeneratorRules.WorkList;
 using DataBaseGenerator.UI.Wpf.View;
 using Microsoft.EntityFrameworkCore;
 using NLog;
+using DataBaseGenerator.UI.Wpf.ViewModel.Options;
 
 namespace DataBaseGenerator.UI.Wpf.ViewModel
 {

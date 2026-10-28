@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -16,10 +16,11 @@ using DataBaseGenerator.Core.LiteDbGenerator.Enums;
 using DataBaseGenerator.Core.LiteDbGenerator.LiteDbModels;
 using DataBaseGenerator.Core.LiteDbGenerator.Models;
 using DataBaseGenerator.Core.MySqlGenerator;
-using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Patient;
+using DataBaseGenerator.Core.GeneratorRules.Patient;
 using LiteDB;
 using Microsoft.Win32;
 using NLog;
+using DataBaseGenerator.UI.Wpf.ViewModel.Options;
 
 namespace DataBaseGenerator.UI.Wpf.ViewModel
 {

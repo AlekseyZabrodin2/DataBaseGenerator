@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using DataBaseGenerator.Core.MySqlGenerator;
-using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Study;
+using DataBaseGenerator.Core.GeneratorRules.Study;
 using LiteDB;
 
 namespace DataBaseGenerator.Core.LiteDbGenerator.Models

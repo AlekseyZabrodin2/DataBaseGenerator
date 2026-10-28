@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -14,11 +14,12 @@ using DataBaseGenerator.Core.LiteDbGenerator.Contracts;
 using DataBaseGenerator.Core.LiteDbGenerator.Data;
 using DataBaseGenerator.Core.LiteDbGenerator.Enums;
 using DataBaseGenerator.Core.LiteDbGenerator.Models;
-using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Image;
-using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Study;
+using DataBaseGenerator.Core.GeneratorRules.Image;
+using DataBaseGenerator.Core.GeneratorRules.Study;
 using LiteDB;
 using Microsoft.Win32;
 using NLog;
+using DataBaseGenerator.UI.Wpf.ViewModel.Options;
 
 namespace DataBaseGenerator.UI.Wpf.ViewModel
 {

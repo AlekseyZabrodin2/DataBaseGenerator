@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using DataBaseGenerator.Core.MySqlGenerator;
-using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Patient;
-using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.WorkList;
+using DataBaseGenerator.Core.GeneratorRules.Patient;
+using DataBaseGenerator.Core.GeneratorRules.WorkList;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DataBaseGenerator.Test

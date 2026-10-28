@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DataBaseGenerator.Core.LiteDbGenerator.Enums;
-using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.PlannedStudy;
-using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Study;
+using DataBaseGenerator.Core.GeneratorRules.PlannedStudy;
+using DataBaseGenerator.Core.GeneratorRules.Study;
 using LiteDB;
 
 namespace DataBaseGenerator.Core.LiteDbGenerator.Models
