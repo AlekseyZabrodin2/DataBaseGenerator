@@ -195,9 +195,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [ObservableProperty]
         public partial GenderItem SelectedGender { get; set; }
 
-
-
         private readonly GenerationOptionsStore _optionsStore;
+
 
         public FileGeneratorViewModel(GenerationOptionsStore optionsStore)
         {
