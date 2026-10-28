@@ -83,22 +83,22 @@
                         <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Dicom Generator">
                             <MenuItem
                                 Command="{Binding SwitchToDicomGenerateCommand}"
-                                Header="Generate"
+                                Header="DICOM generate"
                                 IsCheckable="True"
                                 IsChecked="{Binding IsDicomGenerateMode, Mode=OneWay}" />
                             <MenuItem
                                 Command="{Binding SwitchToDicomReaderCommand}"
-                                Header="Reader"
+                                Header="DICOM reader"
                                 IsCheckable="True"
                                 IsChecked="{Binding IsDicomReaderMode, Mode=OneWay}" />
                             <MenuItem
                                 Command="{Binding SwitchToDicomPacsCommand}"
-                                Header="PACS"
+                                Header="PACS mover"
                                 IsCheckable="True"
                                 IsChecked="{Binding IsDicomPacsMode, Mode=OneWay}" />
                             <MenuItem
                                 Command="{Binding SwitchToDicomParseCommand}"
-                                Header="Парсинг DICOM"
+                                Header="DICOM parser"
                                 IsCheckable="True"
                                 IsChecked="{Binding IsDicomParseMode, Mode=OneWay}" />
                         </MenuItem>

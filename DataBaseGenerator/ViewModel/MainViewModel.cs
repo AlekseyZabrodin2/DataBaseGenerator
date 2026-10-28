@@ -453,44 +453,44 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private void SwitchToDicomGenerate()
         {
             _dicomGeneratePage ??= new DicomGenerateUserControl();
-            ShowDicomSection("Generate", _dicomGeneratePage);
+            ShowDicomSection("DICOM generate", _dicomGeneratePage);
         }
 
         [RelayCommand]
         private void SwitchToDicomReader()
         {
             _dicomReaderPage ??= new DicomReaderUserControl();
-            ShowDicomSection("Reader", _dicomReaderPage);
+            ShowDicomSection("DICOM reader", _dicomReaderPage);
         }
 
         [RelayCommand]
         private void SwitchToDicomPacs()
         {
             _dicomPacsPage ??= new DicomPacsUserControl();
-            ShowDicomSection("PACS", _dicomPacsPage);
+            ShowDicomSection("PACS mover", _dicomPacsPage);
         }
 
         [RelayCommand]
         private void SwitchToDicomParse()
         {
             _dicomParsePage ??= new DicomParseUserControl();
-            ShowDicomSection("Парсинг DICOM", _dicomParsePage);
+            ShowDicomSection("Dicom parser", _dicomParsePage);
         }
 
         private void ShowDicomSection(string sectionName, UserControl control)
         {
             LeaveLiteDbViewer();
             CurrentPage = control;
-            CurrentPageName = $"DICOM - {sectionName}";
+            CurrentPageName = sectionName;
             IsMySqlMode = false;
             IsLiteDbMode = false;
             IsLiteDbPlannedStudiesMode = false;
             ShowPatients = false;
             ShowStudies = false;
-            IsDicomGenerateMode = sectionName == "Generate";
-            IsDicomReaderMode = sectionName == "Reader";
-            IsDicomPacsMode = sectionName == "PACS";
-            IsDicomParseMode = sectionName == "Парсинг DICOM";
+            IsDicomGenerateMode = sectionName == "DICOM generate";
+            IsDicomReaderMode = sectionName == "DICOM reader";
+            IsDicomPacsMode = sectionName == "PACS mover";
+            IsDicomParseMode = sectionName == "Dicom parser";
         }
 
         private void ClearDicomMode()
