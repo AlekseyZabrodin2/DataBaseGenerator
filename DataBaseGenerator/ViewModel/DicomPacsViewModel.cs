@@ -199,6 +199,59 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
         }
 
+        [RelayCommand]
+        public async Task EchoAsync()
+        {
+            if (string.IsNullOrWhiteSpace(ServerPort) || string.IsNullOrWhiteSpace(ServerPort))
+            {
+                ServerOutputText = "Please enter Host or Port.";
+                return;
+            }
+
+            ServerOutputText = "Connecting ...";
+
+            try
+            {
+                if (!int.TryParse(ServerPort, out var port))
+                {
+                    ServerOutputText = "Некорректный порт.";
+                    return;
+                }
+
+                var client = DicomClientFactory.Create(ServerIp, port, false, CallingAe, CalledAe);
+
+                if (client == null)
+                {
+                    ServerOutputText = "Не удается создать клиент PACS.";
+                    return;
+                }
+
+                DicomStatus responseStatus = null;
+                var echoRequest = new DicomCEchoRequest();
+
+                echoRequest.OnResponseReceived += (request, response) =>
+                {
+                    responseStatus = response.Status;
+                };
+
+                await client.AddRequestAsync(echoRequest);
+                await client.SendAsync();
+
+                if (responseStatus?.State == DicomState.Success)
+                {
+                    ServerOutputText = $"PacS - [ {client.CalledAe} ] connected successful! ({client.Host} : {client.Port})";
+                }
+                else
+                {
+                    ServerOutputText = $"PACS вернул статус: {responseStatus}";
+                }
+            }
+            catch (Exception ex)
+            {
+                ServerOutputText = $"error: {ex.Message}";
+            }
+        }
+
         private void SavePacsConfig()
         {
             _optionsStore.SetPacsServerIp(ServerIp);
