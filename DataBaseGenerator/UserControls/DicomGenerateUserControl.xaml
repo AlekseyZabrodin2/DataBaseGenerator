@@ -1,0 +1,734 @@
+<UserControl
+    x:Class="DataBaseGenerator.UI.Wpf.UserControls.DicomGenerateUserControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:convert="clr-namespace:DataBaseGenerator.UI.Wpf.Converters"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls">
+
+
+    <UserControl.Resources>
+        <convert:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <convert:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+    </UserControl.Resources>
+
+    <Border
+        Grid.Row="0"
+        Margin="5"
+        BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
+        BorderThickness="4">
+
+        <Grid Margin="5,0" ShowGridLines="False">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <Grid
+                Grid.Row="0"
+                Grid.ColumnSpan="4"
+                Margin="0,5">
+
+                <StackPanel Orientation="Vertical">
+                    <TextBlock FontWeight="SemiBold" Text="Folder with TestData" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox
+                            Height="30"
+                            Margin="0,0,10,0"
+                            VerticalContentAlignment="Center"
+                            controls:TextBoxHelper.Watermark="Select folder with TestData ..."
+                            BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
+                            IsReadOnly="True"
+                            Text="{Binding TestDataFolderPathShort}"
+                            ToolTip="{Binding TestDataFolderPath}" />
+
+                        <Button
+                            Grid.Column="1"
+                            Width="100"
+                            Padding="20,8"
+                            Background="{DynamicResource MahApps.Brushes.Accent}"
+                            Command="{Binding BrowseTestDataFolderCommand}"
+                            Content="Browse"
+                            ToolTip="Выбрать директорию с тестовыми данными" />
+                    </Grid>
+                </StackPanel>
+            </Grid>
+
+            <Grid
+                Grid.Row="1"
+                Grid.ColumnSpan="4"
+                Margin="0,5">
+
+                <StackPanel Orientation="Vertical">
+                    <TextBlock FontWeight="SemiBold" Text="Folder for Saving" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox
+                            Margin="0,0,10,0"
+                            VerticalContentAlignment="Center"
+                            controls:TextBoxHelper.Watermark="Select folder for Saving..."
+                            BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
+                            IsReadOnly="True"
+                            Text="{Binding SaveFolderPathShort}"
+                            ToolTip="{Binding SaveFolderPath}" />
+
+                        <Button
+                            Grid.Column="1"
+                            Width="100"
+                            Padding="20,8"
+                            Background="{DynamicResource MahApps.Brushes.Accent}"
+                            Command="{Binding BrowseSaveFolderCommand}"
+                            Content="Browse"
+                            ToolTip="Выбрать директорию для сохранения" />
+                    </Grid>
+                </StackPanel>
+            </Grid>
+
+            <Grid
+                Name="AddPatients"
+                Grid.Row="2"
+                Grid.RowSpan="2"
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                Margin="0,5,5,5">
+
+                <Border
+                    Grid.Row="0"
+                    BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
+                    BorderThickness="4">
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid Grid.Row="0" Grid.Column="0">
+                            <StackPanel>
+                                <TextBlock
+                                    Margin="5,5,0,0"
+                                    FontWeight="DemiBold"
+                                    Text="Количество пациентов:" />
+                                <TextBox Margin="5" Text="{Binding SetPatientsCount, Mode=TwoWay}" />
+
+                                <TextBlock
+                                    Margin="5,3,0,0"
+                                    FontWeight="DemiBold"
+                                    Text="Фамилия:" />
+                                <TextBox
+                                    Margin="5"
+                                    AutomationProperties.AutomationId="AddFamilyTextBox"
+                                    Text="{Binding LastNamePatient, Mode=TwoWay}" />
+
+                                <TextBlock
+                                    Margin="5,3,0,0"
+                                    FontWeight="DemiBold"
+                                    Text="Отчество:" />
+                                <TextBox Margin="5" Text="{Binding MiddleNamePatient, Mode=TwoWay}" />
+
+                                <CheckBox
+                                    Margin="5,3,0,0"
+                                    Content="Дата рождения:"
+                                    FontWeight="DemiBold"
+                                    IsChecked="{Binding UseBirthDatePatient}" />
+                                <DatePicker
+                                    Margin="5"
+                                    IsEnabled="{Binding UseBirthDatePatient}"
+                                    SelectedDate="{Binding BirthDatePatient, Mode=TwoWay}"
+                                    SelectedDateFormat="Short" />
+
+                                <TextBlock
+                                    Margin="5,3,0,0"
+                                    FontWeight="DemiBold"
+                                    Text="Адрес:" />
+                                <TextBox Margin="5" Text="{Binding AddressPatient, Mode=TwoWay}" />
+
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="0" Grid.Column="1">
+                            <StackPanel>
+
+                                <TextBlock
+                                    Margin="5,5,0,0"
+                                    FontWeight="DemiBold"
+                                    Text="ИД пациента" />
+                                <TextBox Margin="5" Text="{Binding IdPatient, Mode=TwoWay}" />
+
+                                <TextBlock
+                                    Margin="5,3,0,0"
+                                    FontWeight="DemiBold"
+                                    Text="Имя:" />
+                                <TextBox Margin="5" Text="{Binding NamePatient, Mode=TwoWay}" />
+
+                                <TextBlock
+                                    Margin="5,3,0,0"
+                                    FontWeight="DemiBold"
+                                    Text="Пол:" />
+                                <ComboBox
+                                    Margin="5"
+                                    DisplayMemberPath="DisplayName"
+                                    ItemsSource="{Binding GenderPatient}"
+                                    SelectedItem="{Binding SelectedGender}" />
+
+                                <TextBlock
+                                    Margin="5,5,0,0"
+                                    FontWeight="DemiBold"
+                                    Text="Период рождения:" />
+                                <DatePicker
+                                    Margin="5"
+                                    IsEnabled="{Binding UsePeriodBirthDatePatient}"
+                                    SelectedDate="{Binding PeriodBirthDatePatient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    SelectedDateFormat="Short" />
+
+                                <TextBlock
+                                    Margin="5,3,0,0"
+                                    FontWeight="DemiBold"
+                                    Text="Телефон:" />
+                                <TextBox Margin="5" Text="{Binding PhonePatient, Mode=TwoWay}" />
+
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="2">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <TextBlock
+                                Margin="5,0,0,0"
+                                FontWeight="DemiBold"
+                                Text="Дополнительная информация:" />
+                            <TextBox
+                                Grid.Row="1"
+                                Margin="5"
+                                Text="{Binding InfoPatient, Mode=TwoWay}" />
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <Grid
+                Name="AddStudies"
+                Grid.Row="2"
+                Grid.Column="2"
+                Margin="5,5,5,5">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Border
+                    Grid.Row="0"
+                    BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
+                    BorderThickness="4">
+                    <StackPanel>
+
+                        <TextBlock
+                            Margin="5,5,0,0"
+                            FontWeight="DemiBold"
+                            Text="Количество исследований:" />
+                        <TextBox Margin="5" Text="{Binding SetStudiesCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock
+                            Margin="5,3,0,0"
+                            FontWeight="DemiBold"
+                            Text="Начало периода:" />
+                        <DatePicker
+                            Margin="5"
+                            IsEnabled="{Binding DataContext.UseCustomPeriod, ElementName=StudyPeriodHost}"
+                            SelectedDate="{Binding StartDatePatient, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock
+                            Margin="5,3,0,0"
+                            FontWeight="DemiBold"
+                            Text="Конец периода:" />
+                        <DatePicker
+                            Margin="5,5,5,10"
+                            AutomationProperties.AutomationId="AddFamilyTextBox"
+                            IsEnabled="{Binding DataContext.UseCustomPeriod, ElementName=StudyPeriodHost}"
+                            SelectedDate="{Binding EndDatePatient, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Grid
+                Name="AddSeries"
+                Grid.Row="2"
+                Grid.Column="3"
+                Margin="5,5,0,5">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Border
+                    Grid.Row="0"
+                    BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
+                    BorderThickness="4">
+                    <StackPanel>
+
+                        <TextBlock
+                            Margin="5,5,0,0"
+                            FontWeight="DemiBold"
+                            Text="Количество серий:" />
+                        <TextBox Margin="5" Text="{Binding SetSeriesCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock
+                            Margin="5,3,0,0"
+                            FontWeight="DemiBold"
+                            Text="Начало проведения:" />
+                        <mah:TimePicker
+                            Margin="5"
+                            Culture="ru"
+                            IsEnabled="{Binding DataContext.UseCustomTime, ElementName=SeriesTimeHost}"
+                            SelectedDateTime="{Binding StartTimePatient, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                            SelectedTimeFormat="Short" />
+
+                        <TextBlock
+                            Margin="5,3,0,0"
+                            FontWeight="DemiBold"
+                            Text="Конец проведения:" />
+                        <mah:TimePicker
+                            Margin="5,5,5,10"
+                            Culture="ru"
+                            IsEnabled="{Binding DataContext.UseCustomTime, ElementName=SeriesTimeHost}"
+                            SelectedDateTime="{Binding EndTimePatient, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                            SelectedTimeFormat="Short" />
+
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Grid
+                Name="AddModality"
+                Grid.Row="3"
+                Grid.Column="2"
+                Grid.ColumnSpan="2"
+                Margin="5,5,0,5"
+                VerticalAlignment="Bottom">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Border
+                    Grid.Row="0"
+                    BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
+                    BorderThickness="4">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0">
+                            <StackPanel>
+                                <TextBlock
+                                    Margin="5,5,0,0"
+                                    FontWeight="DemiBold"
+                                    Text="Количество файлов MG:" />
+                                <TextBox Margin="5" Text="{Binding SopMgCount, Mode=TwoWay}" />
+
+                                <TextBlock
+                                    Margin="5,0,0,0"
+                                    FontWeight="DemiBold"
+                                    Text="Количество файлов DX:" />
+                                <TextBox Margin="5" Text="{Binding SopDxCount, Mode=TwoWay}" />
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Column="1">
+                            <StackPanel>
+
+                                <TextBlock
+                                    Margin="5,5,0,0"
+                                    FontWeight="DemiBold"
+                                    Text="Кодировка:" />
+                                <ComboBox
+                                    Margin="5"
+                                    Background="{DynamicResource MahApps.Brushes.Button.Border}"
+                                    FontWeight="DemiBold"
+                                    IsEditable="False"
+                                    ItemsSource="{Binding Encodings}"
+                                    SelectedItem="{Binding ChooseCod, Mode=TwoWay}" />
+
+                                <TextBlock
+                                    Margin="5,0,0,0"
+                                    FontWeight="DemiBold"
+                                    Text="Количество файлов SR:" />
+                                <TextBox Margin="5" Text="{Binding SopSrCount, Mode=TwoWay}" />
+
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+
+
+                </Border>
+            </Grid>
+
+            <Border
+                Grid.Row="4"
+                Grid.Column="0"
+                Grid.ColumnSpan="4"
+                Margin="0,5"
+                BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
+                BorderThickness="4">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel
+                            x:Name="GenerationOptionsHost"
+                            Grid.Column="0"
+                            Margin="5">
+                            <TextBlock
+                                Margin="5,5,5,10"
+                                FontSize="12"
+                                FontWeight="Bold"
+                                Text="Языки ФИО"
+                                TextDecorations="Underline" />
+                            <CheckBox
+                                Margin="5"
+                                Content="Eng Names"
+                                FontSize="12"
+                                FontWeight="Bold"
+                                IsChecked="{Binding UseEngNames}" />
+                            <CheckBox
+                                Margin="5"
+                                Content="Rus Names"
+                                FontSize="12"
+                                FontWeight="Bold"
+                                IsChecked="{Binding UseRusNames}" />
+                            <CheckBox
+                                Margin="5"
+                                Content="China Names"
+                                FontSize="12"
+                                FontWeight="Bold"
+                                IsChecked="{Binding UseChinaNames}" />
+                        </StackPanel>
+
+                        <StackPanel
+                            Grid.Column="1"
+                            Margin="5"
+                            DataContext="{Binding DataContext, ElementName=GenerationOptionsHost}">
+                            <TextBlock
+                                Margin="5,5,5,10"
+                                FontSize="12"
+                                FontWeight="Bold"
+                                Text="Формат имени"
+                                TextDecorations="Underline" />
+                            <CheckBox
+                                Margin="5"
+                                Content="Empty strings"
+                                FontSize="12"
+                                FontWeight="Bold"
+                                IsChecked="{Binding UseEmptyStrings}" />
+                            <CheckBox
+                                Margin="5"
+                                Content="Long values"
+                                FontSize="12"
+                                FontWeight="Bold"
+                                IsChecked="{Binding UseLongValues}" />
+                            <CheckBox
+                                Margin="5"
+                                Content="Special characters"
+                                FontSize="12"
+                                FontWeight="Bold"
+                                IsChecked="{Binding UseSpecialChars}" />
+                        </StackPanel>
+
+                        <Grid
+                            Grid.Column="2"
+                            Margin="5"
+                            DataContext="{Binding DataContext, ElementName=GenerationOptionsHost}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.ColumnSpan="2"
+                                Margin="120,5,0,10"
+                                FontSize="12"
+                                FontWeight="Bold"
+                                Text="Дата рождения"
+                                TextDecorations="Underline" />
+                            <StackPanel Grid.Row="1" Grid.Column="0">
+                                <RadioButton
+                                    Margin="5"
+                                    Content="Random birthdate"
+                                    FontSize="12"
+                                    FontWeight="Bold"
+                                    GroupName="{Binding BirthdateGroupName}"
+                                    IsChecked="{Binding BirthdateMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Random}" />
+                                <RadioButton
+                                    Margin="5"
+                                    Content="Missing birthdate"
+                                    FontSize="12"
+                                    FontWeight="Bold"
+                                    GroupName="{Binding BirthdateGroupName}"
+                                    IsChecked="{Binding BirthdateMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Missing}" />
+                                <RadioButton
+                                    Margin="5"
+                                    Content="Future birthdate"
+                                    FontSize="12"
+                                    FontWeight="Bold"
+                                    GroupName="{Binding BirthdateGroupName}"
+                                    IsChecked="{Binding BirthdateMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Future}" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="1">
+                                <RadioButton
+                                    Margin="5"
+                                    Content="0 - 17 years"
+                                    FontSize="12"
+                                    FontWeight="Bold"
+                                    GroupName="{Binding BirthdateGroupName}"
+                                    IsChecked="{Binding BirthdateMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Age0To17}" />
+                                <RadioButton
+                                    Margin="5"
+                                    Content="18 - 60 years"
+                                    FontSize="12"
+                                    FontWeight="Bold"
+                                    GroupName="{Binding BirthdateGroupName}"
+                                    IsChecked="{Binding BirthdateMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Age18To60}" />
+                                <RadioButton
+                                    Margin="5"
+                                    Content="61 - 120 years"
+                                    FontSize="12"
+                                    FontWeight="Bold"
+                                    GroupName="{Binding BirthdateGroupName}"
+                                    IsChecked="{Binding BirthdateMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Age61To120}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel
+                            x:Name="StudyPeriodHost"
+                            Grid.Column="3"
+                            Margin="5">
+                            <TextBlock
+                                Margin="5,5,5,10"
+                                FontSize="12"
+                                FontWeight="Bold"
+                                Text="Период исследования"
+                                TextDecorations="Underline" />
+                            <CheckBox
+                                Margin="5"
+                                Content="За день"
+                                FontSize="12"
+                                FontWeight="Bold"
+                                IsChecked="{Binding ForDay}" />
+                            <CheckBox
+                                Margin="5"
+                                Content="За неделю"
+                                FontSize="12"
+                                FontWeight="Bold"
+                                IsChecked="{Binding ForWeek}" />
+                            <CheckBox
+                                Margin="5"
+                                Content="За месяц"
+                                FontSize="12"
+                                FontWeight="Bold"
+                                IsChecked="{Binding ForMonth}" />
+                        </StackPanel>
+
+                        <StackPanel
+                            x:Name="SeriesTimeHost"
+                            Grid.Column="4"
+                            Margin="5">
+                            <TextBlock
+                                Margin="5,5,10,10"
+                                FontSize="12"
+                                FontWeight="Bold"
+                                Text="Время серии"
+                                TextDecorations="Underline" />
+                            <CheckBox
+                                Margin="5"
+                                Content="Утро"
+                                FontSize="12"
+                                FontWeight="Bold"
+                                IsChecked="{Binding Morning}" />
+                            <CheckBox
+                                Margin="5"
+                                Content="День"
+                                FontSize="12"
+                                FontWeight="Bold"
+                                IsChecked="{Binding Day}" />
+                            <CheckBox
+                                Margin="5"
+                                Content="Вечер"
+                                FontSize="12"
+                                FontWeight="Bold"
+                                IsChecked="{Binding Evening}" />
+                        </StackPanel>
+                    </Grid>
+                    <StackPanel
+                        x:Name="IdOptionsHost"
+                        Margin="10,10,10,8"
+                        Orientation="Horizontal">
+                        <CheckBox
+                            Margin="0,0,16,0"
+                            VerticalAlignment="Center"
+                            Content="Случайные буквы префикса"
+                            FontSize="12"
+                            FontWeight="Bold"
+                            IsChecked="{Binding UseRandomPrefix}" />
+                        <TextBlock
+                            Margin="0,0,8,0"
+                            VerticalAlignment="Center"
+                            FontSize="12"
+                            FontWeight="Bold"
+                            Text="Длина префикса" />
+                        <TextBox
+                            Width="40"
+                            Margin="0,0,16,0"
+                            VerticalAlignment="Center"
+                            IsEnabled="{Binding UseRandomPrefix}"
+                            Text="{Binding PrefixLength, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock
+                            Margin="0,0,8,0"
+                            VerticalAlignment="Center"
+                            FontSize="12"
+                            FontWeight="Bold"
+                            Text="Длина ID" />
+                        <TextBox
+                            Width="40"
+                            VerticalAlignment="Center"
+                            Text="{Binding IdLength, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Grid
+                Grid.Row="5"
+                Grid.Column="0"
+                Grid.ColumnSpan="4"
+                Margin="0,5">
+                <Border
+                    Grid.Row="0"
+                    BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
+                    BorderThickness="4">
+                    <TextBox
+                        Name="UpdateText"
+                        MinHeight="40"
+                        HorizontalAlignment="Center"
+                        BorderThickness="0"
+                        FontSize="20"
+                        IsReadOnly="True"
+                        Text="{Binding OutputText, UpdateSourceTrigger=PropertyChanged}" />
+                </Border>
+            </Grid>
+
+            <Button
+                Name="CleanUpButton"
+                Grid.Row="6"
+                Grid.Column="1"
+                Width="70"
+                Height="40"
+                Margin="5"
+                HorizontalAlignment="Center"
+                Background="{DynamicResource MahApps.Brushes.Accent}"
+                Command="{Binding CleanUpFieldsCommand}"
+                Content="Reset" />
+
+            <Button
+                Name="GenerateButton"
+                Grid.Row="6"
+                Grid.Column="2"
+                Width="70"
+                Height="40"
+                Margin="5"
+                HorizontalAlignment="Center"
+                Background="{DynamicResource MahApps.Brushes.Accent}"
+                Command="{Binding GenerateFilesCommand}"
+                Content="Generate" />
+
+            <!--<Grid
+                Grid.Row="0"
+                Grid.RowSpan="7"
+                Grid.Column="0"
+                Grid.ColumnSpan="4"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Border
+                    Background="White"
+                    CornerRadius="1"
+                    Opacity="0.7">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <mah:ProgressRing
+                            Width="100"
+                            Height="100"
+                            Foreground="{DynamicResource MahApps.Brushes.AccentBase}"
+                            IsActive="{Binding IsBusy}" />
+
+                        <TextBlock
+                            Margin="0,-60,0,0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Top"
+                            FontSize="20"
+                            FontWeight="Bold"
+                            Foreground="{DynamicResource MahApps.Brushes.AccentBase}"
+                            Text="{Binding CurrentProgress, StringFormat='{}{0}%'}"
+                            Visibility="{Binding PercentShow, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                        <TextBlock
+                            Margin="0,30,0,0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontSize="18"
+                            Foreground="Black"
+                            Text="{Binding BusyMessage}" />
+                    </StackPanel>
+                </Border>
+                <Button
+                    Height="50"
+                    VerticalAlignment="Bottom"
+                    Background="{DynamicResource MahApps.Brushes.AccentBase}"
+                    Command="{Binding CancelCommand}"
+                    Content="Cancel"
+                    IsEnabled="True"
+                    Visibility="{Binding CanCancel, Converter={StaticResource BoolToVisibilityConverter}}" />
+            </Grid>-->
+
+        </Grid>
+    </Border>
+</UserControl>
