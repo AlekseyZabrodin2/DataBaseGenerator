@@ -12,7 +12,7 @@ namespace DataBaseGenerator.Core.MySqlGenerator.Data
         public BaseGenerateContext(DbContextOptions<BaseGenerateContext> options)
             : base(options)
         {
-            Database.EnsureCreated();
+            //Database.EnsureCreated();
         }
 
 

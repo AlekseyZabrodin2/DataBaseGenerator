@@ -11,14 +11,16 @@ using System.Windows;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DataBaseGenerator.Core.MySqlGenerator;
-using DataBaseGenerator.Core.MySqlGenerator.Data;
 using DataBaseGenerator.Core.GeneratorRules.Patient;
 using DataBaseGenerator.Core.GeneratorRules.WorkList;
+using DataBaseGenerator.Core.MySqlGenerator;
+using DataBaseGenerator.Core.MySqlGenerator.Data;
 using DataBaseGenerator.UI.Wpf.View;
-using Microsoft.EntityFrameworkCore;
-using NLog;
 using DataBaseGenerator.UI.Wpf.ViewModel.Options;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using MySqlConnector;
+using NLog;
 
 namespace DataBaseGenerator.UI.Wpf.ViewModel
 {
@@ -28,6 +30,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private static readonly Random _random = new Random();
         private readonly BaseGenerateContext _context;
         private readonly IHttpClientFactory _httpClient;
+        private readonly IConfiguration _configuration;
         private readonly PatientService _patientService;
         private readonly WorklistService _worklistService;
         private RandomModalityRule _modality;
@@ -345,12 +348,18 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [ObservableProperty]
         public partial int NextPatientId { get; set; } = 1;
 
+        public event Action? ConnectionCheckRequested;
 
 
-        public MySqlGeneratorViewModel(BaseGenerateContext context, IHttpClientFactory clientFactory, GenerationOptionsStore optionsStore)
+
+        public MySqlGeneratorViewModel(BaseGenerateContext context, 
+                IHttpClientFactory clientFactory, 
+                GenerationOptionsStore optionsStore, 
+                IConfiguration configuration)
         {
             _context = context;
             _httpClient = clientFactory;
+            _configuration = configuration;
             GenerationOptions = optionsStore.MySql;
 
             var defaultAeTitle = new RandomModalityRule("DX");
@@ -368,7 +377,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             _worklistService = new WorklistService(_httpClient);
 
             InitializeDirectories();
-            _ = InitializeAsync();
         }
 
 
@@ -397,7 +405,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             _logger.Trace("PathToIcon - {0}", PathToIcon);
         }
 
-        private async Task InitializeAsync()
+        public async Task RefreshDatabaseDataAsync()
         {
             var refreshPat = await RefreshPatientsAsync();
             var patientsText = UpdateText;
@@ -901,22 +909,46 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
         [RelayCommand]
-        public async Task ConnectDB()
+        private async Task ConnectDBAsync()
         {
-            var connectingState = await _patientService.ConnectingEchoAsync();
-            if (connectingState)
+            await MySqlRespondsAsync();                
+        }
+
+        private async Task<bool> MySqlRespondsAsync()
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+            if (string.IsNullOrWhiteSpace(connectionString))
             {
-                MessageBox.Show("Соединение с БД установлено",
-                    "Information",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
+                UpdateText = "Строка подключения к MySQL не задана.";
+                return false;
             }
-            else
+
+            try
             {
-                MessageBox.Show("Не удалось подключиться к БД",
-                    "Warning",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                var builder = new MySqlConnectionStringBuilder(connectionString)
+                {
+                    ConnectionTimeout = 2
+                };
+
+                await using var connection = new MySqlConnection(builder.ConnectionString);
+                await connection.OpenAsync();
+                await RefreshDatabaseDataAsync();
+
+                UpdateText = "Соединение с MySQL установлено.";
+                _logger.Info("Соединение с БД установлено");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                UpdateText = $"Ошибка подключения к MySQL: {ex.Message}";
+                _logger.Debug(ex, "MySQL status check failed");
+
+                return false;
+            }
+            finally
+            {
+                ConnectionCheckRequested?.Invoke();
             }
         }
 

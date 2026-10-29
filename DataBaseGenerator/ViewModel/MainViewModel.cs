@@ -124,35 +124,44 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             _configuration = configuration;
 
             DatabaseTabs = new();
+
             _ = InitializeDatabaseAsync();
-
-            SwitchToMySql();
-
+            _ = SwitchToMySql();
             InitializeDirectories();
         }
 
-        private void RequestServiceStatus()
+        private async Task RequestServiceStatus()
         {
             var retryWebHost = _startupCheckPending;
             _startupCheckPending = false;
-            _ = RefreshStatusAsync(retryWebHost);
+            await RefreshStatusAsync(retryWebHost);
         }
 
-        private async Task RefreshStatusAsync(bool retryWebHost)
+        private async Task RefreshStatusAsync(bool retryWebHost, bool checkWebHost = true)
         {
             if (Interlocked.Exchange(ref _statusCheckRunning, 1) == 1)
                 return;
 
             try
             {
-                IsWebHostOnline = null;
+                if (checkWebHost)
+                    IsWebHostOnline = null;
+
                 IsMySqlOnline = null;
 
-                var webHostTask = WebHostRespondsAsync(retryWebHost);
+                Task<bool>? webHostTask = checkWebHost ? WebHostRespondsAsync(retryWebHost) : null;
                 var mySqlTask = MySqlRespondsAsync();
-                await Task.WhenAll(webHostTask, mySqlTask);
 
-                IsWebHostOnline = await webHostTask;
+                if (webHostTask != null)
+                {
+                    await Task.WhenAll(webHostTask, mySqlTask);
+                    IsWebHostOnline = await webHostTask;
+                }
+                else
+                {
+                    await mySqlTask;
+                }
+
                 IsMySqlOnline = await mySqlTask;
             }
             finally
@@ -317,10 +326,15 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private DicomParseUserControl _dicomParsePage;
 
         [RelayCommand]
-        private void SwitchToMySql()
+        private async Task SwitchToMySql()
         {
             LeaveLiteDbViewer();
             _mySqlPage ??= new MySqlGeneratorUserControl();
+
+            var viewModel = App.GetService<MySqlGeneratorViewModel>();
+            viewModel.ConnectionCheckRequested -= OnConnectionCheckRequested;
+            viewModel.ConnectionCheckRequested += OnConnectionCheckRequested;
+
             CurrentPage = _mySqlPage;
             CurrentPageName = "MySql Generator";
             IsMySqlMode = true;
@@ -329,11 +343,21 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             ShowPatients = false;
             ShowStudies = false;
             ClearDicomMode();
-            RequestServiceStatus();
+            await RequestServiceStatus();
+
+            if (IsMySqlOnline == true)
+            {
+                await viewModel.RefreshDatabaseDataAsync();
+            }
         }
-        
+
+        private void OnConnectionCheckRequested()
+        {
+            _ = RefreshStatusAsync(retryWebHost: false, checkWebHost: false);
+        }
+
         [RelayCommand]
-        private void ShowPatientsTable()
+        private async Task ShowPatientsTable()
         {
             _patientsPage ??= new LiteDbGeneratorUserControl();
 
@@ -342,11 +366,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             ShowSeries = false;
             ShowImages = false;
 
-            ShowTable("Patients", _patientsPage);
+            await ShowTable("Patients", _patientsPage);
         }
 
         [RelayCommand]
-        private void ShowStudiesTable()
+        private async Task ShowStudiesTable()
         {
             _studiesPage ??= new StudiesLiteDbTableUserControl();
 
@@ -355,11 +379,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             ShowSeries = false;
             ShowImages = false;
 
-            ShowTable("Studies", _studiesPage);
+            await ShowTable("Studies", _studiesPage);
         }        
 
         [RelayCommand]
-        private void SwitchToPlannedStudies()
+        private async Task SwitchToPlannedStudies()
         {
             LeaveLiteDbViewer();
             _plannedPage ??= new PlannedStudiesLiteDbUserControl();
@@ -371,11 +395,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             ShowPatients = false;
             ShowStudies = false;
             ClearDicomMode();
-            RequestServiceStatus();
+            await RequestServiceStatus();
         }
 
         [RelayCommand]
-        private void ShowLiteDbViewer()
+        private async Task ShowLiteDbViewer()
         {
             if (IsLiteDbOperationRunning())
             {
@@ -414,10 +438,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             ShowStudies = false;
             IsLiteDbViewerMode = true;
             ClearDicomMode();
-            RequestServiceStatus();
+            await RequestServiceStatus();
         }
 
-        private void ShowTable(string tableName, UserControl control)
+        private async Task ShowTable(string tableName, UserControl control)
         {
             LeaveLiteDbViewer();
             CurrentPage = control;
@@ -426,7 +450,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             IsLiteDbMode = true;
             IsLiteDbPlannedStudiesMode = false;
             ClearDicomMode();
-            RequestServiceStatus();
+            await RequestServiceStatus();
         }
 
         private bool IsLiteDbOperationRunning()
