@@ -266,64 +266,67 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             try
             {
-                var files = await Task.Run(() =>
-                    Directory.GetFiles(
-                        FolderPathFull,
-                        "*",
-                        SearchOption.AllDirectories));
+                var folderPath = FolderPathFull;
 
-                var studies = new Dictionary<string, DicomStudyPreview>();
-                var invalidFileCount = 0;
-
-                foreach (var filePath in files)
+                var (studies, invalidFileCount) = await Task.Run(async () =>
                 {
-                    try
+                    var files = Directory.GetFiles(folderPath, "*", SearchOption.AllDirectories);
+
+                    var foundStudies = new Dictionary<string, DicomStudyPreview>();
+                    var invalidCount = 0;
+
+                    foreach (var filePath in files)
                     {
-                        var dicomFile = await DicomFile.OpenAsync(filePath);
-                        var dataset = dicomFile.Dataset;
-
-                        var studyUid = dataset.GetSingleValueOrDefault<string>(
-                            DicomTag.StudyInstanceUID, string.Empty);
-
-                        // Файл без StudyInstanceUID не объединяем с другими.
-                        var key = string.IsNullOrWhiteSpace(studyUid)
-                            ? $"__NO_UID__{filePath}"
-                            : studyUid;
-
-                        if (studies.TryGetValue(key, out var existingStudy))
+                        try
                         {
-                            existingStudy.FilePaths.Add(filePath);
-                            continue;
+                            var dicomFile = await DicomFile.OpenAsync(filePath);
+                            var dataset = dicomFile.Dataset;
+
+                            var studyUid = dataset.GetSingleValueOrDefault<string>(
+                                DicomTag.StudyInstanceUID, string.Empty);
+
+                            // Файл без StudyInstanceUID не объединяем с другими.
+                            var key = string.IsNullOrWhiteSpace(studyUid)
+                                ? $"__NO_UID__{filePath}"
+                                : studyUid;
+
+                            if (foundStudies.TryGetValue(key, out var existingStudy))
+                            {
+                                existingStudy.FilePaths.Add(filePath);
+                                continue;
+                            }
+
+                            var patientName = dataset
+                                .GetSingleValueOrDefault(DicomTag.PatientName, string.Empty)
+                                .Replace('^', ' ')
+                                .Trim();
+
+                            var studyDate = dataset.GetSingleValueOrDefault(DicomTag.StudyDate, string.Empty);
+                            studyDate = DateTime.TryParseExact(studyDate, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date)
+                                    ? date.ToString("dd.MM.yyyy")
+                                    : studyDate;
+
+                            foundStudies[key] = new DicomStudyPreview
+                            {
+                                StudyInstanceUid = studyUid,
+                                PatientName = patientName,
+                                PatientId = dataset.GetSingleValueOrDefault<string>(DicomTag.PatientID, string.Empty),
+                                StudyDate = studyDate,
+                                StudyDescription = dataset.GetSingleValueOrDefault<string>(DicomTag.StudyDescription, string.Empty),
+                                FilePaths = [filePath],
+                                IsSelected = true
+                            };
                         }
-
-                        var patientName = dataset
-                            .GetSingleValueOrDefault(DicomTag.PatientName, string.Empty)
-                            .Replace('^', ' ')
-                            .Trim();
-
-                        var studyDate = dataset.GetSingleValueOrDefault(DicomTag.StudyDate, string.Empty);
-                        studyDate = DateTime.TryParseExact(studyDate, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date)
-                                ? date.ToString("dd.MM.yyyy")
-                                : studyDate;
-
-                        studies[key] = new DicomStudyPreview
+                        catch
                         {
-                            StudyInstanceUid = studyUid,
-                            PatientName = patientName,
-                            PatientId = dataset.GetSingleValueOrDefault<string>(DicomTag.PatientID, string.Empty),
-                            StudyDate = studyDate,
-                            StudyDescription = dataset.GetSingleValueOrDefault<string>(DicomTag.StudyDescription, string.Empty),
-                            FilePaths = [filePath],
-                            IsSelected = true
-                        };
+                            invalidCount++;
+                        }
                     }
-                    catch
-                    {
-                        invalidFileCount++;
-                    }
-                }
 
-                foreach (var study in studies.Values)
+                    return (foundStudies.Values.ToList(), invalidCount);
+                });
+
+                foreach (var study in studies)
                 {
                     study.PropertyChanged += PreviewStudy_PropertyChanged;
                     PreviewStudies.Add(study);
