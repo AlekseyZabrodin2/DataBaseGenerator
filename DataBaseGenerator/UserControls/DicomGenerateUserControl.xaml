@@ -400,7 +400,7 @@
                 Grid.Row="4"
                 Grid.Column="0"
                 Grid.ColumnSpan="4"
-                Margin="0,5"
+                Margin="0,0,0,5"
                 BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
                 BorderThickness="4">
                 <StackPanel>
@@ -641,19 +641,22 @@
                 Grid.Row="5"
                 Grid.Column="0"
                 Grid.ColumnSpan="4"
-                Margin="0,5">
+                Margin="0,0,0,5">
                 <Border
                     Grid.Row="0"
                     BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
                     BorderThickness="4">
                     <TextBox
                         Name="UpdateText"
-                        MinHeight="40"
-                        HorizontalAlignment="Center"
+                        Height="50"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
                         BorderThickness="0"
-                        FontSize="20"
+                        FontSize="18"
                         IsReadOnly="True"
-                        Text="{Binding OutputText, UpdateSourceTrigger=PropertyChanged}" />
+                        Text="{Binding OutputText, UpdateSourceTrigger=PropertyChanged}"
+                        TextWrapping="Wrap"
+                        VerticalScrollBarVisibility="Auto" />
                 </Border>
             </Grid>
 

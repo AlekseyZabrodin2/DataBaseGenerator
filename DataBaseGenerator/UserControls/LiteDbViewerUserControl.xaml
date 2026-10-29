@@ -209,9 +209,11 @@
             BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
             BorderThickness="4">
             <TextBox
+                Height="50"
                 HorizontalContentAlignment="Center"
                 VerticalContentAlignment="Center"
-                FontSize="20"
+                BorderThickness="0"
+                FontSize="18"
                 IsReadOnly="True"
                 Text="{Binding StatusText}" />
         </Border>

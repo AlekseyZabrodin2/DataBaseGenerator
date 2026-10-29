@@ -35,7 +35,7 @@
                 Margin="5"
                 Padding="10"
                 BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
-                BorderThickness="2">
+                BorderThickness="4">
 
                 <Grid x:Name="ConnectingBlock">
                     <Grid.RowDefinitions>
@@ -151,10 +151,10 @@
             <!--  Предпросмотр: занимает всё оставшееся место  -->
             <Border
                 Grid.Row="1"
-                Margin="5"
+                Margin="5,0"
                 Padding="10"
                 BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
-                BorderThickness="2">
+                BorderThickness="4">
 
                 <Grid>
                     <Grid.RowDefinitions>
@@ -170,27 +170,28 @@
                         </Grid.ColumnDefinitions>
 
                         <WrapPanel Margin="0,5,0,0">
-                            <TextBlock Text="Исследований: " />
+                            <TextBlock FontWeight="DemiBold" Text="Исследований: " />
                             <TextBlock
-                                Margin="0,0,16,0"
+                                Margin="0,0,20,0"
                                 FontWeight="DemiBold"
                                 Text="{Binding PreviewStudyCount}" />
 
-                            <TextBlock Text="Файлов всего: " />
+                            <TextBlock FontWeight="DemiBold" Text="Файлов всего: " />
                             <TextBlock
-                                Margin="0,0,16,0"
+                                Margin="0,0,20,0"
                                 FontWeight="DemiBold"
                                 Text="{Binding PreviewFileCount}" />
 
-                            <TextBlock Text="К отправке: " />
+                            <TextBlock FontWeight="DemiBold" Text="К отправке: " />
                             <TextBlock
-                                Margin="0,0,16,0"
+                                Margin="0,0,20,0"
                                 FontWeight="DemiBold"
                                 Text="{Binding SelectedFileCount}" />
 
                             <CheckBox
                                 VerticalAlignment="Center"
                                 Content="Выбрать все"
+                                FontWeight="DemiBold"
                                 IsChecked="{Binding AreAllStudiesSelected, Mode=TwoWay}" />
                         </WrapPanel>
 
@@ -209,7 +210,7 @@
                         Grid.Row="1"
                         Margin="-10"
                         BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
-                        BorderThickness="0,2,0,0">
+                        BorderThickness="0,4,0,0">
                         <DataGrid
                             Grid.Row="1"
                             AutoGenerateColumns="False"
@@ -287,15 +288,18 @@
                     Padding="8"
                     VerticalAlignment="Center"
                     BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
-                    BorderThickness="2">
+                    BorderThickness="4">
 
                     <TextBox
+                        Height="40"
+                        HorizontalContentAlignment="Center"
                         VerticalContentAlignment="Center"
                         BorderThickness="0"
-                        FontSize="12"
+                        FontSize="18"
                         IsReadOnly="True"
                         Text="{Binding ServerOutputText, UpdateSourceTrigger=PropertyChanged}"
-                        TextWrapping="Wrap" />
+                        TextWrapping="Wrap"
+                        VerticalScrollBarVisibility="Auto" />
                 </Border>
 
                 <Button
@@ -310,46 +314,48 @@
 
             <!--  Блокировка интерфейса во время операции  -->
             <Grid
+                Grid.Row="0"
                 Grid.RowSpan="3"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
-                Panel.ZIndex="10"
                 Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}">
 
                 <Border
-                    Background="Black"
+                    Background="White"
                     CornerRadius="1"
-                    Opacity="0.7" />
+                    Opacity="0.7">
 
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-
-                    <Grid Width="100" Height="100">
-                        <mah:ProgressRing Foreground="{DynamicResource MahApps.Brushes.AccentBase}" IsActive="{Binding IsBusy}" />
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <mah:ProgressRing
+                            Width="100"
+                            Height="100"
+                            Foreground="{DynamicResource MahApps.Brushes.AccentBase}"
+                            IsActive="{Binding IsBusy}" />
 
                         <TextBlock
+                            Margin="0,-60,0,0"
                             HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
+                            VerticalAlignment="Top"
                             FontSize="20"
                             FontWeight="Bold"
                             Foreground="{DynamicResource MahApps.Brushes.AccentBase}"
                             Text="{Binding CurrentProgress, StringFormat='{}{0}%'}" />
-                    </Grid>
-
-                    <TextBlock
-                        Margin="0,20,0,0"
-                        HorizontalAlignment="Center"
-                        FontSize="18"
-                        Foreground="{DynamicResource MahApps.Brushes.AccentBase}"
-                        Text="{Binding BusyMessage}" />
-
-                    <Button
-                        Height="40"
-                        MinWidth="120"
-                        Margin="0,20,0,0"
-                        Background="{DynamicResource MahApps.Brushes.Accent}"
-                        Command="{Binding CancaelSendingImageCommand}"
-                        Content="Отмена" />
-                </StackPanel>
+                        <TextBlock
+                            Margin="0,30,0,0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontSize="18"
+                            Foreground="Black"
+                            Text="{Binding BusyMessage}" />
+                    </StackPanel>
+                </Border>
+                <Button
+                    Height="50"
+                    Margin="5"
+                    VerticalAlignment="Bottom"
+                    Background="{DynamicResource MahApps.Brushes.Accent}"
+                    Command="{Binding CancaelSendingImageCommand}"
+                    Content="Отмена" />
             </Grid>
         </Grid>
     </Border>

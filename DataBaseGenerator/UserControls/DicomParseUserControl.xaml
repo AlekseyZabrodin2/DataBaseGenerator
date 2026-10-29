@@ -931,7 +931,7 @@
                     </StackPanel>
                 </Border>
                 <Button
-                    Height="25"
+                Height="50"
                     VerticalAlignment="Bottom"
                     Background="{DynamicResource MahApps.Brushes.AccentBase}"
                     Command="{Binding CancelCommand}"

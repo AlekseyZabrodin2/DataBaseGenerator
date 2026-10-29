@@ -35,6 +35,7 @@
                 Height="60"
                 HorizontalContentAlignment="Center"
                 VerticalContentAlignment="Center"
+                BorderThickness="0"
                 FontSize="18"
                 IsReadOnly="True"
                 Text="{Binding UpdateText}"
