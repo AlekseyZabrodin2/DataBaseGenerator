@@ -19,6 +19,7 @@ using DataBaseGenerator.Core.GeneratorRules.Study;
 using FellowOakDicom;
 using Microsoft.Win32;
 using DataBaseGenerator.UI.Wpf.ViewModel.Options;
+using System.Numerics;
 
 namespace DataBaseGenerator.UI.Wpf.ViewModel
 {
@@ -155,7 +156,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         public partial string IdPrefix { get; set; }
 
         [ObservableProperty]
-        public partial int IdNumber { get; set; }
+        public partial BigInteger IdNumber { get; set; }
 
         [ObservableProperty]
         public partial string LastNamePatient { get; set; }
@@ -559,31 +560,33 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             return _cancellationTokenSource.Token;
         }
 
-        public static (string Prefix, int Number) ParsePatientId(string patientId)
+        public static (string Prefix, BigInteger Number) ParsePatientId(string patientId)
         {
             if (string.IsNullOrWhiteSpace(patientId))
-                return (string.Empty, 0);
+                return (string.Empty, BigInteger.Zero);
 
             int prefixEnd = 0;
+
             for (int i = 0; i < patientId.Length; i++)
             {
                 if (char.IsDigit(patientId[i]))
                     break;
+
                 prefixEnd = i + 1;
             }
 
             if (prefixEnd >= patientId.Length)
-                return (patientId, 0);
+                return (patientId, BigInteger.Zero);
 
-            var prefix = patientId.Substring(0, prefixEnd);
-            var numberPart = patientId.Substring(prefixEnd);
+            var prefix = patientId[..prefixEnd];
+            var numberPart = patientId[prefixEnd..];
 
             var number = numberPart.TrimStart('0');
 
             if (string.IsNullOrEmpty(number))
                 number = "0";
 
-            return (prefix, int.Parse(number));
+            return (prefix, BigInteger.Parse(number));
         }
 
         private string BuildShortPath(string fullPath, int keepFolders = 3)
