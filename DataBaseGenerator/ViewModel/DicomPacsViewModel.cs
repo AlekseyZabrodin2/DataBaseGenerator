@@ -25,6 +25,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private CancellationTokenSource _cancellationTokenSource;
         private bool _isUpdatingSelection;
         private bool _areAllStudiesSelected;
+        private readonly GenerationOptionsStore _optionsStore;
 
         [ObservableProperty]
         public partial string ServerIp { get; set; } = string.Empty;
@@ -106,8 +107,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
         }
 
-
-        private readonly GenerationOptionsStore _optionsStore;
 
 
         public DicomPacsViewModel(GenerationOptionsStore optionsStore)

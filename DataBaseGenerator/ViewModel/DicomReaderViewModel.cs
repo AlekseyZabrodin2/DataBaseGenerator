@@ -7,6 +7,7 @@ using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DataBaseGenerator.UI.Wpf.Model;
+using DataBaseGenerator.UI.Wpf.ViewModel.Options;
 using FellowOakDicom;
 using Microsoft.Win32;
 using NLog;
@@ -16,7 +17,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
     public partial class DicomReaderViewModel : ObservableObject
     {
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
-
+        private readonly GenerationOptionsStore _optionsStore;
 
         public ObservableCollection<string> DicomFilesCollection { get; } = new();
 
@@ -51,8 +52,13 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
 
-        public DicomReaderViewModel()
+
+        public DicomReaderViewModel(GenerationOptionsStore optionsStore)
         {
+            _optionsStore = optionsStore;
+
+            InitialiseServerConnectingProperty();
+            
             FilteredDicomTags = CollectionViewSource.GetDefaultView(DicomTags);
             FilteredDicomTags.Filter = FilterDicomTag;
         }
@@ -73,6 +79,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             FilteredDicomTags.Refresh();
         }
 
+        private void InitialiseServerConnectingProperty()
+        {
+            DatabasePath = _optionsStore.DicomReaderDirPath;
+        }
 
         [RelayCommand]
         public void BrowseDicomFilesFolder()
@@ -82,12 +92,12 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 Title = "Выберите DICOM-файл"
             };
 
+            DicomFilesCollection.Clear();
+            DicomTags.Clear();
+            PatientInfo = null;
+
             if (dialog.ShowDialog() == true)
             {
-                DicomFilesCollection.Clear();
-                DicomTags.Clear();
-                PatientInfo = null;
-
                 DatabasePath = dialog.FolderName;
 
                 var fileName = Directory
@@ -100,7 +110,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 {
                     DicomFilesCollection.Add(file);
                 }
-            }
+
+                _optionsStore.SetDicomReaderDirPath(DatabasePath);
+            }            
         }
 
         [RelayCommand]

@@ -30,6 +30,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
             PlannedStudiesDatabasePath = document?.PlannedStudiesDatabasePath ?? string.Empty;
             DicomTestDataFolderPath = document?.DicomTestDataFolderPath ?? string.Empty;
             DicomSaveFolderPath = document?.DicomSaveFolderPath ?? string.Empty;
+            DicomReaderDirPath = document?.DicomReaderDirPath ?? string.Empty;
             PacsServerIp = document?.PacsServerIp ?? string.Empty;
             PacsServerPort = document?.PacsServerPort ?? string.Empty;
             PacsCallingAe = document?.PacsCallingAe ?? string.Empty;
@@ -49,6 +50,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
         public string DicomTestDataFolderPath { get; private set; }
 
         public string DicomSaveFolderPath { get; private set; }
+
+        public string DicomReaderDirPath { get; private set; }
 
         public string PacsServerIp { get; private set; }
 
@@ -107,6 +110,15 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
                 return;
 
             DicomSaveFolderPath = path;
+            Save();
+        }
+
+        public void SetDicomReaderDirPath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path) || string.Equals(DicomReaderDirPath, path, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            DicomReaderDirPath = path;
             Save();
         }
 
@@ -200,6 +212,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
                     PlannedStudiesDatabasePath = PlannedStudiesDatabasePath,
                     DicomTestDataFolderPath = DicomTestDataFolderPath,
                     DicomSaveFolderPath = DicomSaveFolderPath,
+                    DicomReaderDirPath = DicomReaderDirPath,
                     PacsServerIp = PacsServerIp,
                     PacsServerPort = PacsServerPort,
                     PacsCallingAe = PacsCallingAe,
@@ -224,6 +237,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
             public string PlannedStudiesDatabasePath { get; set; }
             public string DicomTestDataFolderPath { get; set; }
             public string DicomSaveFolderPath { get; set; }
+            public string DicomReaderDirPath { get; set; }
             public string PacsServerIp { get; set; }
             public string PacsServerPort { get; set; }
             public string PacsCallingAe { get; set; }
