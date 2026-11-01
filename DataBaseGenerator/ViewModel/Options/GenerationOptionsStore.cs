@@ -21,7 +21,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
 
         public GenerationOptionsStore()
         {
-            _path = Path.Combine(AppContext.BaseDirectory, "generation-options.json");
+            var directory = Path.Combine(AppContext.BaseDirectory, "DataBaseGeneratorSettings");
+            
+            Directory.CreateDirectory(directory);
+
+            _path = Path.Combine(directory, "generation-options.json");
 
             var document = Read();
             MySql = Create("BirthdateMySql", document?.MySql);
@@ -184,7 +188,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
         private GenerationOptionsDocument Read()
         {
             if (!File.Exists(_path))
-                return null;
+                return new GenerationOptionsDocument();
 
             try
             {

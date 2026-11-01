@@ -15,10 +15,10 @@ using DataBaseGenerator.Core.GeneratorRules.Patient;
 using DataBaseGenerator.Core.GeneratorRules.WorkList;
 using DataBaseGenerator.Core.MySqlGenerator;
 using DataBaseGenerator.Core.MySqlGenerator.Data;
+using DataBaseGenerator.UI.Wpf.Service;
 using DataBaseGenerator.UI.Wpf.View;
 using DataBaseGenerator.UI.Wpf.ViewModel.Options;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using MySqlConnector;
 using NLog;
 
@@ -30,7 +30,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private static readonly Random _random = new Random();
         private readonly BaseGenerateContext _context;
         private readonly IHttpClientFactory _httpClient;
-        private readonly IConfiguration _configuration;
+        private readonly ApplicationSettingsService _settingsService;
         private readonly PatientService _patientService;
         private readonly WorklistService _worklistService;
         private RandomModalityRule _modality;
@@ -354,12 +354,12 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         public MySqlGeneratorViewModel(BaseGenerateContext context, 
                 IHttpClientFactory clientFactory, 
-                GenerationOptionsStore optionsStore, 
-                IConfiguration configuration)
+                GenerationOptionsStore optionsStore,
+                ApplicationSettingsService settingsService)
         {
             _context = context;
             _httpClient = clientFactory;
-            _configuration = configuration;
+            _settingsService = settingsService;
             GenerationOptions = optionsStore.MySql;
 
             var defaultAeTitle = new RandomModalityRule("DX");
@@ -916,20 +916,20 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         private async Task<bool> MySqlRespondsAsync()
         {
-            var connectionString = _configuration.GetConnectionString("DefaultConnection");
-            if (string.IsNullOrWhiteSpace(connectionString))
-            {
-                UpdateText = "Строка подключения к MySQL не задана.";
-                return false;
-            }
+            var settings = _settingsService.Settings;
 
+            var builder = new MySqlConnectionStringBuilder
+            {
+                Server = settings.MySqlServer,
+                Port = settings.MySqlPort,
+                Database = settings.MySqlDatabase,
+                UserID = settings.MySqlUser,
+                Password = settings.MySqlPassword,
+                ConnectionTimeout = 2
+            };
+            
             try
             {
-                var builder = new MySqlConnectionStringBuilder(connectionString)
-                {
-                    ConnectionTimeout = 2
-                };
-
                 await using var connection = new MySqlConnection(builder.ConnectionString);
                 await connection.OpenAsync();
                 await RefreshDatabaseDataAsync();
@@ -1132,7 +1132,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         public void OpenWebPage()
         {
-            var url = "http://localhost:5289"; // или любой нужный маршрут
+            var url = _settingsService.Settings.WebHostUrl; // или любой нужный маршрут
             try
             {
                 Process.Start(new ProcessStartInfo

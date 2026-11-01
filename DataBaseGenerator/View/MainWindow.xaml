@@ -147,6 +147,10 @@
                             <MenuItem Command="{Binding OpenSpecificationWindowCommand}" Header="Вызвать справку" />
                             <MenuItem Command="{Binding AboutProgramCommand}" Header="О программе...  (Ctrl+O)" />
                         </MenuItem>
+                        <MenuItem
+                            BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
+                            Command="{Binding ShowSettingsCommand}"
+                            Header="Настройки" />
                     </Menu>
                 </StackPanel>
             </Border>

@@ -6,15 +6,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DataBaseGenerator.Core.LiteDbGenerator.Data;
+using DataBaseGenerator.UI.Wpf.Service;
 using DataBaseGenerator.UI.Wpf.UserControls;
 using DataBaseGenerator.UI.Wpf.View;
 using DataBaseGenerator.UI.Wpf.ViewModel.LiteDbTabs;
-using Microsoft.Extensions.Configuration;
 using MySqlConnector;
 using NLog;
 
@@ -106,7 +105,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [ObservableProperty]
         public partial bool? IsMySqlOnline { get; set; }
 
-        private readonly IConfiguration _configuration;
+        private readonly ApplicationSettingsService _settingsService;
         private int _statusCheckRunning;
         private bool _startupCheckPending = true;
 
@@ -118,10 +117,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
 
 
-        public MainViewModel(IServiceProvider serviceProvider, IConfiguration configuration)
+        public MainViewModel(IServiceProvider serviceProvider, ApplicationSettingsService settingsService)
         {
             _serviceProvider = serviceProvider;
-            _configuration = configuration;
+            _settingsService = settingsService;
 
             DatabaseTabs = new();
 
@@ -188,18 +187,28 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         private async Task<bool> MySqlRespondsAsync()
         {
-            var connectionString = _configuration.GetConnectionString("DefaultConnection");
-            if (string.IsNullOrWhiteSpace(connectionString))
+            var settings = _settingsService.Settings;
+
+            if (string.IsNullOrWhiteSpace(settings.MySqlServer) ||
+                string.IsNullOrWhiteSpace(settings.MySqlDatabase) ||
+                string.IsNullOrWhiteSpace(settings.MySqlUser))
+            {
                 return false;
+            }
 
             try
             {
-                var builder = new MySqlConnectionStringBuilder(connectionString)
+                var builder = new MySqlConnectionStringBuilder
                 {
+                    Server = settings.MySqlServer,
+                    Port = settings.MySqlPort,
+                    Database = settings.MySqlDatabase,
+                    UserID = settings.MySqlUser,
+                    Password = settings.MySqlPassword,
                     ConnectionTimeout = 2
                 };
 
-                await using var connection = new MySqlConnection(builder.ConnectionString);
+                await using var connection = new MySqlConnection(builder.ConnectionString);                
                 await connection.OpenAsync();
                 return true;
             }
@@ -324,6 +333,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private DicomReaderUserControl _dicomReaderPage;
         private DicomPacsUserControl _dicomPacsPage;
         private DicomParseUserControl _dicomParsePage;
+        private SettingsUserControl _settingsPage;
 
         [RelayCommand]
         private async Task SwitchToMySql()
@@ -499,6 +509,17 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         {
             _dicomParsePage ??= new DicomParseUserControl();
             ShowDicomSection("Dicom parser", _dicomParsePage);
+        }
+
+        [RelayCommand]
+        private void ShowSettings()
+        {
+            _settingsPage ??= new SettingsUserControl();
+
+            _settingsPage.ViewModel.ResetSaveStatus();
+
+            CurrentPage = _settingsPage;
+            CurrentPageName = "Settings";
         }
 
         private void ShowDicomSection(string sectionName, UserControl control)
