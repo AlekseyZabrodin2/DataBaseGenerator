@@ -9,6 +9,8 @@ using DataBaseGenerator.Core.LiteDbGenerator.Data;
 using DataBaseGenerator.Core.LiteDbGenerator.Services;
 using DataBaseGenerator.Core.MySqlGenerator;
 using DataBaseGenerator.Core.MySqlGenerator.Data;
+using DataBaseGenerator.UI.Wpf.Service;
+using DataBaseGenerator.UI.Wpf.UserControls;
 using DataBaseGenerator.UI.Wpf.View;
 using DataBaseGenerator.UI.Wpf.ViewModel;
 using DataBaseGenerator.UI.Wpf.ViewModel.Options;
@@ -30,7 +32,8 @@ namespace DataBaseGenerator.UI.Wpf
         private readonly BaseGenerateContext _context;
         const string _exeName = "DataBaseGenerator.Web.exe";
         const string _webHostPath = "WebHost\\DataBaseGenerator.Web.exe";
-        private string _exeToRun;
+        private string _exeToRun; 
+        private readonly ApplicationSettingsService _settingsService;
 
         public static IStudyStorageModule SharedStorage { get; set; }
         public static IPlannedStudyStorageModule PlannedStorage { get; private set; }
@@ -54,6 +57,9 @@ namespace DataBaseGenerator.UI.Wpf
             this.InitializeComponent();
 
             var configuration = AppConfiguration.LoadConfiguration();
+
+            _settingsService = new ApplicationSettingsService();
+            var settings = _settingsService.Settings;
 
             var dataDirectory = Path.Combine(AppContext.BaseDirectory, "LiteDataBase");
             if (!Directory.Exists(dataDirectory))
@@ -111,6 +117,9 @@ namespace DataBaseGenerator.UI.Wpf
                     services.AddTransient<DialogMessageWindow>();
                     services.AddTransient<MainWindow>();
                     services.AddTransient<SpecificationWindow>();
+                    services.AddSingleton(_settingsService);
+                    services.AddSingleton<SettingsViewModel>();
+                    services.AddSingleton<SettingsUserControl>();
 
                     services.AddHttpClient("DBGeneratorApi", client =>
                     {
