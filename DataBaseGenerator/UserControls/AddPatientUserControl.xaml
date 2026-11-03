@@ -8,9 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:DataBaseGenerator.UI.Wpf.ViewModel">
 
-
     <Grid Name="AddPatients">
-
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
@@ -20,85 +18,222 @@
             Grid.Row="0"
             BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
             BorderThickness="5">
+
             <DockPanel LastChildFill="True">
-            <StackPanel DockPanel.Dock="Top">
 
-                <TextBlock
-                    Margin="5,5,0,0"
-                    FontWeight="DemiBold"
-                    Text="Patient ID *" />
-                <TextBox Margin="5" Text="{Binding AddIdPatient, Mode=TwoWay}" />
+                <StackPanel DockPanel.Dock="Top">
 
-                <TextBlock
-                    Margin="5,5,0,0"
-                    FontWeight="DemiBold"
-                    Text="Surname: *" />
-                <TextBox Margin="5" Text="{Binding AddFamily, Mode=TwoWay}" />
+                    <!--  Patient ID  -->
+                    <TextBlock
+                        Margin="5,5,0,0"
+                        FontWeight="DemiBold"
+                        Text="Patient ID *" />
 
-                <TextBlock
-                    Margin="5,5,0,0"
-                    FontWeight="DemiBold"
-                    Text="Name: *" />
-                <TextBox Margin="5" Text="{Binding AddName, Mode=TwoWay}" />
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="PatientIdTextBox" Text="{Binding AddIdPatient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock
+                            Grid.Column="1"
+                            MinWidth="20"
+                            Margin="5,0"
+                            VerticalAlignment="Center"
+                            Foreground="Black"
+                            Text="{Binding Text.Length, ElementName=PatientIdTextBox, StringFormat={}{0}}"
+                            TextAlignment="Right" />
+                    </Grid>
 
-                <TextBlock
-                    Margin="5,5,0,0"
-                    FontWeight="DemiBold"
-                    Text="Middle name: *" />
-                <TextBox Margin="5" Text="{Binding AddMiddleName, Mode=TwoWay}" />
+                    <!--  Surname  -->
+                    <TextBlock
+                        Margin="5,5,0,0"
+                        FontWeight="DemiBold"
+                        Text="Surname: *" />
 
-                <TextBlock
-                    Margin="5,5,0,0"
-                    FontWeight="DemiBold"
-                    Text="Birthdate:" />
-                <mah:DateTimePicker
-                    Margin="5"
-                    Culture="ru"
-                    SelectedDateFormat="Short"
-                    SelectedDateTime="{Binding PatientBirthDate, Mode=TwoWay}"
-                    SelectedTimeFormat="Long" />
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="FamilyTextBox" Text="{Binding AddFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock
+                            Grid.Column="1"
+                            MinWidth="20"
+                            Margin="5,0"
+                            VerticalAlignment="Center"
+                            Foreground="Black"
+                            Text="{Binding Text.Length, ElementName=FamilyTextBox, StringFormat={}{0}}"
+                            TextAlignment="Right" />
+                    </Grid>
 
-                <TextBlock
-                    Margin="5,5,0,0"
-                    FontWeight="DemiBold"
-                    Text="Gender:" />
-                <ComboBox
-                    Margin="5"
-                    ItemsSource="{Binding Gender}"
-                    SelectedItem="{Binding SelecedGender}" />
+                    <!--  Name  -->
+                    <TextBlock
+                        Margin="5,5,0,0"
+                        FontWeight="DemiBold"
+                        Text="Name: *" />
 
-                <TextBlock
-                    Margin="5,5,0,0"
-                    FontWeight="DemiBold"
-                    Text="Address:" />
-                <TextBox Margin="5" Text="{Binding AddAdress, Mode=TwoWay}" />
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="NameTextBox" Text="{Binding AddName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock
+                            Grid.Column="1"
+                            MinWidth="20"
+                            Margin="5,0"
+                            VerticalAlignment="Center"
+                            Foreground="Black"
+                            Text="{Binding Text.Length, ElementName=NameTextBox, StringFormat={}{0}}"
+                            TextAlignment="Right" />
+                    </Grid>
 
-                <TextBlock
-                    Margin="5,5,0,0"
-                    FontWeight="DemiBold"
-                    Text="Telephone:" />
-                <TextBox Margin="5" Text="{Binding AddTelephone, Mode=TwoWay}" />
+                    <!--  Middle name  -->
+                    <TextBlock
+                        Margin="5,5,0,0"
+                        FontWeight="DemiBold"
+                        Text="Middle name: *" />
 
-                <TextBlock
-                    Margin="5,5,0,0"
-                    FontWeight="DemiBold"
-                    Text="Place of work" />
-                <TextBox Margin="5" Text="{Binding AddWorkPlase, Mode=TwoWay}" />
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="MiddleNameTextBox" Text="{Binding AddMiddleName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock
+                            Grid.Column="1"
+                            MinWidth="20"
+                            Margin="5,0"
+                            VerticalAlignment="Center"
+                            Foreground="Black"
+                            Text="{Binding Text.Length, ElementName=MiddleNameTextBox, StringFormat={}{0}}"
+                            TextAlignment="Right" />
+                    </Grid>
 
-                <TextBlock
-                    Margin="5,5,0,0"
-                    FontWeight="DemiBold"
-                    Text="Additional information:" />
-            </StackPanel>
+                    <!--  Birthdate  -->
+                    <TextBlock
+                        Margin="5,5,0,0"
+                        FontWeight="DemiBold"
+                        Text="Birthdate:" />
+                    <mah:DateTimePicker
+                        Margin="5"
+                        Culture="ru"
+                        SelectedDateFormat="Short"
+                        SelectedDateTime="{Binding PatientBirthDate, Mode=TwoWay}"
+                        SelectedTimeFormat="Long" />
 
-                <TextBox
-                    MinHeight="80"
-                    Margin="5"
-                    AcceptsReturn="True"
-                    Text="{Binding AddInfo, Mode=TwoWay}"
-                    TextWrapping="Wrap"
-                    VerticalContentAlignment="Top"
-                    VerticalScrollBarVisibility="Auto" />
+                    <!--  Gender  -->
+                    <TextBlock
+                        Margin="5,5,0,0"
+                        FontWeight="DemiBold"
+                        Text="Gender:" />
+                    <ComboBox
+                        Margin="5"
+                        ItemsSource="{Binding Gender}"
+                        SelectedItem="{Binding SelecedGender}" />
+
+                    <!--  Address  -->
+                    <TextBlock
+                        Margin="5,5,0,0"
+                        FontWeight="DemiBold"
+                        Text="Address:" />
+
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="AddressTextBox" Text="{Binding AddAdress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock
+                            Grid.Column="1"
+                            MinWidth="20"
+                            Margin="5,0"
+                            VerticalAlignment="Center"
+                            Foreground="Black"
+                            Text="{Binding Text.Length, ElementName=AddressTextBox, StringFormat={}{0}}"
+                            TextAlignment="Right" />
+                    </Grid>
+
+                    <!--  Telephone  -->
+                    <TextBlock
+                        Margin="5,5,0,0"
+                        FontWeight="DemiBold"
+                        Text="Telephone:" />
+
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="TelephoneTextBox" Text="{Binding AddTelephone, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock
+                            Grid.Column="1"
+                            MinWidth="20"
+                            Margin="5,0"
+                            VerticalAlignment="Center"
+                            Foreground="Black"
+                            Text="{Binding Text.Length, ElementName=TelephoneTextBox, StringFormat={}{0}}"
+                            TextAlignment="Right" />
+                    </Grid>
+
+                    <!--  Place of work  -->
+                    <TextBlock
+                        Margin="5,5,0,0"
+                        FontWeight="DemiBold"
+                        Text="Place of work" />
+
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="WorkPlaceTextBox" Text="{Binding AddWorkPlase, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock
+                            Grid.Column="1"
+                            MinWidth="20"
+                            Margin="5,0"
+                            VerticalAlignment="Center"
+                            Foreground="Black"
+                            Text="{Binding Text.Length, ElementName=WorkPlaceTextBox, StringFormat={}{0}}"
+                            TextAlignment="Right" />
+                    </Grid>
+
+                    <!--  Additional information  -->
+                    <TextBlock
+                        Margin="5,5,0,0"
+                        FontWeight="DemiBold"
+                        Text="Additional information:" />
+
+                </StackPanel>
+
+                <!--  Additional information text  -->
+                <Grid Margin="5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox
+                        x:Name="InfoTextBox"
+                        Grid.Column="0"
+                        MinHeight="80"
+                        VerticalContentAlignment="Top"
+                        AcceptsReturn="True"
+                        Text="{Binding AddInfo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        TextWrapping="Wrap"
+                        VerticalScrollBarVisibility="Auto" />
+
+                    <TextBlock
+                        Grid.Column="1"
+                        MinWidth="20"
+                        Margin="5,0"
+                        VerticalAlignment="Top"
+                        Foreground="Black"
+                        Text="{Binding Text.Length, ElementName=InfoTextBox, StringFormat={}{0}}"
+                        TextAlignment="Right" />
+                </Grid>
+
             </DockPanel>
         </Border>
 
@@ -106,16 +241,19 @@
             Grid.Row="1"
             Margin="0,10,0,0"
             Columns="2">
+
             <Button
                 Height="50"
                 Margin="5,0"
                 Command="{Binding AddOnePatientCommand}"
                 Content="Add" />
+
             <Button
                 Height="50"
                 Margin="5,0"
                 Command="{Binding CancelAddPatientCommand}"
                 Content="Cancel" />
+
         </UniformGrid>
     </Grid>
 </UserControl>
