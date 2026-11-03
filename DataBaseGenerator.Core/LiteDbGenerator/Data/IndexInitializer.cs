@@ -11,8 +11,7 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Data
             context.Patients.EnsureIndex(x => x.FirstName);
             context.Patients.EnsureIndex(x => x.MiddleName);
             context.Patients.EnsureIndex(x => x.BirthDate);
-            context.Patients.EnsureIndex(x => x.Phone);
-            context.Patients.EnsureIndex(x => x.Address);
+            context.Patients.EnsureIndex(x => x.FullName);
 
             context.Studies.EnsureIndex(x => x.StudyInstanceUid, true);
             context.Studies.EnsureIndex(x => x.StudyId);
