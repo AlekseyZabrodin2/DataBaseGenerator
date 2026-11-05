@@ -45,6 +45,7 @@
         <Grid
             Name="MenuPanel"
             Grid.ColumnSpan="4"
+            IsEnabled="{Binding IsLicenseValid}"
             Margin="5,5,5,0">
 
             <Border>
