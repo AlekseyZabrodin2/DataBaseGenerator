@@ -14,7 +14,7 @@ namespace DataBaseGenerator.UI.Wpf.Licensing
         private const string RegistryPath =@"Software\DataBaseGenerator";
         private const string RegistryValueName = "TrialState";
         private static readonly string LicenseDirectory = Path.Combine(AppContext.BaseDirectory, "License");
-        private static readonly string LicenseFilePath = Path.Combine(LicenseDirectory, "license.lic");
+        private static readonly string LicenseFilePath = Path.Combine(LicenseDirectory, "activation.lic");
         private static readonly string PublicKeyFilePath = Path.Combine(LicenseDirectory, "public_key.pem");
         private static readonly string[] FilePaths =
         {
