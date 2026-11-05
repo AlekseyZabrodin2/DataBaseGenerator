@@ -10,6 +10,7 @@ using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DataBaseGenerator.Core.LiteDbGenerator.Data;
+using DataBaseGenerator.UI.Wpf.Licensing;
 using DataBaseGenerator.UI.Wpf.Service;
 using DataBaseGenerator.UI.Wpf.UserControls;
 using DataBaseGenerator.UI.Wpf.View;
@@ -105,6 +106,12 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [ObservableProperty]
         public partial bool? IsMySqlOnline { get; set; }
 
+        [ObservableProperty]
+        public partial bool IsLicenseValid { get; set; }
+
+        [ObservableProperty]
+        public partial LicenseCheckResult LicenseResult { get; set; }
+
         private readonly ApplicationSettingsService _settingsService;
         private int _statusCheckRunning;
         private bool _startupCheckPending = true;
@@ -123,10 +130,32 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             _settingsService = settingsService;
 
             DatabaseTabs = new();
+            
+            InitializeDirectories();
+        }
+
+
+        public void InitializeApplication(LicenseCheckResult licenseResult)
+        {
+            LicenseResult = licenseResult;
+            IsLicenseValid = licenseResult.IsValid;
+
+            if (!IsLicenseValid)
+            {
+                var licenseViewModel = new LicenseViewModel(LicenseResult);
+                licenseViewModel.LicenseActivated += InitializeApplication;
+
+                CurrentPage = new LicenseUserControl
+                {
+                    DataContext = licenseViewModel
+                };
+
+                CurrentPageName = "Лицензия";
+                return;
+            }
 
             _ = InitializeDatabaseAsync();
             _ = SwitchToMySql();
-            InitializeDirectories();
         }
 
         private async Task RequestServiceStatus()

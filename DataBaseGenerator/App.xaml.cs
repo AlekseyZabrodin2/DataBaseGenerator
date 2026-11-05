@@ -9,6 +9,7 @@ using DataBaseGenerator.Core.LiteDbGenerator.Data;
 using DataBaseGenerator.Core.LiteDbGenerator.Services;
 using DataBaseGenerator.Core.MySqlGenerator;
 using DataBaseGenerator.Core.MySqlGenerator.Data;
+using DataBaseGenerator.UI.Wpf.Licensing;
 using DataBaseGenerator.UI.Wpf.Service;
 using DataBaseGenerator.UI.Wpf.UserControls;
 using DataBaseGenerator.UI.Wpf.View;
@@ -133,8 +134,6 @@ namespace DataBaseGenerator.UI.Wpf
 
             _host = hostBuilder.Build();
             ApplySavedLiteDbPaths();
-
-            EnsureSingleWebHostProcessRunning();
         }
 
         private void ApplySavedLiteDbPaths()
@@ -153,6 +152,11 @@ namespace DataBaseGenerator.UI.Wpf
         {
             StopWebHost();
             StartWebHost();
+        }
+
+        public void RestartWebHost()
+        {
+            EnsureSingleWebHostProcessRunning();
         }
 
         private void StartWebHost()
@@ -198,26 +202,40 @@ namespace DataBaseGenerator.UI.Wpf
                 }
             }
         }
-
+                
         protected override void OnStartup(StartupEventArgs e)
         {
+            base.OnStartup(e);
+
             try
             {
-                base.OnStartup(e);
+                var licenseService = new LicenseService();
+                var licenseResult = licenseService.Check();
 
-                var mainWindow = new MainWindow();
+                var mainViewModel = _host.Services.GetRequiredService<MainViewModel>();
+                mainViewModel.InitializeApplication(licenseResult);
+
+                if (licenseResult.IsValid)
+                {
+                    _logger.Info($"Лицензия проверена: {licenseResult.State}");
+                    EnsureSingleWebHostProcessRunning();
+                }
+                else
+                {
+                    _logger.Warn($"Лицензия недействительна: {licenseResult.State}");
+                }
+
+                var mainWindow = _host.Services.GetRequiredService<MainWindow>();
                 mainWindow.Show();
-                _logger.Info("Main window is started");
 
                 mainWindow.Closed += (_, _) => Shutdown();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                _logger.Error(ex, "Нет подключения к БД");
-                MessageBox.Show($"Нет подключения к БД.\r\n Некоторые функции будут недоступны.\r\n {ex.Message}",
-                                "Ошибка подключения",
-                                MessageBoxButton.OK, MessageBoxImage.Warning);
-                base.Shutdown();
+                _logger.Error(ex, "Ошибка при запуске приложения.");
+                MessageBox.Show($"Ошибка при запуске приложения:\n{ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                Shutdown();
             }
         }
 
