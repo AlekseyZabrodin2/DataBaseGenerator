@@ -29,7 +29,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
         private static readonly Random _random = new Random();
         private readonly BaseGenerateContext _context;
-        private readonly IHttpClientFactory _httpClient;
         private readonly ApplicationSettingsService _settingsService;
         private readonly PatientService _patientService;
         private readonly WorklistService _worklistService;
@@ -353,12 +352,10 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
 
         public MySqlGeneratorViewModel(BaseGenerateContext context, 
-                IHttpClientFactory clientFactory, 
                 GenerationOptionsStore optionsStore,
                 ApplicationSettingsService settingsService)
         {
             _context = context;
-            _httpClient = clientFactory;
             _settingsService = settingsService;
             GenerationOptions = optionsStore.MySql;
 
@@ -373,8 +370,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             Gender = new List<string> { "Man", "Female", "Other" };
 
-            _patientService = new PatientService(_httpClient);
-            _worklistService = new WorklistService(_httpClient);
+            _patientService = new PatientService(_context);
+            _worklistService = new WorklistService(_context);
 
             InitializeDirectories();
         }
@@ -444,7 +441,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 StartBusy("Генерация пациентов...");
 
-                var newPatient = new PatientGeneratorParameters(
+                var newPatient = new PatientGeneratorDto(
                     new OrderIdPatientRule(),
                     new RandomLastNameRule(),
                     new RandomFirstNameRule(),
@@ -1126,24 +1123,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 _logger.Info("<<< AddOnePatientAsync: END");
                 StopBusy();
-            }
-        }
-
-        [RelayCommand]
-        public void OpenWebPage()
-        {
-            var url = _settingsService.Settings.WebHostUrl; // или любой нужный маршрут
-            try
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = url,
-                    UseShellExecute = true // важно для Windows — откроет в браузере
-                });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Не удалось открыть веб-страницу: " + ex.Message);
             }
         }
 
