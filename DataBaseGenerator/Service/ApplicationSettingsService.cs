@@ -2,7 +2,10 @@
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
+using DataBaseGenerator.Core.MySqlGenerator.Data;
 using DataBaseGenerator.UI.Wpf.Model;
+using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 
 namespace DataBaseGenerator.UI.Wpf.Service
 {
@@ -38,6 +41,51 @@ namespace DataBaseGenerator.UI.Wpf.Service
             var json = JsonSerializer.Serialize(Settings, new JsonSerializerOptions { WriteIndented = true });
 
             await File.WriteAllTextAsync(_settingsPath, json);
+        }
+
+        public void ApplyConnectionStringIfEmpty(string connectionString)
+        {
+            if (!string.IsNullOrWhiteSpace(Settings.MySqlDatabase) &&
+                !string.IsNullOrWhiteSpace(Settings.MySqlUser))
+                return;
+
+            if (string.IsNullOrWhiteSpace(connectionString))
+                return;
+
+            var source = new MySqlConnectionStringBuilder(connectionString);
+            Settings.MySqlServer = source.Server;
+            Settings.MySqlPort = source.Port;
+            Settings.MySqlDatabase = source.Database;
+            Settings.MySqlUser = source.UserID;
+            Settings.MySqlPassword = source.Password;
+
+            var json = JsonSerializer.Serialize(Settings, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(_settingsPath, json);
+        }
+
+        public BaseGenerateContext CreateContext()
+        {
+            if (string.IsNullOrWhiteSpace(Settings.MySqlServer) ||
+                string.IsNullOrWhiteSpace(Settings.MySqlDatabase) ||
+                string.IsNullOrWhiteSpace(Settings.MySqlUser))
+            {
+                throw new InvalidOperationException("Заполните подключение MySQL в настройках.");
+            }
+
+            var builder = new MySqlConnectionStringBuilder
+            {
+                Server = Settings.MySqlServer,
+                Port = Settings.MySqlPort,
+                Database = Settings.MySqlDatabase,
+                UserID = Settings.MySqlUser,
+                Password = Settings.MySqlPassword
+            };
+
+            var options = new DbContextOptionsBuilder<BaseGenerateContext>()
+                .UseMySql(builder.ConnectionString, new MySqlServerVersion(new Version(8, 0, 28)))
+                .Options;
+
+            return new BaseGenerateContext(options);
         }
     }
 }

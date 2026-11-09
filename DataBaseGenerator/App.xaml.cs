@@ -5,14 +5,12 @@ using DataBaseGenerator.Core.LiteDbGenerator.Contracts;
 using DataBaseGenerator.Core.LiteDbGenerator.Data;
 using DataBaseGenerator.Core.LiteDbGenerator.Services;
 using DataBaseGenerator.Core.MySqlGenerator;
-using DataBaseGenerator.Core.MySqlGenerator.Data;
 using DataBaseGenerator.UI.Wpf.Licensing;
 using DataBaseGenerator.UI.Wpf.Service;
 using DataBaseGenerator.UI.Wpf.UserControls;
 using DataBaseGenerator.UI.Wpf.View;
 using DataBaseGenerator.UI.Wpf.ViewModel;
 using DataBaseGenerator.UI.Wpf.ViewModel.Options;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -53,7 +51,7 @@ namespace DataBaseGenerator.UI.Wpf
             var configuration = AppConfiguration.LoadConfiguration();
 
             _settingsService = new ApplicationSettingsService();
-            var settings = _settingsService.Settings;
+            _settingsService.ApplyConnectionStringIfEmpty(configuration.GetConnectionString("DefaultConnection"));
 
             var dataDirectory = Path.Combine(AppContext.BaseDirectory, "LiteDataBase");
             if (!Directory.Exists(dataDirectory))
@@ -83,17 +81,6 @@ namespace DataBaseGenerator.UI.Wpf
                             _logger.Info($"VALUE: {value}");
                         }
                     }
-
-                    var connectionString = context.Configuration.GetConnectionString("DefaultConnection");
-                    _logger.Info($"ConnectionString = {connectionString}");
-
-                    services.AddDbContext<BaseGenerateContext>(options =>
-                    options.UseMySql(
-                        context.Configuration.GetConnectionString("DefaultConnection"),
-                        new MySqlServerVersion(new Version(8, 0, 28))));
-
-                    services.AddScoped<PatientService>();
-                    services.AddScoped<WorklistService>();
 
                     services.AddSingleton<IStudyApplicationService, StudyApplicationService>();
                     services.AddSingleton(this);
