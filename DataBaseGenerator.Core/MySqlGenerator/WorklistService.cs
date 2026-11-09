@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Net.Http;
-using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
+using DataBaseGenerator.Core.MySqlGenerator.Data;
+using Microsoft.EntityFrameworkCore;
 using NLog;
 
 namespace DataBaseGenerator.Core.MySqlGenerator
@@ -11,62 +12,158 @@ namespace DataBaseGenerator.Core.MySqlGenerator
     public class WorklistService
     {
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
-        private readonly HttpClient _httpClient;
+        private readonly BaseGenerateContext _context;
 
 
-        public WorklistService(IHttpClientFactory clientFactory)
+        public WorklistService(BaseGenerateContext context)
         {
-            _httpClient = clientFactory.CreateClient("DBGeneratorApi");
+            _context = context;
         }
 
+        private void LogAllExceptions(Exception ex, string message)
+        {
+            int level = 0;
+            var current = ex;
+            while (current != null)
+            {
+                _logger.Error(current, $"{message} (Level {level})");
+                current = current.InnerException;
+                level++;
+            }
+        }
 
         public async Task<List<WorkList>> GetAllAsync()
         {
-            _logger.Trace("Get All worklists");
+            try
+            {
+                var workList = await _context.WorkList.ToListAsync();
+                _logger.Info($"Loaded {workList.Count} workList");
 
-            var response = await _httpClient.GetAsync("worklist/all");
-            response.EnsureSuccessStatusCode();
+                return workList;
+            }
+            catch (Exception ex)
+            {
+                LogAllExceptions(ex, "Can`t get all workLists");
+                return new List<WorkList>();
+            }
 
-            var content = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<List<WorkList>>(content);
         }
 
         public async Task<int> GetWorkListCountAsync()
         {
-            _logger.Trace("Get worklist count");
-
-            var response = await _httpClient.GetAsync("worklist/workListCount");
-            response.EnsureSuccessStatusCode();
-
-            var content = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<int>(content);
+            try
+            {
+                return await _context.WorkList.CountAsync();
+            }
+            catch (Exception ex)
+            {
+                LogAllExceptions(ex, "Can't get workList count");
+                return 0;
+            }
         }
 
         public async Task GenerateAsync(WorkListGeneratorDto inputParameters, CancellationToken cancellationToken)
         {
-            _logger.Trace("Generate worklists");
+            try
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    _logger.Info("Cancellation requested, stopping generation...");
+                    return;
+                }
 
-            var json = JsonConvert.SerializeObject(inputParameters);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+                await CreateAsync(inputParameters, cancellationToken);
+                _logger.Info($"Created {inputParameters.WorkListCount} WorkLists");
+            }
+            catch (Exception ex)
+            {
+                LogAllExceptions(ex, "WorkList not generated");
+            }
+        }
 
-            var response = await _httpClient.PostAsync("worklist/generate", content, cancellationToken);
-            response.EnsureSuccessStatusCode();
+        public async Task CreateAsync(WorkListGeneratorDto inputParameters, CancellationToken cancellationToken)
+        {
+            var total = inputParameters.WorkListCount;
+            var batchSize = 1000;
+            var newWorkLists = new List<WorkList>(batchSize);
+
+            var maxId = await _context.WorkList
+                .AnyAsync(cancellationToken)
+                ? await _context.WorkList.MaxAsync(w => w.ID_WorkList, cancellationToken)
+                : 0;
+
+            var currentId = maxId;
+
+            for (var workListIndex = 0; workListIndex < total; workListIndex++)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                    break;
+
+                currentId++;
+
+                var newWorkList = GenerateWorkList(currentId, inputParameters);
+                newWorkLists.Add(newWorkList);
+
+                if (newWorkLists.Count >= batchSize || workListIndex == total - 1)
+                {
+                    await _context.WorkList.AddRangeAsync(newWorkLists, cancellationToken);
+                    await _context.SaveChangesAsync(cancellationToken);
+
+                    _context.ChangeTracker.Clear();
+                    newWorkLists.Clear();
+                }
+            }
+        }
+
+        private WorkList GenerateWorkList(int workListIndex, WorkListGeneratorDto inputParameters)
+        {
+            return new WorkList()
+            {
+                ID_WorkList = workListIndex,
+                CreateDate = inputParameters.CreateDate.Generate(),
+                CreateTime = inputParameters.CreateTime.Generate(),
+                ID_Patient = inputParameters.ID_Patient.Generate(),
+                State = inputParameters.State.Generate(),
+                SOPInstanceUID = inputParameters.SOPInstanceUID.Generate(),
+                Modality = inputParameters.Modality.Generate(),
+                StationAeTitle = inputParameters.StationAeTitle.Generate(),
+                ProcedureStepStartDateTime = inputParameters.ProcedureStepStartDateTime.Generate(),
+                PerformingPhysiciansName = inputParameters.PerformingPhysiciansName.Generate(),
+                StudyDescription = inputParameters.StudyDescription.Generate(),
+                ReferringPhysiciansName = inputParameters.ReferringPhysiciansName.Generate(),
+                RequestingPhysician = inputParameters.RequestingPhysician.Generate()
+            };
         }
 
         public async Task DeleteFirstAsync()
         {
-            _logger.Trace("Delete First worklist");
+            try
+            {
+                _context.WorkList.Remove(_context.WorkList.First());
+                await _context.SaveChangesAsync();
 
-            var response = await _httpClient.DeleteAsync("worklist/deleteFirst");
-            response.EnsureSuccessStatusCode();
+                _logger.Info("Delete First WorkList");
+            }
+            catch (Exception ex)
+            {
+                LogAllExceptions(ex, "First workList not deleted");
+            }
+
         }
 
         public async Task DeleteAllAsync()
         {
-            _logger.Trace("Delete All worklists");
+            try
+            {
+                _context.WorkList.RemoveRange(_context.WorkList);
+                await _context.SaveChangesAsync();
 
-            var response = await _httpClient.DeleteAsync("worklist/deleteAll");
-            response.EnsureSuccessStatusCode();
+                _logger.Info("Delete All WorkLists");
+            }
+            catch (Exception ex)
+            {
+                LogAllExceptions(ex, "WorkList table not deleted");
+            }
         }
     }
 }
