@@ -57,15 +57,6 @@
                 HorizontalAlignment="Left"
                 Command="{Binding ConnectDBCommand}"
                 Content="Connect" />
-
-            <Button
-                Name="OpenWeb"
-                Width="120"
-                Height="50"
-                Margin="0,0,10,0"
-                HorizontalAlignment="Right"
-                Command="{Binding OpenWebPageCommand}"
-                Content="Web version" />
         </Grid>
 
         <Grid

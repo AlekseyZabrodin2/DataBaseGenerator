@@ -81,7 +81,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             DaysPassed = string.Empty;
 
-            ((App)Application.Current).RestartWebHost();
             LicenseActivated?.Invoke(result);
         }
     }

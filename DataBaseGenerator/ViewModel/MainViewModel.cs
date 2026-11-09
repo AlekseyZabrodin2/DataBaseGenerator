@@ -23,9 +23,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
     public partial class  MainViewModel : ObservableObject
     {
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
-        private DialogMessageWindow _dialogMessage = new DialogMessageWindow();
+        private DialogMessageWindow _dialogMessage;
         private MediaPlayer _mediaPlayer = new MediaPlayer();
-        private SpecificationWindow _specificationWindow = new SpecificationWindow(); 
+        private SpecificationWindow _specificationWindow; 
         private readonly IServiceProvider _serviceProvider;
 
 
@@ -95,9 +95,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         public partial string PathToIcon { get; set; }
 
         [ObservableProperty]
-        public partial bool? IsWebHostOnline { get; set; }
-
-        [ObservableProperty]
         public partial bool? IsMySqlOnline { get; set; }
 
         [ObservableProperty]
@@ -154,58 +151,25 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         private async Task RequestServiceStatus()
         {
-            var retryWebHost = _startupCheckPending;
-            _startupCheckPending = false;
-            await RefreshStatusAsync(retryWebHost);
+            await RefreshStatusAsync();
         }
 
-        private async Task RefreshStatusAsync(bool retryWebHost, bool checkWebHost = true)
+        private async Task RefreshStatusAsync()
         {
             if (Interlocked.Exchange(ref _statusCheckRunning, 1) == 1)
                 return;
 
             try
             {
-                if (checkWebHost)
-                    IsWebHostOnline = null;
-
                 IsMySqlOnline = null;
-
-                Task<bool>? webHostTask = checkWebHost ? WebHostRespondsAsync(retryWebHost) : null;
-                var mySqlTask = MySqlRespondsAsync();
-
-                if (webHostTask != null)
-                {
-                    await Task.WhenAll(webHostTask, mySqlTask);
-                    IsWebHostOnline = await webHostTask;
-                }
-                else
-                {
-                    await mySqlTask;
-                }
-
-                IsMySqlOnline = await mySqlTask;
+                
+                IsMySqlOnline = await MySqlRespondsAsync();
+                ;
             }
             finally
             {
                 Interlocked.Exchange(ref _statusCheckRunning, 0);
             }
-        }
-
-        private async Task<bool> WebHostRespondsAsync(bool retry)
-        {
-            var attempts = retry ? 4 : 1;
-
-            for (var attempt = 1; attempt <= attempts; attempt++)
-            {
-                if (Process.GetProcessesByName("DataBaseGenerator.Web").Length > 0)
-                    return true;
-
-                if (attempt < attempts)
-                    await Task.Delay(1000);
-            }
-
-            return false;
         }
 
         private async Task<bool> MySqlRespondsAsync()
@@ -303,16 +267,16 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         public void AboutProgram()
         {
-            _dialogMessage.DataContext = this;
+            _dialogMessage = new DialogMessageWindow { DataContext = this };
             _dialogMessage.ShowDialog();
         }
 
         [RelayCommand]
         public void ClosingDialogWindow()
         {
-            //_mediaPlayer.Open(new Uri(PathToResourceAudio));
-            //_mediaPlayer.Play();
-            _dialogMessage.Close();
+            _mediaPlayer.Open(new Uri(PathToResourceAudio));
+            _mediaPlayer.Play();
+            _dialogMessage?.Close();
         }
 
         [RelayCommand]
@@ -330,14 +294,14 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         public void OpenSpecificationWindow()
         {
-            _specificationWindow.DataContext = this;
+            _specificationWindow = new SpecificationWindow { DataContext = this };
             _specificationWindow.Show();
         }
 
         [RelayCommand]
         public void CloseSpecificationWindow()
         {
-            _specificationWindow.Close();
+            _specificationWindow?.Close();
         }
 
         [RelayCommand]
@@ -386,7 +350,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         private void OnConnectionCheckRequested()
         {
-            _ = RefreshStatusAsync(retryWebHost: false, checkWebHost: false);
+            _ = RefreshStatusAsync();
         }
 
         [RelayCommand]

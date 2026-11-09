@@ -101,48 +101,10 @@
                     </Grid>
                 </GroupBox>
 
-                <!--  WebHost  -->
-                <GroupBox
-                    Margin="0,0,0,20"
-                    Padding="15"
-                    Header="WebHost">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="150" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            FontWeight="DemiBold"
-                            Text="Адрес сервиса:" />
-                        <TextBox
-                            Grid.Column="1"
-                            Margin="5"
-                            Text="{Binding Settings.WebHostUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-
-                        <TextBlock
-                            Grid.Row="1"
-                            VerticalAlignment="Center"
-                            FontWeight="DemiBold"
-                            Text="Адрес API" />
-                        <TextBox
-                            Grid.Row="1"
-                            Grid.Column="1"
-                            Margin="5"
-                            Text="{Binding Settings.WebHostApiUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    </Grid>
-                </GroupBox>
-
                 <TextBlock
+                    Margin="0,0,0,20"
                     HorizontalAlignment="Right"
                     FontSize="14"
-                    Margin="0,0,0,20"
                     Text="{Binding SaveStatus}"
                     TextWrapping="Wrap">
                     <TextBlock.Style>

@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Net.Http.Headers;
 using System.Windows;
 using DataBaseGenerator.Core.LiteDbGenerator.Contracts;
 using DataBaseGenerator.Core.LiteDbGenerator.Data;
@@ -29,11 +26,7 @@ namespace DataBaseGenerator.UI.Wpf
     public partial class App : Application
     {
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
-        private readonly IHost _host; 
-        private readonly BaseGenerateContext _context;
-        const string _exeName = "DataBaseGenerator.Web.exe";
-        const string _webHostPath = "WebHost\\DataBaseGenerator.Web.exe";
-        private string _exeToRun; 
+        private readonly IHost _host;
         private readonly ApplicationSettingsService _settingsService;
 
         public static IStudyStorageModule SharedStorage { get; set; }
@@ -121,16 +114,7 @@ namespace DataBaseGenerator.UI.Wpf
                     services.AddSingleton(_settingsService);
                     services.AddSingleton<SettingsViewModel>();
                     services.AddSingleton<SettingsUserControl>();
-
-                    services.AddHttpClient("DBGeneratorApi", client =>
-                    {
-                        var webHostApiUrl = context.Configuration["WebHost:ApiUri"] ?? "http://localhost:5289/api/";
-
-                        client.BaseAddress = new Uri(webHostApiUrl);
-                        client.DefaultRequestHeaders.Accept.Clear();
-                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     });
-                });
 
             _host = hostBuilder.Build();
             ApplySavedLiteDbPaths();
@@ -146,61 +130,6 @@ namespace DataBaseGenerator.UI.Wpf
 
             if (File.Exists(store.PlannedStudiesDatabasePath))
                 UpdatePlannedStorage(store.PlannedStudiesDatabasePath, true);
-        }
-
-        private void EnsureSingleWebHostProcessRunning()
-        {
-            StopWebHost();
-            StartWebHost();
-        }
-
-        public void RestartWebHost()
-        {
-            EnsureSingleWebHostProcessRunning();
-        }
-
-        private void StartWebHost()
-        {
-            bool isRunning = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(_exeName)).Any();
-            if (!isRunning)
-            {
-                try
-                {
-                    var exeDir = GetExeDirectory();
-                    var pathNearExe = GetPathNearExe(exeDir);
-                    var pathFromDebug = GetPathFromDebug(exeDir);
-
-                    if (File.Exists(pathNearExe))
-                    {
-                        _exeToRun = pathNearExe;
-                    }
-                    else if (File.Exists(pathFromDebug))
-                    {
-                        _exeToRun= pathFromDebug;
-                    }
-                    if (_exeToRun != null)
-                    {
-                        Process.Start(new ProcessStartInfo
-                        {
-                            FileName = _exeToRun,
-                            UseShellExecute = false,
-                            CreateNoWindow = true
-                        });
-                        _logger.Info("WebHost started");
-                    }
-                    else
-                    {
-                        string allPaths = $"{pathNearExe} и {pathFromDebug}";
-                        _logger.Warn($"Не найден файл: {allPaths}, Ошибка запуска веб-хоста");
-                        MessageBox.Show($"Не найден файл: {allPaths}, Ошибка запуска веб-хоста");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error(ex, "Ошибка запуска веб-сервера");
-                    MessageBox.Show($"Ошибка запуска веб-сервера: {ex.Message}");
-                }
-            }
         }
                 
         protected override void OnStartup(StartupEventArgs e)
@@ -218,7 +147,6 @@ namespace DataBaseGenerator.UI.Wpf
                 if (licenseResult.IsValid)
                 {
                     _logger.Info($"Лицензия проверена: {licenseResult.State}");
-                    EnsureSingleWebHostProcessRunning();
                 }
                 else
                 {
@@ -241,53 +169,8 @@ namespace DataBaseGenerator.UI.Wpf
 
         protected override void OnExit(ExitEventArgs e)
         {
-            StopWebHost();
-
             _host.Dispose();
-
             base.OnExit(e);
-        }
-
-        private void StopWebHost()
-        {
-            var processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(_exeName));
-            foreach (var process in processes)
-            {
-                try
-                {
-                    process.Kill();
-                    process.WaitForExit();
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error(ex, "Can`t stop process {processId}", process.Id);
-                }
-                _logger.Info("WebHost stoped");
-            }
-        }
-
-        private string GetExeDirectory()
-        {
-            var exeDir = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
-            _logger.Trace("exeDir - {0}", exeDir);
-
-            return exeDir;
-        }
-
-        private string GetPathNearExe(string exeDir)
-        {
-            var pathNearExe = Path.Combine(exeDir, _webHostPath);
-            _logger.Trace("pathNearExe - {0}", pathNearExe);
-
-            return pathNearExe;
-        }
-
-        private string GetPathFromDebug(string exeDir)
-        {
-            var pathFromDebug = Path.GetFullPath(Path.Combine(exeDir, @"..\..\..", _webHostPath));
-            _logger.Trace("pathFromDebug - {0}", pathFromDebug);
-
-            return pathFromDebug;
         }
 
         public static void UpdateSharedStorage(string dbPath, bool readOnly)

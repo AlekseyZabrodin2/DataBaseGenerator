@@ -1,15 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36301.6
+# Visual Studio Version 18
+VisualStudioVersion = 18.11.12328.437 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataBaseGenerator.UI.Wpf", "DataBaseGenerator\DataBaseGenerator.UI.Wpf.csproj", "{38FCB766-26B5-4EC1-BAB8-FE30619ADBC0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataBaseGenerator.Core", "DataBaseGenerator.Core\DataBaseGenerator.Core.csproj", "{02B49DBC-8436-4A25-B423-BD3C04E9E6F1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataBaseGenerator.Test", "DataBaseGenerator.Test\DataBaseGenerator.Test.csproj", "{BA7E70DD-E31D-4332-962B-CFF7D8488A6C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataBaseGenerator.Web", "DataBaseGenerator.Web\DataBaseGenerator.Web.csproj", "{844C4E9B-98B6-4FFE-B707-004058F01E1D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +27,6 @@ Global
 		{BA7E70DD-E31D-4332-962B-CFF7D8488A6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA7E70DD-E31D-4332-962B-CFF7D8488A6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA7E70DD-E31D-4332-962B-CFF7D8488A6C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{844C4E9B-98B6-4FFE-B707-004058F01E1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{844C4E9B-98B6-4FFE-B707-004058F01E1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{844C4E9B-98B6-4FFE-B707-004058F01E1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{844C4E9B-98B6-4FFE-B707-004058F01E1D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

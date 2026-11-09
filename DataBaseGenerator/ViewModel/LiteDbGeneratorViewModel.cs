@@ -645,24 +645,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
         [RelayCommand]
-        public void OpenWebPage()
-        {
-            var url = "http://localhost:5289"; // или любой нужный маршрут
-            try
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = url,
-                    UseShellExecute = true // важно для Windows — откроет в браузере
-                });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Не удалось открыть веб-страницу: " + ex.Message);
-            }
-        }
-
-        [RelayCommand]
         public async Task DeleteAllTablesAsync()
         {
             try
