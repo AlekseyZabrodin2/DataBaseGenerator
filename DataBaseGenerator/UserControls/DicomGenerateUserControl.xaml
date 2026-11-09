@@ -177,8 +177,24 @@
                                 <TextBlock
                                     Margin="5,5,0,0"
                                     FontWeight="DemiBold"
-                                    Text="ИД пациента" />
-                                <TextBox Margin="5" Text="{Binding IdPatient, Mode=TwoWay}" />
+                                    Text="ID пациента" />
+                                <Grid Margin="5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <CheckBox
+                                        Margin="0,0,8,0"
+                                        VerticalAlignment="Center"
+                                        IsChecked="{Binding UseFixedPatientId}" />
+
+                                    <TextBox
+                                        x:Name="PatientIdTextBox"
+                                        Grid.Column="1"
+                                        VerticalContentAlignment="Center"
+                                        Text="{Binding IdPatient, Mode=TwoWay}" />
+                                </Grid>
 
                                 <TextBlock
                                     Margin="5,3,0,0"

@@ -153,6 +153,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         public partial string IdPatient { get; set; }
 
         [ObservableProperty]
+        public partial bool UseFixedPatientId { get; set; }
+
+        [ObservableProperty]
         public partial string IdPrefix { get; set; }
 
         [ObservableProperty]
@@ -402,7 +405,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     _patientParameters = new PatientGeneratorParameters(
                         ChooseCod,
                         CreateNameRule(generationOptions),
-                        new OrderedIdRule(IdPrefix, IdNumber, IdOptions.IdLength, IdOptions.UseRandomPrefix, IdOptions.PrefixLength),
+                        new OrderedIdRule(IdPrefix, IdNumber, IdOptions.IdLength, IdOptions.UseRandomPrefix, IdOptions.PrefixLength, UseFixedPatientId, IdPatient),
                         new RandomSexRule(SelectedGender.Code),
                         new PatientAddressRule(AddressPatient),
                         new PatientCommentsRule(InfoPatient),
@@ -501,6 +504,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             SopSrCount = 0;
 
             IdPatient = string.Empty;
+            UseFixedPatientId = false;
             LastNamePatient = string.Empty;
             NamePatient = string.Empty;
             MiddleNamePatient = string.Empty;

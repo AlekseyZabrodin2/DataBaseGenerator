@@ -8,12 +8,16 @@ namespace DataBaseGenerator.Core.GeneratorRules.Patient
         public string Prefix { get; set; }
         public BigInteger IdNumber { get; set; }
         public int IdLength { get; set; }
+        public bool UseFixedId { get; set; }
+        public string FixedPatientId { get; set; }
 
 
-        public OrderedIdRule(string prefix, BigInteger idNumber, int idLength = 6, bool randomPrefix = false, int prefixLength = 4)
+        public OrderedIdRule(string prefix, BigInteger idNumber, int idLength = 6, bool randomPrefix = false, int prefixLength = 4, bool useFixedId = false, string fixedPatientId = null)
         {
             IdNumber = idNumber;
             IdLength = Math.Max(1, idLength);
+            UseFixedId = useFixedId;
+            FixedPatientId = fixedPatientId;
 
             Prefix = randomPrefix
                 ? RandomLetters(Math.Clamp(prefixLength, 1, 64))
@@ -22,13 +26,17 @@ namespace DataBaseGenerator.Core.GeneratorRules.Patient
 
         public string Generate(int order)
         {
+            if (UseFixedId && !string.IsNullOrWhiteSpace(FixedPatientId))
+                return FixedPatientId.Trim();
+
             if (order < 0)
                 order = 0;
 
             if (string.IsNullOrWhiteSpace(Prefix))
                 throw new InvalidOperationException("Prefix must contain a string.");
 
-            var idNumber = IdNumber + order + 1;
+            var entered = !string.IsNullOrWhiteSpace(FixedPatientId);
+            var idNumber = entered ? IdNumber + order : IdNumber + order + 1;
             var patientId = $"{Prefix}{idNumber.ToString("D" + IdLength)}";
 
             if (patientId.Length > 64)
