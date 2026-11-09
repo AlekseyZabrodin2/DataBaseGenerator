@@ -1,1 +1,0 @@
-dotnet publish ../DataBaseGenerator.Web/DataBaseGenerator.Web.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o ../DataBaseGenerator/WebHost
