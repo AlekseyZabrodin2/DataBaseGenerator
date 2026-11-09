@@ -9,7 +9,7 @@ namespace DataBaseGenerator.UI.Wpf.Licensing
 {
     public sealed class LicenseService
     {
-        private const int TrialDays = 14;
+        private const int TrialDays = 30;
         private const int ClockToleranceMinutes = 5;
         private const string RegistryPath =@"Software\DataBaseGenerator";
         private const string RegistryValueName = "TrialState";
