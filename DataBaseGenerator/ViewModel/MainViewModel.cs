@@ -92,12 +92,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         public partial bool ShowStudies { get; set; }
 
         [ObservableProperty]
-        public partial bool ShowSeries { get; set; }
-
-        [ObservableProperty]
-        public partial bool ShowImages { get; set; }
-
-        [ObservableProperty]
         public partial string PathToIcon { get; set; }
 
         [ObservableProperty]
@@ -402,8 +396,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             ShowPatients = true;
             ShowStudies = false;
-            ShowSeries = false;
-            ShowImages = false;
 
             await ShowTable("Patients", _patientsPage);
         }
@@ -415,8 +407,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             ShowPatients = false;
             ShowStudies = true;
-            ShowSeries = false;
-            ShowImages = false;
 
             await ShowTable("Studies", _studiesPage);
         }        

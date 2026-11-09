@@ -15,8 +15,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.LiteDbTabs
 
         public bool HasPatientsTable { get; set; }
         public bool HasStudiesTable { get; set; }
-        public bool HasSeriesTable { get; set; }
-        public bool HasImagesTable { get; set; }
 
         [ObservableProperty]
         public partial bool ShowPatients { get; set; } = true;
@@ -24,11 +22,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.LiteDbTabs
         [ObservableProperty]
         public partial bool ShowStudies { get; set; }
 
-        [ObservableProperty]
-        public partial bool ShowSeries { get; set; }
-
-        [ObservableProperty]
-        public partial bool ShowImages { get; set; }
 
         public PatientDatabaseTab(string filePath)
         {
@@ -46,17 +39,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.LiteDbTabs
 
                 HasPatientsTable = collections.Contains("patients");
                 HasStudiesTable = collections.Contains("studies");
-                HasSeriesTable = collections.Contains("series");
-                HasImagesTable = collections.Contains("images");
 
                 if (HasPatientsTable)
                     ShowPatients = true;
                 else if (HasStudiesTable)
                     ShowStudies = true;
-                else if (HasSeriesTable)
-                    ShowSeries = true;
-                else if (HasImagesTable)
-                    ShowImages = true;
 
             }
             catch (Exception ex)

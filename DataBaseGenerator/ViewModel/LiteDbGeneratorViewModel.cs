@@ -167,22 +167,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         public partial bool ShowStudies { get; set; }
 
         [ObservableProperty]
-        public partial bool ShowSeries { get; set; }
-
-        [ObservableProperty]
-        public partial bool ShowImages { get; set; }
-
-        //[ObservableProperty]
-        //private partial PatientsTableViewModel PatientsVM { get; set; }
-
-        [ObservableProperty]
         public partial LiteDbStudiesTableViewModel StudiesVM { get; set; }
-
-        //[ObservableProperty]
-        //private partial SeriesTableViewModel SeriesVM { get; set; }
-
-        //[ObservableProperty]
-        //private partial ImagesTableViewModel ImagesVM { get; set; }
 
         private CancellationTokenSource _cancellationTokenSource; 
         
