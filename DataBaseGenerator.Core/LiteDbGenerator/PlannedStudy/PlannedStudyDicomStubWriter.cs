@@ -113,7 +113,7 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.PlannedStudy
       string frameOfReferenceUid,
       int instanceNumber)
     {
-      var now = DateTime.Now;
+      var instanceCreated = PickInstanceCreationDateTime(studyDateTime);
       var dataset = new DicomDataset
       {
         { DicomTag.SpecificCharacterSet, "ISO_IR 192" },
@@ -122,8 +122,8 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.PlannedStudy
         { DicomTag.SOPInstanceUID, UidGenerator.NormalizeUid(sopInstanceUid) },
         { DicomTag.StudyDate, studyDateTime.Date },
         { DicomTag.StudyTime, new DateTime(studyDateTime.TimeOfDay.Ticks) },
-        { DicomTag.InstanceCreationDate, now.Date },
-        { DicomTag.InstanceCreationTime, new DateTime(now.TimeOfDay.Ticks) },
+        { DicomTag.InstanceCreationDate, instanceCreated.Date },
+        { DicomTag.InstanceCreationTime, new DateTime(instanceCreated.TimeOfDay.Ticks) },
         { DicomTag.Modality, "DX" },
         { DicomTag.Manufacturer, "ADVIN SOLUTIONS" },
         { DicomTag.StationName, "Uniexpert 001" },
@@ -304,6 +304,22 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.PlannedStudy
         return "Planned view";
 
       return description.Substring(start + 1, end - start - 1);
+    }
+
+    /// <summary>Instance creation not before planned study date/time; not after stub write moment.</summary>
+    private static DateTime PickInstanceCreationDateTime(DateTime studyDateTime)
+    {
+      var end = DateTime.Now;
+      var start = studyDateTime;
+
+      if (start > end)
+        return end;
+
+      var spanTicks = end.Ticks - start.Ticks;
+      if (spanTicks <= 0)
+        return end;
+
+      return start.AddTicks(Random.Shared.NextInt64(0, spanTicks + 1));
     }
 
     private static string GenerateAdaniSopInstanceUid()
