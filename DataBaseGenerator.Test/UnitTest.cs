@@ -1,8 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using DataBaseGenerator.Core.MySqlGenerator;
 using DataBaseGenerator.Core.GeneratorRules.Patient;
 using DataBaseGenerator.Core.GeneratorRules.WorkList;
+using DataBaseGenerator.Core.LiteDbGenerator.Enums;
+using DataBaseGenerator.Core.LiteDbGenerator.Models;
+using DataBaseGenerator.Core.LiteDbGenerator.PlannedStudy;
+using FellowOakDicom;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DataBaseGenerator.Test
@@ -122,6 +127,54 @@ namespace DataBaseGenerator.Test
             var result = workList.Generator(newWorkList, patientIDs);
 
             Console.WriteLine(result);
+        }
+
+        [TestMethod]
+        public void PlannedStudyStubWrite_WritesDicomFiles()
+        {
+            var writer = new PlannedStudyDicomStubWriter();
+            var study = new PlannedStudyLiteDb
+            {
+                Id = "2.25.118693752840759730111890450793372487131",
+                StudyInstanceUid = "2.25.118693752840759730111890450793372487131",
+                PatientId = "MXE0000005",
+                PatientLastName = "Test",
+                PatientFirstName = "Patient",
+                StudyID = "STD-TEST",
+                StudyDateTime = DateTime.Now.AddDays(-5),
+                Gender = PatientSex.Other
+            };
+            var areas = new[]
+            {
+                new PlannedStudyArea
+                {
+                    BodyPartGuid = "075078f3-a940-492f-8874-67c989d1b36a",
+                    AnatomicRegionCodeValue = "16982005",
+                    ViewCodeValue = "399033003",
+                    ProjectionUid = "256959603182452846723296224630387872385",
+                    LateralityCode = "B"
+                }
+            };
+            var details = new List<(string Description, string LateralityCode)> { ("Chest - Lung (frontal)", "U") };
+            var tempRoot = Path.Combine(Path.GetTempPath(), "DicomStubTest_" + Guid.NewGuid().ToString("N"));
+            var paths = writer.WriteStubs(tempRoot, study, areas, details);
+            Assert.AreEqual(1, paths.Length);
+            Assert.IsTrue(File.Exists(paths[0]), $"Missing file: {paths[0]}");
+
+            var dataset = DicomFile.Open(paths[0]).Dataset;
+            Assert.IsTrue(dataset.TryGetSequence(DicomTag.ViewCodeSequence, out var viewSeq));
+            var viewItem = viewSeq.Items[0];
+            Assert.AreEqual("399033003", viewItem.GetSingleValueOrDefault(DicomTag.CodeValue, string.Empty));
+            Assert.AreEqual(
+                "256959603182452846723296224630387872385",
+                viewItem.GetSingleValueOrDefault(DicomTag.ContextUID, string.Empty));
+            Assert.AreEqual("B", dataset.GetSingleValueOrDefault(DicomTag.ImageLaterality, string.Empty));
+
+            var instanceDate = dataset.GetSingleValueOrDefault(DicomTag.InstanceCreationDate, DateTime.MinValue);
+            var instanceTime = dataset.GetSingleValueOrDefault(DicomTag.InstanceCreationTime, DateTime.MinValue);
+            var instanceCreated = instanceDate.Date.Add(instanceTime.TimeOfDay);
+            Assert.IsTrue(instanceCreated >= study.StudyDateTime!.Value.AddSeconds(-1));
+            Assert.IsTrue(instanceCreated <= DateTime.Now.AddSeconds(1));
         }
     }
 }
