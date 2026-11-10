@@ -2,7 +2,7 @@ using System;
 
 namespace DataBaseGenerator.Core.GeneratorRules.Study
 {
-    internal class StudyIdGenerator
+    public static class StudyIdGenerator
     {
 
         public static string GenerateStudyId()

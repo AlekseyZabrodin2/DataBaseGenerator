@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using DataBaseGenerator.Core.LiteDbGenerator.PlannedStudy;
 
 namespace DataBaseGenerator.Core.GeneratorRules.PlannedStudy
 {
@@ -33,7 +35,7 @@ namespace DataBaseGenerator.Core.GeneratorRules.PlannedStudy
             for (int i = 0; i < count; i++)
             {
                 var fileName = $"DX-{GetRandomLetter()}-{i + 1}-{GenerateRandomNumber(36)}.dcm";
-                var path = $@"c:\DicomTempFolder\{fileName}";
+                var path = Path.Combine(PlannedStudyDicomStubWriter.DefaultTempFolder, fileName);
                 paths.Add(path);
             }
 
