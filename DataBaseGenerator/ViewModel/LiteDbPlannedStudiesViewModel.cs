@@ -110,7 +110,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [ObservableProperty]
         public partial bool CancelButtonIsVisibil { get; set; } = true;
 
-
+        [ObservableProperty]
+        public partial bool GeneratePlannedStudiesWithDicomFiles { get; set; } = true;
 
         public LiteDbPlannedStudiesViewModel()
         {
@@ -319,26 +320,34 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     HasDose = plannedStudyDto.HasDose
                 };
 
-                try
+                if (GeneratePlannedStudiesWithDicomFiles)
                 {
-                    var projectionPaths = _plannedStudyDicomStubWriter.WriteStubs(
-                        PlannedStudyDicomStubWriter.DefaultTempFolder,
-                        _plannedStudyLiteDb,
-                        studyAreas,
-                        areaDetails);
-                    PlannedStudyDicomStubWriter.AlignArtifacts(_plannedStudyLiteDb, studyAreas, projectionPaths);
-
-                    if (_plannedStudyLiteDb.ProjectionPaths.Length == 0)
+                    try
                     {
-                        _logger.Warn(
-                            "Planned study {StudyUid}: no DICOM stubs on disk; StudyAreas cleared for UniExpert compatibility",
-                            studyInstanceUid);
+                        var projectionPaths = _plannedStudyDicomStubWriter.WriteStubs(
+                            PlannedStudyDicomStubWriter.DefaultTempFolder,
+                            _plannedStudyLiteDb,
+                            studyAreas,
+                            areaDetails);
+                        PlannedStudyDicomStubWriter.AlignArtifacts(_plannedStudyLiteDb, studyAreas, projectionPaths);
+
+                        if (_plannedStudyLiteDb.ProjectionPaths.Length == 0)
+                        {
+                            _logger.Warn(
+                                "Planned study {StudyUid}: no DICOM stubs on disk after write; StudyAreas aligned to existing files only",
+                                studyInstanceUid);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Warn(ex, "Failed to write planned DICOM stubs to {Folder}", PlannedStudyDicomStubWriter.DefaultTempFolder);
+                        _plannedStudyLiteDb.ProjectionPaths = Array.Empty<string>();
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    _logger.Warn(ex, "Failed to write planned DICOM stubs to {Folder}", PlannedStudyDicomStubWriter.DefaultTempFolder);
-                    PlannedStudyDicomStubWriter.AlignArtifacts(_plannedStudyLiteDb, studyAreas, Array.Empty<string>());
+                    _plannedStudyLiteDb.StudyAreas = studyAreas;
+                    _plannedStudyLiteDb.ProjectionPaths = Array.Empty<string>();
                 }
 
                 return _plannedStudyLiteDb;
