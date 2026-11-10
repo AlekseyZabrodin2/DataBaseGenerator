@@ -84,4 +84,63 @@
         </Setter>
     </Style>
 
+    <Style x:Key="PlannedStudyDicomToggleStyle" TargetType="{x:Type ToggleButton}">
+        <Setter Property="FocusVisualStyle" Value="{StaticResource ButtonFocusVisual}" />
+        <Setter Property="Background" Value="{StaticResource ButtonNormalBackground}" />
+        <Setter Property="BorderBrush" Value="{StaticResource ButtonNormalBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Padding" Value="1" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                    <StackPanel Orientation="Horizontal">
+                        <Border
+                            x:Name="dbOnly"
+                            Height="40"
+                            MinWidth="74"
+                            Margin="0,0,0,0"
+                            Background="LightGray"
+                            CornerRadius="2,0,0,4">
+                            <TextBlock
+                                x:Name="dbOnlyText"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Text="только БД"
+                                TextWrapping="Wrap" />
+                        </Border>
+                        <Border
+                            x:Name="withDcm"
+                            Height="40"
+                            MinWidth="74"
+                            Background="LightGray"
+                            CornerRadius="0,2,4,0">
+                            <TextBlock
+                                x:Name="withDcmText"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Text=".dcm файлы"
+                                TextWrapping="Wrap" />
+                        </Border>
+                    </StackPanel>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Foreground" Value="#ADADAD" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="False">
+                            <Setter TargetName="dbOnly" Property="Background" Value="Green" />
+                            <Setter TargetName="dbOnlyText" Property="Foreground" Value="White" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="withDcm" Property="Background" Value="Green" />
+                            <Setter TargetName="withDcmText" Property="Foreground" Value="White" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>
