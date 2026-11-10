@@ -3,6 +3,7 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using DataBaseGenerator.UI.Wpf.Service;
 using NLog;
 
 namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
@@ -21,11 +22,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
 
         public GenerationOptionsStore()
         {
-            var directory = Path.Combine(AppContext.BaseDirectory, "DataBaseGeneratorSettings");
-            
-            Directory.CreateDirectory(directory);
-
-            _path = Path.Combine(directory, "generation-options.json");
+            _path = Path.Combine(UserDataPaths.SettingsDirectory, "generation-options.json");
 
             var document = Read();
             MySql = Create("BirthdateMySql", document?.MySql);

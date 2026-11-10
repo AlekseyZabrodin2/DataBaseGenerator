@@ -17,11 +17,7 @@ namespace DataBaseGenerator.UI.Wpf.Service
 
         public ApplicationSettingsService()
         {
-            var directory = Path.Combine(AppContext.BaseDirectory, "DataBaseGeneratorSettings");
-
-            Directory.CreateDirectory(directory);
-
-            _settingsPath = Path.Combine(directory, "userSettings.json");
+            _settingsPath = Path.Combine(UserDataPaths.SettingsDirectory, "userSettings.json");
 
             Settings = Load();
         }
@@ -41,26 +37,6 @@ namespace DataBaseGenerator.UI.Wpf.Service
             var json = JsonSerializer.Serialize(Settings, new JsonSerializerOptions { WriteIndented = true });
 
             await File.WriteAllTextAsync(_settingsPath, json);
-        }
-
-        public void ApplyConnectionStringIfEmpty(string connectionString)
-        {
-            if (!string.IsNullOrWhiteSpace(Settings.MySqlDatabase) &&
-                !string.IsNullOrWhiteSpace(Settings.MySqlUser))
-                return;
-
-            if (string.IsNullOrWhiteSpace(connectionString))
-                return;
-
-            var source = new MySqlConnectionStringBuilder(connectionString);
-            Settings.MySqlServer = source.Server;
-            Settings.MySqlPort = source.Port;
-            Settings.MySqlDatabase = source.Database;
-            Settings.MySqlUser = source.UserID;
-            Settings.MySqlPassword = source.Password;
-
-            var json = JsonSerializer.Serialize(Settings, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(_settingsPath, json);
         }
 
         public BaseGenerateContext CreateContext()

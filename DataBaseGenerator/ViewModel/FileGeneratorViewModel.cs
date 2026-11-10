@@ -20,11 +20,13 @@ using FellowOakDicom;
 using Microsoft.Win32;
 using DataBaseGenerator.UI.Wpf.ViewModel.Options;
 using System.Numerics;
+using NLog;
 
 namespace DataBaseGenerator.UI.Wpf.ViewModel
 {
     public partial class FileGeneratorViewModel : ObservableObject
     {
+        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
         private StudyGeneratorParameters _studyParameters;
         private PatientGeneratorParameters _patientParameters;
         private PatientGenerator _patientGenerator;
@@ -35,7 +37,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private CancellationTokenSource _cancellationTokenSource;
         public bool _useBirthDatePatient;
         public int _sumCounts;
-        private string _testDataPath = string.Empty;
+        private string _testDataPath = string.Empty;        
         private string _saveFolderPath = string.Empty;
 
         public PatientGenerationOptions GenerationOptions { get; } = new("DicomGenerateBirthdate");
@@ -45,15 +47,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         public DicomStudyPeriodOptions StudyPeriod { get; } = new();
 
         public DicomSeriesTimeOptions SeriesTime { get; } = new();
-
-        //private readonly string _pathToSave = @"D:\DicomGeneratorResult";
-        // Path to TestData in Debug
-        //private readonly string _pathToTestData = @"D:\Develop\DicomGeneratorTestData\";
-
-
-        // Path to TestData after Install
-        //private readonly string _pathToTestData = @"C:\Program Files (x86)\DicomGenerator\DicomGeneratorTestData\";
-
 
         public string TestDataFolderPath
         {
@@ -241,10 +234,23 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             EndDatePatient = DateTime.Now;
             EndTimePatient = DateTime.Now;
 
-            TestDataFolderPath = _optionsStore.DicomTestDataFolderPath;
-            SaveFolderPath = _optionsStore.DicomSaveFolderPath;
+            TestDataFolderPath = string.IsNullOrWhiteSpace(_optionsStore.DicomTestDataFolderPath) ? InitializeDirectories() : _optionsStore.DicomTestDataFolderPath;
+            SaveFolderPath = _optionsStore.DicomSaveFolderPath;            
         }
 
+        private string InitializeDirectories()
+        {
+            var exePath = Process.GetCurrentProcess().MainModule.FileName;
+            _logger.Trace("ExePath - {0}", exePath);
+
+            var exeDirectory = Path.GetDirectoryName(exePath) ?? string.Empty;
+            _logger.Trace("Exe directory - {0}", exeDirectory);
+
+            var testDataPath = Path.Combine(exeDirectory, "DicomGeneratorTestData");
+            _logger.Trace("PathToTestData - {0}", testDataPath);
+
+            return testDataPath;
+        }
 
 
         private void ApplyStudyPeriod()

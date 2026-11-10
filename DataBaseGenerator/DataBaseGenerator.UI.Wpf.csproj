@@ -32,6 +32,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="DataBaseGeneratorSettings\userSettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="DicomGeneratorTestData\DX\1.2.826.0.1.3680043.2.564.20131127.125650.594.3924971542.dcm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="DicomGeneratorTestData\MG\1.2.826.0.1.3680043.2.564.2015226.9358.504.2981769307.dcm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="DicomGeneratorTestData\SR\1.2.826.0.1.3680043.2.564.2021114.161122.766.4010675301.dcm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="NLog.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -41,6 +53,9 @@
 	  <None Update="License\**\*">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
+	  <Folder Include="DicomGeneratorTestData\DX\" />
+	  <Folder Include="DicomGeneratorTestData\MG\" />
+	  <Folder Include="DicomGeneratorTestData\SR\" />
     <Folder Include="Properties\" />
   </ItemGroup>
 

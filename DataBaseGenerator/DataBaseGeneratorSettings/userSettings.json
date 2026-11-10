@@ -1,0 +1,7 @@
+﻿{
+    "MySqlServer": "localhost",
+    "MySqlDatabase": "medxregistry",
+    "MySqlUser": "root",
+    "MySqlPassword": "root",
+    "MySqlPort": 3306
+}
