@@ -10,9 +10,12 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Models
 {
     public class PlannedStudyLiteDbDto
     {
-        public PlannedStudyLiteDbDto(RandomBodyPartDataRule randomBodyPart)
+        public PlannedStudyLiteDbDto(
+            RandomBodyPartDataRule randomBodyPart,
+            RandomStudyDateTimeRule randomStudyDateTime)
         {
             RandomBodyPart = randomBodyPart ?? throw new ArgumentNullException(nameof(randomBodyPart));
+            RandomStudyDateTime = randomStudyDateTime ?? throw new ArgumentNullException(nameof(randomStudyDateTime));
         }
 
         public string Id { get; set; }
@@ -50,5 +53,6 @@ namespace DataBaseGenerator.Core.LiteDbGenerator.Models
         public bool HasDose{ get; set; }
 
         public RandomBodyPartDataRule RandomBodyPart { get; }
+        public RandomStudyDateTimeRule RandomStudyDateTime { get; }
     }
 }
