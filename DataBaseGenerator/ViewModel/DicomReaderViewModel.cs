@@ -124,6 +124,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
 
             DicomFilesCollection.Clear();
+            DicomTags.Clear();
+            PatientInfo = null;
 
             var fileName = Directory
                     .EnumerateFiles(DatabasePath, "*", SearchOption.AllDirectories)
