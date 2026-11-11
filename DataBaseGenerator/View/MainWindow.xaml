@@ -45,8 +45,8 @@
         <Grid
             Name="MenuPanel"
             Grid.ColumnSpan="4"
-            IsEnabled="{Binding IsLicenseValid}"
-            Margin="5,5,5,0">
+            Margin="5,5,5,0"
+            IsEnabled="{Binding IsLicenseValid}">
 
             <Border>
                 <StackPanel>
@@ -103,7 +103,7 @@
                                 IsCheckable="True"
                                 IsChecked="{Binding IsDicomParseMode, Mode=OneWay}" />
                         </MenuItem>
-                        
+
                         <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Tools">
                             <MenuItem Header="MD5">
                                 <MenuItem Header="Сгенерировать" />
@@ -114,7 +114,7 @@
                                 <MenuItem Command="{Binding ToolMessageCommand}" Header="Не нажимать" />
                             </MenuItem>
                         </MenuItem>
-                        
+
                         <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Help">
                             <MenuItem Command="{Binding OpenSpecificationWindowCommand}" Header="Вызвать справку" />
                             <MenuItem Command="{Binding AboutProgramCommand}" Header="О программе...  (Ctrl+O)" />
@@ -122,7 +122,7 @@
                         <MenuItem
                             BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
                             Command="{Binding ShowSettingsCommand}"
-                            Header="Настройки" />
+                            Header="Settings" />
                     </Menu>
                 </StackPanel>
             </Border>
@@ -131,7 +131,7 @@
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
                 Orientation="Horizontal">
-               
+
                 <Border
                     Padding="5,2"
                     BorderThickness="1.5"

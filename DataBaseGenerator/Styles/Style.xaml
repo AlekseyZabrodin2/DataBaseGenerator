@@ -108,7 +108,7 @@
                                 x:Name="dbOnlyText"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                Text="только БД"
+                                Text="only DB"
                                 TextWrapping="Wrap" />
                         </Border>
                         <Border
@@ -121,7 +121,7 @@
                                 x:Name="withDcmText"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                Text=".dcm файлы"
+                                Text=".dcm files"
                                 TextWrapping="Wrap" />
                         </Border>
                     </StackPanel>

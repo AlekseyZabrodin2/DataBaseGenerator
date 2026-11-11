@@ -306,7 +306,7 @@
                         Background="{DynamicResource MahApps.Brushes.Accent}"
                         BorderThickness="0"
                         Command="{Binding BrowseAdditionalFolderCommand}"
-                        Content="+ Папка" />
+                        Content="+ Folder" />
 
                     <Button
                         Width="80"
@@ -931,7 +931,7 @@
                     </StackPanel>
                 </Border>
                 <Button
-                Height="50"
+                    Height="50"
                     VerticalAlignment="Bottom"
                     Background="{DynamicResource MahApps.Brushes.AccentBase}"
                     Command="{Binding CancelCommand}"

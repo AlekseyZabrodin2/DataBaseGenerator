@@ -241,7 +241,7 @@
                 Height="50"
                 Margin="5,0"
                 Command="{Binding CancelAddPatientCommand}"
-                Content="Cancel" />
+                Content="Reset" />
 
         </UniformGrid>
     </Grid>
