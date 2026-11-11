@@ -333,11 +333,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                 PreviewStudyCount = PreviewStudies.Count;
                 PreviewFileCount = PreviewStudies.Sum(study => study.FileCount);
-                AreAllStudiesSelected = PreviewStudies.Count > 0;
-
-                SelectedFileCount = PreviewStudies
-                    .Where(study => study.IsSelected)
-                    .Sum(study => study.FileCount);
+                SyncAreAllStudiesSelectedFromItems();
 
                 ServerOutputText =
                     $"Найдено исследований: {PreviewStudyCount}. " +
@@ -356,24 +352,24 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         private void PreviewStudy_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName != nameof(DicomStudyPreview.IsSelected) ||
-                _isUpdatingSelection)
-            {
+            if (e.PropertyName != nameof(DicomStudyPreview.IsSelected) || _isUpdatingSelection)
                 return;
-            }
-            if (e.PropertyName == nameof(DicomStudyPreview.IsSelected))
+
+            SyncAreAllStudiesSelectedFromItems();
+        }
+
+        private void SyncAreAllStudiesSelectedFromItems()
+        {
+            var allSelected = PreviewStudies.Count > 0 && PreviewStudies.All(study => study.IsSelected);
+            if (_areAllStudiesSelected != allSelected)
             {
-                if (!_isUpdatingSelection)
-                    AreAllStudiesSelected = PreviewStudies.All(study => study.IsSelected);
-
-                SelectedFileCount = PreviewStudies
-                    .Where(study => study.IsSelected)
-                    .Sum(study => study.FileCount);
+                _areAllStudiesSelected = allSelected;
+                OnPropertyChanged(nameof(AreAllStudiesSelected));
             }
 
-            AreAllStudiesSelected =
-                PreviewStudies.Count > 0 &&
-                PreviewStudies.All(study => study.IsSelected);
+            SelectedFileCount = PreviewStudies
+                .Where(study => study.IsSelected)
+                .Sum(study => study.FileCount);
         }
 
 
