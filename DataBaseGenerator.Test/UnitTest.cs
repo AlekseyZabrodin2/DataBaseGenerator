@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using DataBaseGenerator.Core.MySqlGenerator;
 using DataBaseGenerator.Core.GeneratorRules.Patient;
+using System.Numerics;
 using DataBaseGenerator.Core.GeneratorRules.WorkList;
 using DataBaseGenerator.Core.LiteDbGenerator.Enums;
 using DataBaseGenerator.Core.LiteDbGenerator.Models;
@@ -127,6 +128,17 @@ namespace DataBaseGenerator.Test
             var result = workList.Generator(newWorkList, patientIDs);
 
             Console.WriteLine(result);
+        }
+
+        [TestMethod]
+        public void OrderedIdRule_RandomPrefix_IsNewOnEachGenerate()
+        {
+            var rule = new OrderedIdRule("MXE", 0, 6, randomPrefix: true, prefixLength: 4);
+            var id0 = rule.Generate(0);
+            var id1 = rule.Generate(1);
+            Assert.AreNotEqual(id0[..4], id1[..4], "Random prefix should change per Generate call.");
+            StringAssert.StartsWith(id0, id0[..4]);
+            Assert.AreEqual(10, id0.Length);
         }
 
         [TestMethod]
