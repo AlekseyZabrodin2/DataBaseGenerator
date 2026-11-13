@@ -37,6 +37,14 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
             PacsCallingAe = document?.PacsCallingAe ?? string.Empty;
             PacsCalledAe = document?.PacsCalledAe ?? string.Empty;
             PacsFolderPath = document?.PacsFolderPath ?? string.Empty;
+            var deliveryFromFile = document?.DeliveryDatabasePath;
+            DeliveryDatabasePath = !string.IsNullOrWhiteSpace(deliveryFromFile)
+                ? deliveryFromFile
+                : DefaultDeliveryDatabasePath();
+
+            if (string.IsNullOrWhiteSpace(deliveryFromFile) && !string.IsNullOrWhiteSpace(DeliveryDatabasePath))
+                Save();
+
             ParserConfig = NormalizeParserConfig(document?.Parser);
         }
 
@@ -63,6 +71,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
         public string PacsCalledAe { get; private set; }
 
         public string PacsFolderPath { get; private set; }
+
+        public string DeliveryDatabasePath { get; private set; }
 
         public ParserAppConfig ParserConfig { get; private set; }
 
@@ -168,6 +178,21 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
             Save();
         }
 
+        public void SetDeliveryDatabasePath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path) || string.Equals(DeliveryDatabasePath, path, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            DeliveryDatabasePath = path;
+            Save();
+        }
+
+        private static string DefaultDeliveryDatabasePath()
+        {
+            const string candidate = @"D:\Develop\UniExpert\Build\Debug\delivery.db";
+            return File.Exists(candidate) ? candidate : string.Empty;
+        }
+
         private PatientGenerationOptions Create(string groupName, GenerationOptionsData data)
         {
             var options = new PatientGenerationOptions(groupName);
@@ -219,6 +244,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
                     PacsCallingAe = PacsCallingAe,
                     PacsCalledAe = PacsCalledAe,
                     PacsFolderPath = PacsFolderPath,
+                    DeliveryDatabasePath = DeliveryDatabasePath,
                     Parser = ParserConfig
                 };
 
@@ -244,6 +270,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
             public string PacsCallingAe { get; set; }
             public string PacsCalledAe { get; set; }
             public string PacsFolderPath { get; set; }
+            public string DeliveryDatabasePath { get; set; }
             public ParserAppConfig Parser { get; set; }
         }
 

@@ -27,7 +27,17 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private MediaPlayer _mediaPlayer = new MediaPlayer();
         private SpecificationWindow _specificationWindow; 
         private readonly IServiceProvider _serviceProvider;
-
+        private MySqlGeneratorUserControl _mySqlPage;
+        private LiteDbGeneratorUserControl _patientsPage;
+        private StudiesLiteDbTableUserControl _studiesPage;
+        private PlannedStudiesLiteDbUserControl _plannedPage;
+        private LiteDbViewerUserControl _viewerPage;
+        private DicomGenerateUserControl _dicomGeneratePage;
+        private DicomReaderUserControl _dicomReaderPage;
+        private DicomPacsUserControl _dicomPacsPage;
+        private DicomParseUserControl _dicomParsePage;
+        private DeliveryJournalUserControl _deliveryJournalPage;
+        private SettingsUserControl _settingsPage;
 
         [ObservableProperty]
         public partial UserControl CurrentPage { get; set; }
@@ -84,6 +94,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         [ObservableProperty]
         public partial bool IsDicomParseMode { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsDeliveryJournalMode { get; set; }
 
         [ObservableProperty]
         public partial bool ShowPatients { get; set; } = true;
@@ -310,18 +323,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             MessageBox.Show("Ну я же просил !!!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
-
-        private MySqlGeneratorUserControl _mySqlPage;
-        private LiteDbGeneratorUserControl _patientsPage;
-        private StudiesLiteDbTableUserControl _studiesPage;
-        private PlannedStudiesLiteDbUserControl _plannedPage;
-        private LiteDbViewerUserControl _viewerPage;
-        private DicomGenerateUserControl _dicomGeneratePage;
-        private DicomReaderUserControl _dicomReaderPage;
-        private DicomPacsUserControl _dicomPacsPage;
-        private DicomParseUserControl _dicomParsePage;
-        private SettingsUserControl _settingsPage;
-
         [RelayCommand]
         private async Task SwitchToMySql()
         {
@@ -495,6 +496,26 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
         [RelayCommand]
+        private async Task SwitchToDeliveryJournal()
+        {
+            LeaveLiteDbViewer();
+            _deliveryJournalPage ??= new DeliveryJournalUserControl();
+            CurrentPage = _deliveryJournalPage;
+            CurrentPageName = "LiteDb - Delivery journal";
+            IsMySqlMode = false;
+            IsLiteDbMode = false;
+            IsLiteDbPlannedStudiesMode = false;
+            ShowPatients = false;
+            ShowStudies = false;
+            ClearDicomMode();
+            IsDeliveryJournalMode = true;
+            await RequestServiceStatus();
+
+            if (_deliveryJournalPage.ViewModel.RefreshDataBaseCommand.CanExecute(null))
+                await _deliveryJournalPage.ViewModel.RefreshDataBaseCommand.ExecuteAsync(null);
+        }
+
+        [RelayCommand]
         private void ShowSettings()
         {
             _settingsPage ??= new SettingsUserControl();
@@ -519,6 +540,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             IsDicomReaderMode = sectionName == "DICOM reader";
             IsDicomPacsMode = sectionName == "PACS mover";
             IsDicomParseMode = sectionName == "Dicom parser";
+            IsDeliveryJournalMode = false;
         }
 
         private void ClearDicomMode()
@@ -527,6 +549,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             IsDicomReaderMode = false;
             IsDicomPacsMode = false;
             IsDicomParseMode = false;
+            IsDeliveryJournalMode = false;
         }
 
         private void LeaveLiteDbViewer()

@@ -70,6 +70,7 @@ namespace DataBaseGenerator.UI.Wpf
                     services.AddSingleton<LiteDbStudiesTableViewModel>();
                     services.AddSingleton<LiteDbPlannedStudiesViewModel>();
                     services.AddSingleton<LiteDbViewerViewModel>();
+                    services.AddSingleton<DeliveryJournalViewModel>();
                     services.AddSingleton<FileGeneratorViewModel>();
                     services.AddSingleton<DicomReaderViewModel>();
                     services.AddSingleton<DicomPacsViewModel>();
