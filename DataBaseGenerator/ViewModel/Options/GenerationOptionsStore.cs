@@ -41,7 +41,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
             DeliveryDatabasePath = !string.IsNullOrWhiteSpace(deliveryFromFile)
                 ? deliveryFromFile
                 : DefaultDeliveryDatabasePath();
-
+            OrthancBaseUrl = string.IsNullOrWhiteSpace(document?.OrthancBaseUrl)
+                ? "http://localhost:8042"
+                : document.OrthancBaseUrl.Trim();
+            OrthancUsername = document?.OrthancUsername ?? "orthanc";
+            OrthancPassword = document?.OrthancPassword ?? "orthanc";
             if (string.IsNullOrWhiteSpace(deliveryFromFile) && !string.IsNullOrWhiteSpace(DeliveryDatabasePath))
                 Save();
 
@@ -73,6 +77,12 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
         public string PacsFolderPath { get; private set; }
 
         public string DeliveryDatabasePath { get; private set; }
+
+        public string OrthancBaseUrl { get; private set; }
+
+        public string OrthancUsername { get; private set; }
+
+        public string OrthancPassword { get; private set; }
 
         public ParserAppConfig ParserConfig { get; private set; }
 
@@ -187,6 +197,20 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
             Save();
         }
 
+        public void SetOrthancConnection(string baseUrl, string username, string password)
+        {
+            baseUrl = (baseUrl ?? string.Empty).Trim();
+            username ??= string.Empty;
+            password ??= string.Empty;
+            if (baseUrl == OrthancBaseUrl && username == OrthancUsername && password == OrthancPassword)
+                return;
+
+            OrthancBaseUrl = baseUrl;
+            OrthancUsername = username;
+            OrthancPassword = password;
+            Save();
+        }
+
         private static string DefaultDeliveryDatabasePath()
         {
             const string candidate = @"D:\Develop\UniExpert\Build\Debug\delivery.db";
@@ -245,6 +269,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
                     PacsCalledAe = PacsCalledAe,
                     PacsFolderPath = PacsFolderPath,
                     DeliveryDatabasePath = DeliveryDatabasePath,
+                    OrthancBaseUrl = OrthancBaseUrl,
+                    OrthancUsername = OrthancUsername,
+                    OrthancPassword = OrthancPassword,
                     Parser = ParserConfig
                 };
 
@@ -271,6 +298,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
             public string PacsCalledAe { get; set; }
             public string PacsFolderPath { get; set; }
             public string DeliveryDatabasePath { get; set; }
+            public string OrthancBaseUrl { get; set; }
+            public string OrthancUsername { get; set; }
+            public string OrthancPassword { get; set; }
             public ParserAppConfig Parser { get; set; }
         }
 

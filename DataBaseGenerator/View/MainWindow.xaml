@@ -45,18 +45,25 @@
         <Grid
             Name="MenuPanel"
             Grid.ColumnSpan="4"
-            Margin="5,5,5,0"
+            Margin="10,5,5,0"
             IsEnabled="{Binding IsLicenseValid}">
 
             <Border>
                 <StackPanel>
                     <Menu x:Name="ContextMenu">
-                        <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="DataBases">
+                        <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="WorkLists">
                             <MenuItem
                                 Command="{Binding SwitchToMySqlCommand}"
-                                Header="MySql Generator"
+                                Header="MySql - WorkList"
                                 IsCheckable="True"
                                 IsChecked="{Binding IsMySqlMode, Mode=OneWay}" />
+                            <MenuItem
+                                Command="{Binding SwitchToOrthancWorklistCommand}"
+                                Header="Orthanc - WorkList"
+                                IsCheckable="True"
+                                IsChecked="{Binding IsOrthancWorklistMode, Mode=OneWay}" />
+                        </MenuItem>
+                        <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="LiteDB">
                             <MenuItem
                                 Command="{Binding ShowPatientsTableCommand}"
                                 Header="LiteDB - Patients"
