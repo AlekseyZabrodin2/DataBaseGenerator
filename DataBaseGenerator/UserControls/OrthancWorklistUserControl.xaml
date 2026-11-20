@@ -329,10 +329,10 @@
                     EnableColumnVirtualization="True"
                     EnableRowVirtualization="True"
                     HorizontalScrollBarVisibility="Visible"
-                    VerticalScrollBarVisibility="Auto"
                     IsReadOnly="True"
                     ItemsSource="{Binding Rows}"
                     ScrollViewer.IsDeferredScrollingEnabled="True"
+                    VerticalScrollBarVisibility="Auto"
                     VirtualizingPanel.ScrollUnit="Pixel"
                     VirtualizingPanel.VirtualizationMode="Recycling">
                     <DataGrid.Columns>
@@ -356,7 +356,7 @@
                         <DataGridTextColumn
                             Width="140"
                             Binding="{Binding AccessionNumber}"
-                            Header="Accession" />                        
+                            Header="Accession" />
                         <DataGridTextColumn
                             Width="160"
                             Binding="{Binding ReferringPhysicianName}"
@@ -376,7 +376,7 @@
                         <DataGridTextColumn
                             Width="200"
                             Binding="{Binding Description}"
-                            Header="Описание шага" />  
+                            Header="Описание шага" />
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
@@ -405,6 +405,7 @@
                         HorizontalAlignment="Right"
                         HorizontalContentAlignment="Center"
                         VerticalContentAlignment="Center"
+                        Background="{DynamicResource MahApps.Brushes.Button.Border}"
                         BorderBrush="Black"
                         FontWeight="Bold"
                         Text="{Binding WorkListCount, UpdateSourceTrigger=PropertyChanged}" />
@@ -424,6 +425,7 @@
                         HorizontalAlignment="Right"
                         HorizontalContentAlignment="Center"
                         VerticalContentAlignment="Center"
+                        Background="{DynamicResource MahApps.Brushes.Button.Border}"
                         BorderBrush="Black"
                         FontWeight="Bold"
                         ItemsSource="{Binding ModalityRules}"
@@ -445,6 +447,7 @@
                         HorizontalAlignment="Right"
                         VerticalContentAlignment="Center"
                         mah:TextBoxHelper.Watermark="Enter title:"
+                        Background="{DynamicResource MahApps.Brushes.Button.Border}"
                         BorderBrush="Black"
                         FontWeight="Bold"
                         Text="{Binding SetAeTitle, UpdateSourceTrigger=PropertyChanged}" />
