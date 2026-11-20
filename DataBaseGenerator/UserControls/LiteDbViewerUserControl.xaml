@@ -9,6 +9,7 @@
     xmlns:viewmodel="clr-namespace:DataBaseGenerator.UI.Wpf.ViewModel"
     d:DataContext="{d:DesignInstance Type=viewmodel:LiteDbViewerViewModel}"
     mc:Ignorable="d">
+
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -102,7 +103,7 @@
                     Grid.Column="4"
                     Margin="8,0,4,0"
                     VerticalAlignment="Center"
-                    Content="Автообновление"
+                    Content="Autoupdate"
                     FontWeight="SemiBold"
                     IsChecked="{Binding AutoRefresh}"
                     ToolTip="Перечитывать файл каждые 10 секунд" />
@@ -136,7 +137,7 @@
                             Margin="0,0,8,0"
                             VerticalAlignment="Center"
                             FontWeight="SemiBold"
-                            Text="Поиск" />
+                            Text="Search" />
                         <TextBox
                             Width="240"
                             Height="28"
@@ -208,9 +209,11 @@
             BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
             BorderThickness="4">
             <TextBox
+                Height="50"
                 HorizontalContentAlignment="Center"
                 VerticalContentAlignment="Center"
-                FontSize="20"
+                BorderThickness="0"
+                FontSize="18"
                 IsReadOnly="True"
                 Text="{Binding StatusText}" />
         </Border>

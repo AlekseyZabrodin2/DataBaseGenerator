@@ -68,7 +68,7 @@
                         Margin="5,0,0,0"
                         VerticalAlignment="Center"
                         FontWeight="SemiBold"
-                        Text="Режим:" />
+                        Text="Mode:" />
 
                     <!--  Контейнер для переключателей  -->
                     <ToggleButton

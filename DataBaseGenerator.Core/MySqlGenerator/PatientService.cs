@@ -1,9 +1,12 @@
-﻿using System.Collections.ObjectModel;
-using System.Net.Http;
-using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
+using DataBaseGenerator.Core.MySqlGenerator.Data;
+using Microsoft.EntityFrameworkCore;
 using NLog;
 
 namespace DataBaseGenerator.Core.MySqlGenerator
@@ -11,85 +14,310 @@ namespace DataBaseGenerator.Core.MySqlGenerator
     public class PatientService
     {
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
-        private readonly HttpClient _httpClient;
+        private readonly BaseGenerateContext _context;
+        private Patient _patient;
 
 
-        public PatientService(IHttpClientFactory clientFactory)
+        public PatientService(BaseGenerateContext context)
         {
-            _httpClient = clientFactory.CreateClient("DBGeneratorApi");
+            _context = context;
         }
 
 
-        public async Task<ObservableCollection<Patient>> GetAllAsync()
+        private void LogAllExceptions(Exception ex, string message)
         {
-            _logger.Trace("Get All patients");
-
-            var response = await _httpClient.GetAsync("patient/all");
-            response.EnsureSuccessStatusCode();
-
-            var content = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<ObservableCollection<Patient>>(content);
+            int level = 0;
+            var current = ex;
+            while (current != null)
+            {
+                _logger.Error(current, $"{message} (Level {level})");
+                current = current.InnerException;
+                level++;
+            }
         }
 
-        public async Task GenerateAsync(PatientGeneratorParameters inputParameters, CancellationToken cancellationToken)
+        public async Task<List<Patient>> GetAllAsync()
         {
-            _logger.Trace("Generate patients");
+            try
+            {
+                var patients = await _context.Patient.ToListAsync();
+                _logger.Info($"Loaded {patients.Count} patients");
 
-            var json = JsonConvert.SerializeObject(inputParameters);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+                return patients;
+            }
+            catch (Exception ex)
+            {
+                LogAllExceptions(ex, "Can`t get all patients");
+                return new List<Patient>();
+            }
+        }
 
-            var response = await _httpClient.PostAsync("patient/generate", content, cancellationToken);
-            response.EnsureSuccessStatusCode();
-        }  
-
-        public async Task AddOneAsync(PatientInputParameters inputParameters)
+        public async Task GenerateAsync(PatientGeneratorDto inputParameters, CancellationToken cancellationToken)
         {
-            _logger.Trace("Add One patient");
+            try
+            {
+                _logger.Trace("Generate patients");
 
-            var json = JsonConvert.SerializeObject(inputParameters);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    _logger.Info("Cancellation requested, stopping generation...");
+                    return;
+                }
 
-            var response = await _httpClient.PostAsync("patient/addOne", content);
-            if (response.IsSuccessStatusCode)
-                return;
+                await CreateByBulkAsync(inputParameters, cancellationToken);
 
-            var error = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException(string.IsNullOrWhiteSpace(error)
-                ? $"Ошибка API: {(int)response.StatusCode}"
-                : error);
-        }        
+                _logger.Info($"Created {inputParameters.PatientCount} patients");
+            }
+            catch (Exception ex)
+            {
+                LogAllExceptions(ex, "Patient not generated");
+                throw;
+            }
+        }
+
+        public async Task CreateByOneAsync(PatientGeneratorDto patientGeneratorParameters, CancellationToken cancellationToken)
+        {
+            var total = patientGeneratorParameters.PatientCount;
+            var batchSize = 1000;
+            var patients = new List<Patient>(batchSize);
+            var prefix = "MXE";
+            var digitsCount = 7;
+            var format = new string('0', digitsCount);
+
+            var nextPatientId = GenerateNextPatientId(prefix, digitsCount, 1);
+            var nonDigitPattern = new Regex(@"[^\d]");
+            var numericPart = nonDigitPattern.Replace(nextPatientId, string.Empty);
+            var currentNumber = uint.Parse(numericPart);
+
+            for (var patientIndex = 0; patientIndex < total; patientIndex++)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    _logger.Info("Cancellation requested, stopping generation...");
+                    break;
+                }
+
+                var newNumber = currentNumber + patientIndex;
+                var patientId = $"{prefix}{newNumber.ToString(format)}";
+                var patient = GeneratePatients((int)newNumber, patientGeneratorParameters, patientId);
+
+                var exists = await _context.Patient.AnyAsync(p => p.ID_Patient == patient.ID_Patient, cancellationToken);
+                if (exists)
+                {
+                    _logger.Warn($"Patient with ID {patient.ID_Patient} already exists, skipping...");
+                    continue;
+                }
+
+                _context.Patient.Add(patient);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+        }
+
+        /// <summary>
+        ///  CREATE patients by 1000 and save, it`s faster 
+        /// </summary>        
+        public async Task CreateByBulkAsync(PatientGeneratorDto patientGeneratorParameters, CancellationToken cancellationToken)
+        {
+            var total = patientGeneratorParameters.PatientCount;
+            var batchSize = 1000;
+            var patients = new List<Patient>(batchSize);
+            var prefix = "MXE";
+            var digitsCount = 7;
+            var format = new string('0', digitsCount);
+
+            var existingIds = await _context.Patient
+                .Where(p => p.PatientID.StartsWith(prefix))
+                .Select(p => p.PatientID)
+                .ToListAsync(cancellationToken);
+
+            var nonDigitPattern = new Regex(@"[^\d]");
+
+            var maxNumber = existingIds.Any()
+                ? existingIds
+                    .Select(id =>
+                    {
+                        var numPart = nonDigitPattern.Replace(id, string.Empty);
+                        return uint.TryParse(numPart, out var num) ? num : 0;
+                    })
+                    .Max()
+                : 0;
+
+            var currentNumber = maxNumber;
+            _logger.Info($"Starting from number: {currentNumber + 1}");
+
+            for (var patientIndex = 0; patientIndex < total; patientIndex++)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                    break;
+
+                var newNumber = currentNumber + patientIndex + 1;
+                var patientId = $"{prefix}{newNumber.ToString(format)}";
+                var patient = GeneratePatients((int)newNumber, patientGeneratorParameters, patientId);
+
+                patients.Add(patient);
+
+                if (patients.Count >= batchSize || patientIndex == total - 1)
+                {
+                    await _context.Patient.AddRangeAsync(patients, cancellationToken);
+                    await _context.SaveChangesAsync(cancellationToken);
+
+                    _context.ChangeTracker.Clear();
+                    patients.Clear();
+                }
+            }
+
+            _logger.Info($"Created {total} patients. Last ID: {prefix}{(currentNumber + total).ToString(format)}");
+        }
+
+        private Patient GeneratePatients(int patientIndex, PatientGeneratorDto patientGeneratorParameters, string newPatientId)
+        {
+            return new Patient
+            {
+                ID_Patient = patientGeneratorParameters.ID_Patient.Generate(patientIndex),
+                LastName = patientGeneratorParameters.LastName.GenerateLastName(patientGeneratorParameters),
+                FirstName = patientGeneratorParameters.FirstName.GenerateFirstName(patientGeneratorParameters),
+                MiddleName = patientGeneratorParameters.MiddleName.GenerateMiddleNames(patientGeneratorParameters),
+                PatientID = newPatientId, //patientGeneratorParameters.PatientID.Generate(patientIndex),
+                BirthDate = patientGeneratorParameters.BirthDate.GenerateBirthdate(patientGeneratorParameters),
+                Sex = patientGeneratorParameters.Sex.Generate(),
+                Address = patientGeneratorParameters.Address.Generate(),
+                AddInfo = patientGeneratorParameters.AddInfo.Generate(),
+                Occupation = patientGeneratorParameters.Occupation.Generate()
+            };
+        }
+
+        public async Task<bool> AddOneAsync(PatientInputParameters inputParameters)
+        {
+            var added = await CreateOne(inputParameters);
+            if (added)
+                _logger.Info("Add patient");
+            else
+                _logger.Warn($"Patient with ID_Patient '{inputParameters.ID_Patient}' already exists");
+
+            return added;
+        }
+
+        public async Task<bool> CreateOne(PatientInputParameters patientGeneratorParameters)
+        {
+            bool checkIsExist = _context.Patient.Any(element => element.ID_Patient == patientGeneratorParameters.ID_Patient);
+
+            if (checkIsExist)
+                return false;
+
+            _patient = CreateOnePatient(patientGeneratorParameters);
+            _context.Patient.Add(_patient);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        private Patient CreateOnePatient(PatientInputParameters patientGeneratorParameters)
+        {
+            return new Patient
+            {
+                ID_Patient = patientGeneratorParameters.ID_Patient,
+                LastName = patientGeneratorParameters.LastName,
+                FirstName = patientGeneratorParameters.FirstName,
+                MiddleName = patientGeneratorParameters.MiddleName,
+                PatientID = patientGeneratorParameters.PatientID,
+                BirthDate = patientGeneratorParameters.BirthDate,
+                Sex = patientGeneratorParameters.Sex,
+                Address = patientGeneratorParameters.Address,
+                AddInfo = patientGeneratorParameters.AddInfo,
+                Occupation = patientGeneratorParameters.Occupation
+            };
+        }
 
         public async Task DeleteFirstAsync()
         {
-            _logger.Trace("Delete First patient");
-
-            var response = await _httpClient.DeleteAsync("patient/deleteFirst");
-            response.EnsureSuccessStatusCode();
+            try
+            {
+                _context.Patient.Remove(_context.Patient.First());
+                await _context.SaveChangesAsync();
+                _logger.Info("Delete first patient");
+            }
+            catch (Exception ex)
+            {
+                LogAllExceptions(ex, "First patient not deleted");
+            }
         }
 
         public async Task DeleteAllAsync()
         {
-            _logger.Trace("Delete All patients");
-
-            var response = await _httpClient.DeleteAsync("patient/deleteAll");
-            response.EnsureSuccessStatusCode();
+            try
+            {
+                _context.Patient.RemoveRange(_context.Patient);
+                await _context.SaveChangesAsync();
+                _logger.Info("Delete all patients");
+            }
+            catch (Exception ex)
+            {
+                LogAllExceptions(ex, "Patient table not deleted");
+            }
         }
 
-        public async Task EditeAsync(ObservableCollection<Patient> patientCollection)
+        public async Task EditeAsync(ObservableCollection<Patient> patients)
         {
-            var json = JsonConvert.SerializeObject(patientCollection);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            foreach (var patient in patients)
+            {
+                _context.Patient.Update(patient);
+            }
 
-            var response = await _httpClient.PostAsync("patient/edite", content);
-            response.EnsureSuccessStatusCode();
+            await _context.SaveChangesAsync();
+            _logger.Info("Edite patients collection");
         }
 
         public async Task<bool> ConnectingEchoAsync()
         {
-            _logger.Trace("Connecting Echo");
+            try
+            {
+                if (await _context.Database.CanConnectAsync())
+                {
+                    _logger.Info("Соединение с БД установлено");
+                    return true;
+                }
+                else
+                {
+                    _logger.Warn("Не удалось подключиться к БД");
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Ошибка при проверке соединения с БД");
+                return false;
+            }
+        }
 
-            var response = await _httpClient.GetAsync("patient/echo");
-            return response.IsSuccessStatusCode;
+        public string GenerateNextPatientId(string prefix, int digitsCount, int startsFrom = 1)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(prefix);
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(digitsCount);
+
+            var format = new string('0', digitsCount);
+
+            var matchedIds = _context.Patient
+                .Select(p => p.PatientID)
+                .Where(id => id.StartsWith(prefix))
+                .ToList();
+
+            if (matchedIds.Count == 0)
+                return $"{prefix}{((uint)startsFrom).ToString(format)}";
+
+            var nonDigitPattern = new Regex(@"[^\d]");
+
+            var maxIdValue = matchedIds
+                .Select(id =>
+                {
+                    var integerPart = nonDigitPattern.Replace(id, string.Empty);
+                    return uint.TryParse(integerPart, out var result) ? result : 0;
+                })
+                .Max();
+
+            var newIdValue = maxIdValue + 1 < (uint)startsFrom
+                ? (uint)startsFrom
+                : maxIdValue + 1;
+
+            return $"{prefix}{newIdValue.ToString(format)}";
         }
     }
 }

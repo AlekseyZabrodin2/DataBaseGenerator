@@ -1,4 +1,5 @@
 ﻿using System;
+using DataBaseGenerator.Core.GeneratorRules;
 
 namespace DataBaseGenerator.Core.MySqlGenerator
 {

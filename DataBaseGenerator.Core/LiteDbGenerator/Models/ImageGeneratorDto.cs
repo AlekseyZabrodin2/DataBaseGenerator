@@ -1,6 +1,6 @@
-﻿using System;
-using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Image;
-using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Study;
+using System;
+using DataBaseGenerator.Core.GeneratorRules.Image;
+using DataBaseGenerator.Core.GeneratorRules.Study;
 
 namespace DataBaseGenerator.Core.LiteDbGenerator.Models
 {

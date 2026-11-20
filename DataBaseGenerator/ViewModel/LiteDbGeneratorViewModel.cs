@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -16,10 +16,11 @@ using DataBaseGenerator.Core.LiteDbGenerator.Enums;
 using DataBaseGenerator.Core.LiteDbGenerator.LiteDbModels;
 using DataBaseGenerator.Core.LiteDbGenerator.Models;
 using DataBaseGenerator.Core.MySqlGenerator;
-using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Patient;
+using DataBaseGenerator.Core.GeneratorRules.Patient;
 using LiteDB;
 using Microsoft.Win32;
 using NLog;
+using DataBaseGenerator.UI.Wpf.ViewModel.Options;
 
 namespace DataBaseGenerator.UI.Wpf.ViewModel
 {
@@ -166,22 +167,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         public partial bool ShowStudies { get; set; }
 
         [ObservableProperty]
-        public partial bool ShowSeries { get; set; }
-
-        [ObservableProperty]
-        public partial bool ShowImages { get; set; }
-
-        //[ObservableProperty]
-        //private partial PatientsTableViewModel PatientsVM { get; set; }
-
-        [ObservableProperty]
         public partial LiteDbStudiesTableViewModel StudiesVM { get; set; }
-
-        //[ObservableProperty]
-        //private partial SeriesTableViewModel SeriesVM { get; set; }
-
-        //[ObservableProperty]
-        //private partial ImagesTableViewModel ImagesVM { get; set; }
 
         private CancellationTokenSource _cancellationTokenSource; 
         
@@ -655,24 +641,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     "Warning",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
-            }
-        }
-
-        [RelayCommand]
-        public void OpenWebPage()
-        {
-            var url = "http://localhost:5289"; // или любой нужный маршрут
-            try
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = url,
-                    UseShellExecute = true // важно для Windows — откроет в браузере
-                });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Не удалось открыть веб-страницу: " + ex.Message);
             }
         }
 

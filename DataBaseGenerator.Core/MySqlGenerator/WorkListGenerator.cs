@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.WorkList;
+using System.Collections.Generic;
+using DataBaseGenerator.Core.GeneratorRules.WorkList;
 
 namespace DataBaseGenerator.Core.MySqlGenerator
 {

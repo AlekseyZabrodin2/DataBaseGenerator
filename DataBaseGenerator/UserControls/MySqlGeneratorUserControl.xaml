@@ -43,7 +43,7 @@
         <userControls:AddPatientUserControl
             Grid.RowSpan="3"
             Grid.Column="0"
-            Margin="5" />
+            Margin="5,5,0,5" />
 
         <userControls:PatientTableUserControl
             Grid.Column="1"

@@ -45,7 +45,8 @@
         <Grid
             Name="MenuPanel"
             Grid.ColumnSpan="4"
-            Margin="5,5,5,0">
+            Margin="5,5,5,0"
+            IsEnabled="{Binding IsLicenseValid}">
 
             <Border>
                 <StackPanel>
@@ -73,6 +74,11 @@
                                 Header="LiteDB - Planned studies"
                                 IsCheckable="True"
                                 IsChecked="{Binding IsLiteDbPlannedStudiesMode, Mode=OneWay}" />
+                            <MenuItem
+                                Command="{Binding SwitchToDeliveryJournalCommand}"
+                                Header="LiteDB - Delivery journal"
+                                IsCheckable="True"
+                                IsChecked="{Binding IsDeliveryJournalMode, Mode=OneWay}" />
                             <Separator />
                             <MenuItem
                                 Command="{Binding ShowLiteDbViewerCommand}"
@@ -80,30 +86,29 @@
                                 IsCheckable="True"
                                 IsChecked="{Binding IsLiteDbViewerMode, Mode=OneWay}" />
                         </MenuItem>
-                        <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="File">
-                            <MenuItem Header="Новый (Ctrl + N)" />
-                            <MenuItem Header="Открыть (Ctrl + Open)" />
-                            <MenuItem Header="Сохранить (Ctrl + S)" />
-                            <MenuItem Header="Сохранить как... (Ctrl + N)" />
-                            <MenuItem Header="Печать (Ctrl + P)" />
-                            <MenuItem Command="{Binding HotkeyExitFromProgramCommand}" Header="Выход (Alt + X)" />
+                        <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Dicom Generator">
+                            <MenuItem
+                                Command="{Binding SwitchToDicomGenerateCommand}"
+                                Header="DICOM generate"
+                                IsCheckable="True"
+                                IsChecked="{Binding IsDicomGenerateMode, Mode=OneWay}" />
+                            <MenuItem
+                                Command="{Binding SwitchToDicomReaderCommand}"
+                                Header="DICOM reader"
+                                IsCheckable="True"
+                                IsChecked="{Binding IsDicomReaderMode, Mode=OneWay}" />
+                            <MenuItem
+                                Command="{Binding SwitchToDicomPacsCommand}"
+                                Header="PACS mover"
+                                IsCheckable="True"
+                                IsChecked="{Binding IsDicomPacsMode, Mode=OneWay}" />
+                            <MenuItem
+                                Command="{Binding SwitchToDicomParseCommand}"
+                                Header="DICOM parser"
+                                IsCheckable="True"
+                                IsChecked="{Binding IsDicomParseMode, Mode=OneWay}" />
                         </MenuItem>
-                        <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="View">
-                            <MenuItem Header="Поверх всех окон" />
-                            <MenuItem Header="Вкладки во весь Экран" />
-                            <MenuItem Header="Масштаб текста">
-                                <MenuItem Header="Крупнее" />
-                                <MenuItem Header="Мельче" />
-                                <MenuItem Header="Восстановить масштаб..." />
-                            </MenuItem>
-                            <MenuItem Header="Свернуть все окна" />
-                        </MenuItem>
-                        <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Options">
-                            <MenuItem Header="Настройки..." />
-                            <MenuItem Header="Импортировать" />
-                            <MenuItem Header="Экспортировать" />
-                            <MenuItem Header="Удалить программу" />
-                        </MenuItem>
+
                         <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Tools">
                             <MenuItem Header="MD5">
                                 <MenuItem Header="Сгенерировать" />
@@ -114,17 +119,15 @@
                                 <MenuItem Command="{Binding ToolMessageCommand}" Header="Не нажимать" />
                             </MenuItem>
                         </MenuItem>
-                        <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Plugins">
-                            <MenuItem Header="Плагин мастерства" />
-                            <MenuItem Header="Просто плагин" />
-                            <MenuItem Header="Бла-Бла плагин" />
-                            <MenuItem Header="Управление плагинами" />
-                            <MenuItem Header="Открыть папку плагинов" />
-                        </MenuItem>
+
                         <MenuItem BorderBrush="{DynamicResource MahApps.Brushes.Accent}" Header="Help">
                             <MenuItem Command="{Binding OpenSpecificationWindowCommand}" Header="Вызвать справку" />
                             <MenuItem Command="{Binding AboutProgramCommand}" Header="О программе...  (Ctrl+O)" />
                         </MenuItem>
+                        <MenuItem
+                            BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
+                            Command="{Binding ShowSettingsCommand}"
+                            Header="Settings" />
                     </Menu>
                 </StackPanel>
             </Border>
@@ -133,48 +136,6 @@
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
                 Orientation="Horizontal">
-
-                <Border
-                    Margin="0,0,8,0"
-                    Padding="5,2"
-                    BorderThickness="1.5"
-                    CornerRadius="3">
-                    <Border.Style>
-                        <Style TargetType="Border">
-                            <Setter Property="BorderBrush" Value="Gray" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsWebHostOnline}" Value="True">
-                                    <Setter Property="BorderBrush" Value="#2E7D32  " />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding IsWebHostOnline}" Value="False">
-                                    <Setter Property="BorderBrush" Value="#C62828" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Border.Style>
-                    <TextBlock
-                        Width="50"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        FontSize="14"
-                        FontWeight="Bold"
-                        Text="Web"
-                        TextAlignment="Center">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="Gray" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsWebHostOnline}" Value="True">
-                                        <Setter Property="Foreground" Value="#2E7D32" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IsWebHostOnline}" Value="False">
-                                        <Setter Property="Foreground" Value="#C62828" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                </Border>
 
                 <Border
                     Padding="5,2"

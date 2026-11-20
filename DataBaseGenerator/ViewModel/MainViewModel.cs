@@ -6,15 +6,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DataBaseGenerator.Core.LiteDbGenerator.Data;
+using DataBaseGenerator.UI.Wpf.Licensing;
+using DataBaseGenerator.UI.Wpf.Service;
 using DataBaseGenerator.UI.Wpf.UserControls;
 using DataBaseGenerator.UI.Wpf.View;
 using DataBaseGenerator.UI.Wpf.ViewModel.LiteDbTabs;
-using Microsoft.Extensions.Configuration;
 using MySqlConnector;
 using NLog;
 
@@ -23,11 +23,21 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
     public partial class  MainViewModel : ObservableObject
     {
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
-        private DialogMessageWindow _dialogMessage = new DialogMessageWindow();
+        private DialogMessageWindow _dialogMessage;
         private MediaPlayer _mediaPlayer = new MediaPlayer();
-        private SpecificationWindow _specificationWindow = new SpecificationWindow(); 
+        private SpecificationWindow _specificationWindow; 
         private readonly IServiceProvider _serviceProvider;
-
+        private MySqlGeneratorUserControl _mySqlPage;
+        private LiteDbGeneratorUserControl _patientsPage;
+        private StudiesLiteDbTableUserControl _studiesPage;
+        private PlannedStudiesLiteDbUserControl _plannedPage;
+        private LiteDbViewerUserControl _viewerPage;
+        private DicomGenerateUserControl _dicomGeneratePage;
+        private DicomReaderUserControl _dicomReaderPage;
+        private DicomPacsUserControl _dicomPacsPage;
+        private DicomParseUserControl _dicomParsePage;
+        private DeliveryJournalUserControl _deliveryJournalPage;
+        private SettingsUserControl _settingsPage;
 
         [ObservableProperty]
         public partial UserControl CurrentPage { get; set; }
@@ -75,27 +85,38 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         public partial bool IsLiteDbViewerMode { get; set; }
 
         [ObservableProperty]
+        public partial bool IsDicomGenerateMode { get; set; }
+        [ObservableProperty]
+        public partial bool IsDicomReaderMode { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsDicomPacsMode { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsDicomParseMode { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsDeliveryJournalMode { get; set; }
+
+        [ObservableProperty]
         public partial bool ShowPatients { get; set; } = true;
 
         [ObservableProperty]
         public partial bool ShowStudies { get; set; }
 
         [ObservableProperty]
-        public partial bool ShowSeries { get; set; }
-
-        [ObservableProperty]
-        public partial bool ShowImages { get; set; }
-
-        [ObservableProperty]
         public partial string PathToIcon { get; set; }
-
-        [ObservableProperty]
-        public partial bool? IsWebHostOnline { get; set; }
 
         [ObservableProperty]
         public partial bool? IsMySqlOnline { get; set; }
 
-        private readonly IConfiguration _configuration;
+        [ObservableProperty]
+        public partial bool IsLicenseValid { get; set; }
+
+        [ObservableProperty]
+        public partial LicenseCheckResult LicenseResult { get; set; }
+
+        private readonly ApplicationSettingsService _settingsService;
         private int _statusCheckRunning;
         private bool _startupCheckPending = true;
 
@@ -107,42 +128,56 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
 
 
-        public MainViewModel(IServiceProvider serviceProvider, IConfiguration configuration)
+        public MainViewModel(IServiceProvider serviceProvider, ApplicationSettingsService settingsService)
         {
             _serviceProvider = serviceProvider;
-            _configuration = configuration;
+            _settingsService = settingsService;
 
             DatabaseTabs = new();
-            _ = InitializeDatabaseAsync();
-
-            SwitchToMySql();
-
+            
             InitializeDirectories();
         }
 
-        private void RequestServiceStatus()
+
+        public void InitializeApplication(LicenseCheckResult licenseResult)
         {
-            var retryWebHost = _startupCheckPending;
-            _startupCheckPending = false;
-            _ = RefreshStatusAsync(retryWebHost);
+            LicenseResult = licenseResult;
+            IsLicenseValid = licenseResult.IsValid;
+
+            if (!IsLicenseValid)
+            {
+                var licenseViewModel = new LicenseViewModel(LicenseResult);
+                licenseViewModel.LicenseActivated += InitializeApplication;
+
+                CurrentPage = new LicenseUserControl
+                {
+                    DataContext = licenseViewModel
+                };
+
+                CurrentPageName = "Лицензия";
+                return;
+            }
+
+            _ = InitializeDatabaseAsync();
+            _ = SwitchToMySql();
         }
 
-        private async Task RefreshStatusAsync(bool retryWebHost)
+        private async Task RequestServiceStatus()
+        {
+            await RefreshStatusAsync();
+        }
+
+        private async Task RefreshStatusAsync()
         {
             if (Interlocked.Exchange(ref _statusCheckRunning, 1) == 1)
                 return;
 
             try
             {
-                IsWebHostOnline = null;
                 IsMySqlOnline = null;
-
-                var webHostTask = WebHostRespondsAsync(retryWebHost);
-                var mySqlTask = MySqlRespondsAsync();
-                await Task.WhenAll(webHostTask, mySqlTask);
-
-                IsWebHostOnline = await webHostTask;
-                IsMySqlOnline = await mySqlTask;
+                
+                IsMySqlOnline = await MySqlRespondsAsync();
+                ;
             }
             finally
             {
@@ -150,36 +185,30 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             }
         }
 
-        private async Task<bool> WebHostRespondsAsync(bool retry)
-        {
-            var attempts = retry ? 4 : 1;
-
-            for (var attempt = 1; attempt <= attempts; attempt++)
-            {
-                if (Process.GetProcessesByName("DataBaseGenerator.Web").Length > 0)
-                    return true;
-
-                if (attempt < attempts)
-                    await Task.Delay(1000);
-            }
-
-            return false;
-        }
-
         private async Task<bool> MySqlRespondsAsync()
         {
-            var connectionString = _configuration.GetConnectionString("DefaultConnection");
-            if (string.IsNullOrWhiteSpace(connectionString))
+            var settings = _settingsService.Settings;
+
+            if (string.IsNullOrWhiteSpace(settings.MySqlServer) ||
+                string.IsNullOrWhiteSpace(settings.MySqlDatabase) ||
+                string.IsNullOrWhiteSpace(settings.MySqlUser))
+            {
                 return false;
+            }
 
             try
             {
-                var builder = new MySqlConnectionStringBuilder(connectionString)
+                var builder = new MySqlConnectionStringBuilder
                 {
+                    Server = settings.MySqlServer,
+                    Port = settings.MySqlPort,
+                    Database = settings.MySqlDatabase,
+                    UserID = settings.MySqlUser,
+                    Password = settings.MySqlPassword,
                     ConnectionTimeout = 2
                 };
 
-                await using var connection = new MySqlConnection(builder.ConnectionString);
+                await using var connection = new MySqlConnection(builder.ConnectionString);                
                 await connection.OpenAsync();
                 return true;
             }
@@ -251,16 +280,16 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         public void AboutProgram()
         {
-            _dialogMessage.DataContext = this;
+            _dialogMessage = new DialogMessageWindow { DataContext = this };
             _dialogMessage.ShowDialog();
         }
 
         [RelayCommand]
         public void ClosingDialogWindow()
         {
-            //_mediaPlayer.Open(new Uri(PathToResourceAudio));
-            //_mediaPlayer.Play();
-            _dialogMessage.Close();
+            _mediaPlayer.Open(new Uri(PathToResourceAudio));
+            _mediaPlayer.Play();
+            _dialogMessage?.Close();
         }
 
         [RelayCommand]
@@ -278,14 +307,14 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [RelayCommand]
         public void OpenSpecificationWindow()
         {
-            _specificationWindow.DataContext = this;
+            _specificationWindow = new SpecificationWindow { DataContext = this };
             _specificationWindow.Show();
         }
 
         [RelayCommand]
         public void CloseSpecificationWindow()
         {
-            _specificationWindow.Close();
+            _specificationWindow?.Close();
         }
 
         [RelayCommand]
@@ -294,18 +323,16 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             MessageBox.Show("Ну я же просил !!!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
-
-        private MySqlGeneratorUserControl _mySqlPage;
-        private LiteDbGeneratorUserControl _patientsPage;
-        private StudiesLiteDbTableUserControl _studiesPage;
-        private PlannedStudiesLiteDbUserControl _plannedPage;
-        private LiteDbViewerUserControl _viewerPage;
-
         [RelayCommand]
-        private void SwitchToMySql()
+        private async Task SwitchToMySql()
         {
             LeaveLiteDbViewer();
             _mySqlPage ??= new MySqlGeneratorUserControl();
+
+            var viewModel = App.GetService<MySqlGeneratorViewModel>();
+            viewModel.ConnectionCheckRequested -= OnConnectionCheckRequested;
+            viewModel.ConnectionCheckRequested += OnConnectionCheckRequested;
+
             CurrentPage = _mySqlPage;
             CurrentPageName = "MySql Generator";
             IsMySqlMode = true;
@@ -313,37 +340,44 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             IsLiteDbPlannedStudiesMode = false;
             ShowPatients = false;
             ShowStudies = false;
-            RequestServiceStatus();
+            ClearDicomMode();
+            await RequestServiceStatus();
+
+            if (IsMySqlOnline == true)
+            {
+                await viewModel.RefreshDatabaseDataAsync();
+            }
         }
-        
+
+        private void OnConnectionCheckRequested()
+        {
+            _ = RefreshStatusAsync();
+        }
+
         [RelayCommand]
-        private void ShowPatientsTable()
+        private async Task ShowPatientsTable()
         {
             _patientsPage ??= new LiteDbGeneratorUserControl();
 
             ShowPatients = true;
             ShowStudies = false;
-            ShowSeries = false;
-            ShowImages = false;
 
-            ShowTable("Patients", _patientsPage);
+            await ShowTable("Patients", _patientsPage);
         }
 
         [RelayCommand]
-        private void ShowStudiesTable()
+        private async Task ShowStudiesTable()
         {
             _studiesPage ??= new StudiesLiteDbTableUserControl();
 
             ShowPatients = false;
             ShowStudies = true;
-            ShowSeries = false;
-            ShowImages = false;
 
-            ShowTable("Studies", _studiesPage);
+            await ShowTable("Studies", _studiesPage);
         }        
 
         [RelayCommand]
-        private void SwitchToPlannedStudies()
+        private async Task SwitchToPlannedStudies()
         {
             LeaveLiteDbViewer();
             _plannedPage ??= new PlannedStudiesLiteDbUserControl();
@@ -354,11 +388,12 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             IsLiteDbPlannedStudiesMode = true;
             ShowPatients = false;
             ShowStudies = false;
-            RequestServiceStatus();
+            ClearDicomMode();
+            await RequestServiceStatus();
         }
 
         [RelayCommand]
-        private void ShowLiteDbViewer()
+        private async Task ShowLiteDbViewer()
         {
             if (IsLiteDbOperationRunning())
             {
@@ -396,10 +431,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             ShowPatients = false;
             ShowStudies = false;
             IsLiteDbViewerMode = true;
-            RequestServiceStatus();
+            ClearDicomMode();
+            await RequestServiceStatus();
         }
 
-        private void ShowTable(string tableName, UserControl control)
+        private async Task ShowTable(string tableName, UserControl control)
         {
             LeaveLiteDbViewer();
             CurrentPage = control;
@@ -407,7 +443,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             IsMySqlMode = false;
             IsLiteDbMode = true;
             IsLiteDbPlannedStudiesMode = false;
-            RequestServiceStatus();
+            ClearDicomMode();
+            await RequestServiceStatus();
         }
 
         private bool IsLiteDbOperationRunning()
@@ -428,6 +465,91 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 App.UpdatePlannedStorage(App.PlannedStorage.DatabasePath, true);
                 planned.IsReadOnlyMode = true;
             }
+        }
+
+        [RelayCommand]
+        private void SwitchToDicomGenerate()
+        {
+            _dicomGeneratePage ??= new DicomGenerateUserControl();
+            ShowDicomSection("DICOM generate", _dicomGeneratePage);
+        }
+
+        [RelayCommand]
+        private void SwitchToDicomReader()
+        {
+            _dicomReaderPage ??= new DicomReaderUserControl();
+            ShowDicomSection("DICOM reader", _dicomReaderPage);
+        }
+
+        [RelayCommand]
+        private void SwitchToDicomPacs()
+        {
+            _dicomPacsPage ??= new DicomPacsUserControl();
+            ShowDicomSection("PACS mover", _dicomPacsPage);
+        }
+
+        [RelayCommand]
+        private void SwitchToDicomParse()
+        {
+            _dicomParsePage ??= new DicomParseUserControl();
+            ShowDicomSection("Dicom parser", _dicomParsePage);
+        }
+
+        [RelayCommand]
+        private async Task SwitchToDeliveryJournal()
+        {
+            LeaveLiteDbViewer();
+            _deliveryJournalPage ??= new DeliveryJournalUserControl();
+            CurrentPage = _deliveryJournalPage;
+            CurrentPageName = "LiteDb - Delivery journal";
+            IsMySqlMode = false;
+            IsLiteDbMode = false;
+            IsLiteDbPlannedStudiesMode = false;
+            ShowPatients = false;
+            ShowStudies = false;
+            ClearDicomMode();
+            IsDeliveryJournalMode = true;
+            await RequestServiceStatus();
+
+            if (_deliveryJournalPage.ViewModel.RefreshDataBaseCommand.CanExecute(null))
+                await _deliveryJournalPage.ViewModel.RefreshDataBaseCommand.ExecuteAsync(null);
+        }
+
+        [RelayCommand]
+        private void ShowSettings()
+        {
+            _settingsPage ??= new SettingsUserControl();
+
+            _settingsPage.ViewModel.ResetSaveStatus();
+
+            CurrentPage = _settingsPage;
+            CurrentPageName = "Settings";
+        }
+
+        private void ShowDicomSection(string sectionName, UserControl control)
+        {
+            LeaveLiteDbViewer();
+            CurrentPage = control;
+            CurrentPageName = sectionName;
+            IsMySqlMode = false;
+            IsLiteDbMode = false;
+            IsLiteDbPlannedStudiesMode = false;
+            ShowPatients = false;
+            ShowStudies = false;
+            IsDicomGenerateMode = sectionName == "DICOM generate";
+            IsDicomReaderMode = sectionName == "DICOM reader";
+            IsDicomPacsMode = sectionName == "PACS mover";
+            IsDicomParseMode = sectionName == "Dicom parser";
+            IsDeliveryJournalMode = false;
+        }
+
+        private void ClearDicomMode()
+        {
+            IsDicomGenerateMode = false;
+            IsDicomReaderMode = false;
+            IsDicomPacsMode = false;
+            IsDicomParseMode = false;
+            IsDeliveryJournalMode = false;
         }
 
         private void LeaveLiteDbViewer()

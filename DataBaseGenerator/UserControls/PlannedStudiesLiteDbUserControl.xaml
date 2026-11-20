@@ -13,8 +13,13 @@
 
 
     <UserControl.Resources>
-        <convert:BoolToInverseBoolConverter x:Key="BoolToInverseBoolConverter" />
-        <convert:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Styles/Style.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <convert:BoolToInverseBoolConverter x:Key="BoolToInverseBoolConverter" />
+            <convert:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        </ResourceDictionary>
     </UserControl.Resources>
 
 
@@ -230,6 +235,12 @@
                         BorderBrush="Black"
                         FontWeight="Bold"
                         Text="{Binding SetStudiesCount, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableIntConverter}}" />
+
+                    <ToggleButton
+                        Margin="8,0"
+                        IsChecked="{Binding GeneratePlannedStudiesWithDicomFiles, Mode=TwoWay}"
+                        Style="{StaticResource PlannedStudyDicomToggleStyle}"
+                        ToolTip="Только БД: StudyAreas без ProjectionPaths — можно подкинуть LiteDB. С .dcm файлами: заготовки в C:\DicomTempFolder и пути в ProjectionPaths." />
 
                     <Button
                         Name="AddStudies"

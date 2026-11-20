@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Patient;
+using DataBaseGenerator.Core.GeneratorRules.Patient;
 
 namespace DataBaseGenerator.Core.MySqlGenerator
 {

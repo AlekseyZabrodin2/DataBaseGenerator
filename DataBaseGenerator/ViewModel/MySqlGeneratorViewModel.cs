@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -11,12 +11,14 @@ using System.Windows;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DataBaseGenerator.Core.GeneratorRules.Patient;
+using DataBaseGenerator.Core.GeneratorRules.WorkList;
 using DataBaseGenerator.Core.MySqlGenerator;
-using DataBaseGenerator.Core.MySqlGenerator.Data;
-using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.Patient;
-using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.WorkList;
+using DataBaseGenerator.UI.Wpf.Service;
 using DataBaseGenerator.UI.Wpf.View;
+using DataBaseGenerator.UI.Wpf.ViewModel.Options;
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 using NLog;
 
 namespace DataBaseGenerator.UI.Wpf.ViewModel
@@ -25,10 +27,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
     {
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
         private static readonly Random _random = new Random();
-        private readonly BaseGenerateContext _context;
-        private readonly IHttpClientFactory _httpClient;
-        private readonly PatientService _patientService;
-        private readonly WorklistService _worklistService;
+        private readonly ApplicationSettingsService _settingsService;
         private RandomModalityRule _modality;
         private DialogMessageWindow _dialogMessage = new DialogMessageWindow();
         private MediaPlayer _mediaPlayer = new MediaPlayer();
@@ -344,12 +343,14 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [ObservableProperty]
         public partial int NextPatientId { get; set; } = 1;
 
+        public event Action? ConnectionCheckRequested;
 
 
-        public MySqlGeneratorViewModel(BaseGenerateContext context, IHttpClientFactory clientFactory, GenerationOptionsStore optionsStore)
+
+        public MySqlGeneratorViewModel(GenerationOptionsStore optionsStore,
+                ApplicationSettingsService settingsService)
         {
-            _context = context;
-            _httpClient = clientFactory;
+            _settingsService = settingsService;
             GenerationOptions = optionsStore.MySql;
 
             var defaultAeTitle = new RandomModalityRule("DX");
@@ -363,11 +364,31 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
             Gender = new List<string> { "Man", "Female", "Other" };
 
-            _patientService = new PatientService(_httpClient);
-            _worklistService = new WorklistService(_httpClient);
-
             InitializeDirectories();
-            _ = InitializeAsync();
+        }
+
+        private async Task UsePatients(Func<PatientService, Task> action)
+        {
+            await using var context = _settingsService.CreateContext();
+            await action(new PatientService(context));
+        }
+
+        private async Task<T> UsePatients<T>(Func<PatientService, Task<T>> action)
+        {
+            await using var context = _settingsService.CreateContext();
+            return await action(new PatientService(context));
+        }
+
+        private async Task UseWorklists(Func<WorklistService, Task> action)
+        {
+            await using var context = _settingsService.CreateContext();
+            await action(new WorklistService(context));
+        }
+
+        private async Task<T> UseWorklists<T>(Func<WorklistService, Task<T>> action)
+        {
+            await using var context = _settingsService.CreateContext();
+            return await action(new WorklistService(context));
         }
 
 
@@ -396,7 +417,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             _logger.Trace("PathToIcon - {0}", PathToIcon);
         }
 
-        private async Task InitializeAsync()
+        public async Task RefreshDatabaseDataAsync()
         {
             var refreshPat = await RefreshPatientsAsync();
             var patientsText = UpdateText;
@@ -435,7 +456,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 StartBusy("Генерация пациентов...");
 
-                var newPatient = new PatientGeneratorParameters(
+                var newPatient = new PatientGeneratorDto(
                     new OrderIdPatientRule(),
                     new RandomLastNameRule(),
                     new RandomFirstNameRule(),
@@ -473,7 +494,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                 _logger.Info("AddPatientAsync: Calling PatientService.GenerateAsync...");                
 
-                await _patientService.GenerateAsync(newPatient, _cancellationTokenSource.Token);
+                await UsePatients(service => service.GenerateAsync(newPatient, _cancellationTokenSource.Token));
 
                 _logger.Info("AddPatientAsync: GenerateAsync completed successfully");
 
@@ -540,7 +561,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     updatePatients.Add(patient);
                 }
 
-                await _patientService.EditeAsync(updatePatients);
+                await UsePatients(service => service.EditeAsync(updatePatients));
                 _logger.Info("All changes saved to database");
                 UpdateText = "All changes saved to database";
             }
@@ -563,7 +584,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 _logger.Info("RefreshPatientsAsync: Calling PatientService.GetAllAsync...");
 
-                var patients = await _patientService.GetAllAsync() ?? [];
+                var patients = await UsePatients(service => service.GetAllAsync()) ?? [];
                 _patients = patients.ToList();
 
                 PatientIds = _patients.Select(patient => patient.ID_Patient).ToList();
@@ -622,7 +643,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 _logger.Info("DeleteFirstPatientAsync: Calling PatientService.DeleteFirstAsync...");
 
-                await _patientService.DeleteFirstAsync();
+                await UsePatients(service => service.DeleteFirstAsync());
 
                 _logger.Info("DeleteFirstPatientAsync: DeleteFirstAsync completed");
 
@@ -655,7 +676,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 _logger.Info("DeleteAllPatientAsync: Calling PatientService.DeleteAllAsync...");
 
-                await _patientService.DeleteAllAsync();
+                await UsePatients(service => service.DeleteAllAsync());
 
                 _logger.Info("DeleteAllPatientAsync: DeleteAllAsync completed");
 
@@ -738,7 +759,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
                 _logger.Info("AddWorkListAsync: Calling WorklistService.GenerateAsync...");
 
-                await _worklistService.GenerateAsync(newWorkList, _cancellationTokenSource.Token);
+                await UseWorklists(service => service.GenerateAsync(newWorkList, _cancellationTokenSource.Token));
 
                 _logger.Info("AddWorkListAsync: GenerateAsync completed");
 
@@ -794,7 +815,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 _logger.Info("RefreshWorkListAsync: Calling WorklistService.GetAllAsync...");
 
-                _workLists = await _worklistService.GetAllAsync() ?? [];
+                _workLists = await UseWorklists(service => service.GetAllAsync()) ?? [];
                 ApplyWorkListFilter();
 
                 UpdateText = "WorkList table is update";
@@ -835,7 +856,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 _logger.Info("DeleteFirstWorkListAsync: Calling WorklistService.DeleteFirstAsync...");
 
-                await _worklistService.DeleteFirstAsync();
+                await UseWorklists(service => service.DeleteFirstAsync());
 
                 _logger.Info("DeleteFirstWorkListAsync: DeleteFirstAsync completed");
 
@@ -868,7 +889,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 _logger.Info("DeleteAllWorkListAsync: Calling WorklistService.DeleteAllAsync...");
 
-                await _worklistService.DeleteAllAsync();
+                await UseWorklists(service => service.DeleteAllAsync());
 
                 _logger.Info("DeleteAllWorkListAsync: DeleteAllAsync completed");
 
@@ -900,22 +921,46 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
         [RelayCommand]
-        public async Task ConnectDB()
+        private async Task ConnectDBAsync()
         {
-            var connectingState = await _patientService.ConnectingEchoAsync();
-            if (connectingState)
+            await MySqlRespondsAsync();                
+        }
+
+        private async Task<bool> MySqlRespondsAsync()
+        {
+            var settings = _settingsService.Settings;
+
+            var builder = new MySqlConnectionStringBuilder
             {
-                MessageBox.Show("Соединение с БД установлено",
-                    "Information",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
+                Server = settings.MySqlServer,
+                Port = settings.MySqlPort,
+                Database = settings.MySqlDatabase,
+                UserID = settings.MySqlUser,
+                Password = settings.MySqlPassword,
+                ConnectionTimeout = 2
+            };
+            
+            try
+            {
+                await using var connection = new MySqlConnection(builder.ConnectionString);
+                await connection.OpenAsync();
+                await RefreshDatabaseDataAsync();
+
+                UpdateText = "Соединение с MySQL установлено.";
+                _logger.Info("Соединение с БД установлено");
+
+                return true;
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Не удалось подключиться к БД",
-                    "Warning",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                UpdateText = $"Ошибка подключения к MySQL: {ex.Message}";
+                _logger.Debug(ex, "MySQL status check failed");
+
+                return false;
+            }
+            finally
+            {
+                ConnectionCheckRequested?.Invoke();
             }
         }
 
@@ -1066,7 +1111,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 };
                 _logger.Info("AddOnePatientAsync: Calling PatientService.AddOneAsync...");
 
-                await _patientService.AddOneAsync(newPatient);
+                await UsePatients(service => service.AddOneAsync(newPatient));
 
                 _logger.Info("AddOnePatientAsync: AddOneAsync completed successfully");
 
@@ -1093,24 +1138,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             {
                 _logger.Info("<<< AddOnePatientAsync: END");
                 StopBusy();
-            }
-        }
-
-        [RelayCommand]
-        public void OpenWebPage()
-        {
-            var url = "http://localhost:5289"; // или любой нужный маршрут
-            try
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = url,
-                    UseShellExecute = true // важно для Windows — откроет в браузере
-                });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Не удалось открыть веб-страницу: " + ex.Message);
             }
         }
 

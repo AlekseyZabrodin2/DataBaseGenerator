@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Net.Http.Headers;
 using System.Windows;
 using DataBaseGenerator.Core.LiteDbGenerator.Contracts;
 using DataBaseGenerator.Core.LiteDbGenerator.Data;
 using DataBaseGenerator.Core.LiteDbGenerator.Services;
-using DataBaseGenerator.Core.MySqlGenerator;
-using DataBaseGenerator.Core.MySqlGenerator.Data;
+using DataBaseGenerator.UI.Wpf.Licensing;
+using DataBaseGenerator.UI.Wpf.Service;
+using DataBaseGenerator.UI.Wpf.UserControls;
 using DataBaseGenerator.UI.Wpf.View;
 using DataBaseGenerator.UI.Wpf.ViewModel;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using DataBaseGenerator.UI.Wpf.ViewModel.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NLog;
@@ -25,11 +22,8 @@ namespace DataBaseGenerator.UI.Wpf
     public partial class App : Application
     {
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
-        private readonly IHost _host; 
-        private readonly BaseGenerateContext _context;
-        const string _exeName = "DataBaseGenerator.Web.exe";
-        const string _webHostPath = "WebHost\\DataBaseGenerator.Web.exe";
-        private string _exeToRun;
+        private readonly IHost _host;
+        private readonly ApplicationSettingsService _settingsService;
 
         public static IStudyStorageModule SharedStorage { get; set; }
         public static IPlannedStudyStorageModule PlannedStorage { get; private set; }
@@ -52,7 +46,7 @@ namespace DataBaseGenerator.UI.Wpf
         {
             this.InitializeComponent();
 
-            var configuration = AppConfiguration.LoadConfiguration();
+            _settingsService = new ApplicationSettingsService();
 
             var dataDirectory = Path.Combine(AppContext.BaseDirectory, "LiteDataBase");
             if (!Directory.Exists(dataDirectory))
@@ -65,35 +59,8 @@ namespace DataBaseGenerator.UI.Wpf
             PlannedStorage = new LiteDbPlannedStudyStorageModule(plannedDbPath, true);
 
             var hostBuilder = Host.CreateDefaultBuilder()
-                .ConfigureAppConfiguration((context, config) =>
+                .ConfigureServices((_, services) =>
                 {
-                    config.AddConfiguration(configuration);
-                })
-                .ConfigureServices((context, services) =>
-                {
-
-                    var root = (IConfigurationRoot)context.Configuration;
-
-                    foreach (var provider in root.Providers)
-                    {
-                        if (provider.TryGet("ConnectionStrings:DefaultConnection", out var value))
-                        {
-                            _logger.Info($"PROVIDER: {provider}");
-                            _logger.Info($"VALUE: {value}");
-                        }
-                    }
-
-                    var connectionString = context.Configuration.GetConnectionString("DefaultConnection");
-                    _logger.Info($"ConnectionString = {connectionString}");
-
-                    services.AddDbContext<BaseGenerateContext>(options =>
-                    options.UseMySql(
-                        context.Configuration.GetConnectionString("DefaultConnection"),
-                        new MySqlServerVersion(new Version(8, 0, 28))));
-
-                    services.AddScoped<PatientService>();
-                    services.AddScoped<WorklistService>();
-
                     services.AddSingleton<IStudyApplicationService, StudyApplicationService>();
                     services.AddSingleton(this);
                     services.AddSingleton<GenerationOptionsStore>();
@@ -103,24 +70,21 @@ namespace DataBaseGenerator.UI.Wpf
                     services.AddSingleton<LiteDbStudiesTableViewModel>();
                     services.AddSingleton<LiteDbPlannedStudiesViewModel>();
                     services.AddSingleton<LiteDbViewerViewModel>();
+                    services.AddSingleton<DeliveryJournalViewModel>();
+                    services.AddSingleton<FileGeneratorViewModel>();
+                    services.AddSingleton<DicomReaderViewModel>();
+                    services.AddSingleton<DicomPacsViewModel>();
+                    services.AddSingleton<DicomFileParserViewModel>();
                     services.AddTransient<DialogMessageWindow>();
                     services.AddTransient<MainWindow>();
                     services.AddTransient<SpecificationWindow>();
-
-                    services.AddHttpClient("DBGeneratorApi", client =>
-                    {
-                        var webHostApiUrl = context.Configuration["WebHost:ApiUri"] ?? "http://localhost:5289/api/";
-
-                        client.BaseAddress = new Uri(webHostApiUrl);
-                        client.DefaultRequestHeaders.Accept.Clear();
-                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    services.AddSingleton(_settingsService);
+                    services.AddSingleton<SettingsViewModel>();
+                    services.AddSingleton<SettingsUserControl>();
                     });
-                });
 
             _host = hostBuilder.Build();
             ApplySavedLiteDbPaths();
-
-            EnsureSingleWebHostProcessRunning();
         }
 
         private void ApplySavedLiteDbPaths()
@@ -134,128 +98,46 @@ namespace DataBaseGenerator.UI.Wpf
             if (File.Exists(store.PlannedStudiesDatabasePath))
                 UpdatePlannedStorage(store.PlannedStudiesDatabasePath, true);
         }
-
-        private void EnsureSingleWebHostProcessRunning()
-        {
-            StopWebHost();
-            StartWebHost();
-        }
-
-        private void StartWebHost()
-        {
-            bool isRunning = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(_exeName)).Any();
-            if (!isRunning)
-            {
-                try
-                {
-                    var exeDir = GetExeDirectory();
-                    var pathNearExe = GetPathNearExe(exeDir);
-                    var pathFromDebug = GetPathFromDebug(exeDir);
-
-                    if (File.Exists(pathNearExe))
-                    {
-                        _exeToRun = pathNearExe;
-                    }
-                    else if (File.Exists(pathFromDebug))
-                    {
-                        _exeToRun= pathFromDebug;
-                    }
-                    if (_exeToRun != null)
-                    {
-                        Process.Start(new ProcessStartInfo
-                        {
-                            FileName = _exeToRun,
-                            UseShellExecute = false,
-                            CreateNoWindow = true
-                        });
-                        _logger.Info("WebHost started");
-                    }
-                    else
-                    {
-                        string allPaths = $"{pathNearExe} и {pathFromDebug}";
-                        _logger.Warn($"Не найден файл: {allPaths}, Ошибка запуска веб-хоста");
-                        MessageBox.Show($"Не найден файл: {allPaths}, Ошибка запуска веб-хоста");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error(ex, "Ошибка запуска веб-сервера");
-                    MessageBox.Show($"Ошибка запуска веб-сервера: {ex.Message}");
-                }
-            }
-        }
-
+                
         protected override void OnStartup(StartupEventArgs e)
         {
+            base.OnStartup(e);
+
             try
             {
-                base.OnStartup(e);
+                var licenseService = new LicenseService();
+                var licenseResult = licenseService.Check();
 
-                var mainWindow = new MainWindow();
+                var mainViewModel = _host.Services.GetRequiredService<MainViewModel>();
+                mainViewModel.InitializeApplication(licenseResult);
+
+                if (licenseResult.IsValid)
+                {
+                    _logger.Info($"Лицензия проверена: {licenseResult.State}");
+                }
+                else
+                {
+                    _logger.Warn($"Лицензия недействительна: {licenseResult.State}");
+                }
+
+                var mainWindow = _host.Services.GetRequiredService<MainWindow>();
                 mainWindow.Show();
-                _logger.Info("Main window is started");
 
                 mainWindow.Closed += (_, _) => Shutdown();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                _logger.Error(ex, "Нет подключения к БД");
-                MessageBox.Show($"Нет подключения к БД.\r\n Некоторые функции будут недоступны.\r\n {ex.Message}",
-                                "Ошибка подключения",
-                                MessageBoxButton.OK, MessageBoxImage.Warning);
-                base.Shutdown();
+                _logger.Error(ex, "Ошибка при запуске приложения.");
+                MessageBox.Show($"Ошибка при запуске приложения:\n{ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                Shutdown();
             }
         }
 
         protected override void OnExit(ExitEventArgs e)
         {
-            StopWebHost();
-
             _host.Dispose();
-
             base.OnExit(e);
-        }
-
-        private void StopWebHost()
-        {
-            var processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(_exeName));
-            foreach (var process in processes)
-            {
-                try
-                {
-                    process.Kill();
-                    process.WaitForExit();
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error(ex, "Can`t stop process {processId}", process.Id);
-                }
-                _logger.Info("WebHost stoped");
-            }
-        }
-
-        private string GetExeDirectory()
-        {
-            var exeDir = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
-            _logger.Trace("exeDir - {0}", exeDir);
-
-            return exeDir;
-        }
-
-        private string GetPathNearExe(string exeDir)
-        {
-            var pathNearExe = Path.Combine(exeDir, _webHostPath);
-            _logger.Trace("pathNearExe - {0}", pathNearExe);
-
-            return pathNearExe;
-        }
-
-        private string GetPathFromDebug(string exeDir)
-        {
-            var pathFromDebug = Path.GetFullPath(Path.Combine(exeDir, @"..\..\..", _webHostPath));
-            _logger.Trace("pathFromDebug - {0}", pathFromDebug);
-
-            return pathFromDebug;
         }
 
         public static void UpdateSharedStorage(string dbPath, bool readOnly)

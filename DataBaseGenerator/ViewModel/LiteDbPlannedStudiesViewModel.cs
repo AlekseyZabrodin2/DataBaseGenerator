@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -10,11 +10,15 @@ using System.Windows;
 using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DataBaseGenerator.Core.GeneratorRules.PlannedStudy;
+using DataBaseGenerator.Core.GeneratorRules.Study;
 using DataBaseGenerator.Core.LiteDbGenerator.Contracts;
 using DataBaseGenerator.Core.LiteDbGenerator.Enums;
 using DataBaseGenerator.Core.LiteDbGenerator.LiteDbModels;
 using DataBaseGenerator.Core.LiteDbGenerator.Models;
-using DataBaseGenerator.Core.MySqlGenerator.GeneratorRules.PlannedStudy;
+using DataBaseGenerator.Core.DicomGenerator.DicomGeneratorModels;
+using DataBaseGenerator.Core.LiteDbGenerator.PlannedStudy;
+using DataBaseGenerator.UI.Wpf.ViewModel.Options;
 using LiteDB;
 using Microsoft.Win32;
 using NLog;
@@ -35,6 +39,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private readonly int _studyBatchSize = 5000;
         private List<PatientLiteDb> _cachedPatients;
         private readonly Random _random = new Random();
+        private readonly PlannedStudyDicomStubWriter _plannedStudyDicomStubWriter = new();
         private List<LitePlannedStudy> _studies = [];
 
 
@@ -105,7 +110,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         [ObservableProperty]
         public partial bool CancelButtonIsVisibil { get; set; } = true;
 
-
+        [ObservableProperty]
+        public partial bool GeneratePlannedStudiesWithDicomFiles { get; set; } = true;
 
         public LiteDbPlannedStudiesViewModel()
         {
@@ -278,7 +284,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                 if (_patientLiteDb == null)
                     throw new InvalidOperationException("В базе пациентов нет записей. Сначала добавьте пациентов.");
 
-                var studyInstanceUid = $"2.25.{GenerateRandomNumber(36)}";
+                var studyInstanceUid = UidGenerator.GenerateStudyUid();
+                var studyDateTime = plannedStudyDto.RandomStudyDateTime.Generate();
+                var (studyAreas, areaDetails) = _plannedStudyDicomStubWriter.CreateStudyAreas(
+                    plannedStudyDto.RandomBodyPart,
+                    _random);
 
                 _plannedStudyLiteDb = new PlannedStudyLiteDb
                 {
@@ -296,20 +306,49 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
                     Comments = _patientLiteDb.Comments,
                     PatientIdDataBase = _patientLiteDb.Id,
 
-                    StudyID = $"STD-{GenerateRandomNumber(12)}t",
+                    StudyID = StudyIdGenerator.GenerateStudyId(),
                     AccessionNumber = _random.Next(100000, 999999).ToString(),
                     StudyInstanceUid = studyInstanceUid,
                     Status = PlannedStudyStatus.Planned,
 
-                    StudyAreas = GenerateRandomStudyAreas(plannedStudyDto),
+                    StudyAreas = studyAreas,
                     ProjectionPaths = Array.Empty<string>(),
                     ImagesCount = 0,
-                    StudyDateTime = null,
+                    StudyDateTime = studyDateTime,
                     IsEmergencyPatient = plannedStudyDto.IsEmergencyPatient,
                     EffectiveDosemSv = plannedStudyDto.EffectiveDosemSv,
                     HasDose = plannedStudyDto.HasDose
-
                 };
+
+                if (GeneratePlannedStudiesWithDicomFiles)
+                {
+                    try
+                    {
+                        var projectionPaths = _plannedStudyDicomStubWriter.WriteStubs(
+                            PlannedStudyDicomStubWriter.DefaultTempFolder,
+                            _plannedStudyLiteDb,
+                            studyAreas,
+                            areaDetails);
+                        PlannedStudyDicomStubWriter.AlignArtifacts(_plannedStudyLiteDb, studyAreas, projectionPaths);
+
+                        if (_plannedStudyLiteDb.ProjectionPaths.Length == 0)
+                        {
+                            _logger.Warn(
+                                "Planned study {StudyUid}: no DICOM stubs on disk after write; StudyAreas aligned to existing files only",
+                                studyInstanceUid);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Warn(ex, "Failed to write planned DICOM stubs to {Folder}", PlannedStudyDicomStubWriter.DefaultTempFolder);
+                        _plannedStudyLiteDb.ProjectionPaths = Array.Empty<string>();
+                    }
+                }
+                else
+                {
+                    _plannedStudyLiteDb.StudyAreas = studyAreas;
+                    _plannedStudyLiteDb.ProjectionPaths = Array.Empty<string>();
+                }
 
                 return _plannedStudyLiteDb;
             }
@@ -598,24 +637,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         }
 
         [RelayCommand]
-        public void OpenWebPage()
-        {
-            var url = "http://localhost:5289"; // или любой нужный маршрут
-            try
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = url,
-                    UseShellExecute = true // важно для Windows — откроет в браузере
-                });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Не удалось открыть веб-страницу: " + ex.Message);
-            }
-        }
-
-        [RelayCommand]
         public async Task DeleteAllTablesAsync()
         {
             try
@@ -869,36 +890,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private PlannedStudyLiteDbDto CreatePlannedStudyDto()
         {
             return new PlannedStudyLiteDbDto(
-                new RandomBodyPartDataRule());
+                new RandomBodyPartDataRule(),
+                new RandomStudyDateTimeRule());
         }
 
-        private PlannedStudyArea[] GenerateRandomStudyAreas(PlannedStudyLiteDbDto plannedStudyDto)
-        {
-            var areas = new List<PlannedStudyArea>();
-            var count = _random.Next(1, 4);
-
-            for (int i = 0; i < count; i++)
-            {
-                var data = plannedStudyDto.RandomBodyPart.Generate();
-
-                areas.Add(new PlannedStudyArea
-                {
-                    BodyPartGuid = data.bodyPartGuid,
-                    AnatomicRegionCodeValue = data.anatomicCode,
-                    ViewCodeValue = data.viewCode,
-                    ProjectionUid = GenerateRandomProjectionUid(),
-                    LateralityCode = data.lateralityCode
-                });
-            }
-
-            return areas.ToArray();
-        }
-
-        private string GenerateRandomProjectionUid()
-        {
-            // Можно сгенерировать случайный UID или вернуть пустую строку
-            // return Guid.NewGuid().ToString("N");
-            return string.Empty;
-        }
     }
 }
