@@ -27,6 +27,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
             var document = Read();
             MySql = Create("BirthdateMySql", document?.MySql);
             LiteDb = Create("BirthdateLiteDb", document?.LiteDb);
+            Orthanc = Create("BirthdateOrthanc", document?.Orthanc);
             PatientsDatabasePath = document?.PatientsDatabasePath ?? string.Empty;
             PlannedStudiesDatabasePath = document?.PlannedStudiesDatabasePath ?? string.Empty;
             DicomTestDataFolderPath = document?.DicomTestDataFolderPath ?? string.Empty;
@@ -55,6 +56,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
         public PatientGenerationOptions MySql { get; }
 
         public PatientGenerationOptions LiteDb { get; }
+
+        public PatientGenerationOptions Orthanc { get; }
 
         public string PatientsDatabasePath { get; private set; }
 
@@ -258,6 +261,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
                 {
                     MySql = MySql.ToData(),
                     LiteDb = LiteDb.ToData(),
+                    Orthanc = Orthanc.ToData(),
                     PatientsDatabasePath = PatientsDatabasePath,
                     PlannedStudiesDatabasePath = PlannedStudiesDatabasePath,
                     DicomTestDataFolderPath = DicomTestDataFolderPath,
@@ -287,6 +291,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
         {
             public GenerationOptionsData MySql { get; set; }
             public GenerationOptionsData LiteDb { get; set; }
+            public GenerationOptionsData Orthanc { get; set; }
             public string PatientsDatabasePath { get; set; }
             public string PlannedStudiesDatabasePath { get; set; }
             public string DicomTestDataFolderPath { get; set; }

@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:userControls="clr-namespace:DataBaseGenerator.UI.Wpf.UserControls"
     xmlns:viewmodel="clr-namespace:DataBaseGenerator.UI.Wpf.ViewModel"
     d:DataContext="{d:DesignInstance Type=viewmodel:OrthancWorklistViewModel}"
     mc:Ignorable="d">
@@ -247,6 +248,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <Border
@@ -383,6 +385,19 @@
 
             <Grid
                 Grid.Row="2"
+                Margin="0,5,0,0"
+                IsEnabled="{Binding IsBusy, Converter={StaticResource BoolToInverseBoolConverter}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Expander Header="Параметры генерации" IsExpanded="False">
+                    <userControls:PatientGenerationOptionsControl DataContext="{Binding GenerationOptions}" />
+                </Expander>
+            </Grid>
+
+            <Grid
+                Grid.Row="3"
                 Margin="5,8,5,0"
                 IsEnabled="{Binding IsBusy, Converter={StaticResource BoolToInverseBoolConverter}}">
                 <Grid.ColumnDefinitions>
@@ -455,7 +470,7 @@
             </Grid>
 
             <Grid
-                Grid.Row="3"
+                Grid.Row="4"
                 Margin="5,5,5,0"
                 IsEnabled="{Binding IsBusy, Converter={StaticResource BoolToInverseBoolConverter}}">
                 <Grid.ColumnDefinitions>
@@ -479,6 +494,16 @@
                         Content="Update WorkList" />
                 </Grid>
 
+                <Button
+                    Grid.Column="1"
+                    Width="130"
+                    Height="40"
+                    Margin="8,0,0,0"
+                    Padding="12,0"
+                    VerticalAlignment="Top"
+                    Command="{Binding ResetGenerationOptionsCommand}"
+                    Content="Reset parameter" />
+
                 <Grid Grid.Column="2">
                     <Button
                         Width="130"
@@ -496,7 +521,7 @@
             </Grid>
 
             <Border
-                Grid.Row="4"
+                Grid.Row="5"
                 Margin="0,5"
                 BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
                 BorderThickness="4">
