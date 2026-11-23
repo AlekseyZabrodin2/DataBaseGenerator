@@ -4,7 +4,7 @@ using System.Windows.Data;
 
 namespace DataBaseGenerator.UI.Wpf.Converters
 {
-    /// <summary>Shows a DICOM PatientSex code (M/F/O) as a Russian word in tables (муж / жен / др).</summary>
+    /// <summary>Shows a DICOM PatientSex code (M/F/O) as a word in tables (male / female / other).</summary>
     public sealed class DicomSexToTextConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -13,9 +13,9 @@ namespace DataBaseGenerator.UI.Wpf.Converters
 
             return code switch
             {
-                "M" or "MAN" => "муж",
-                "F" or "FEMALE" => "жен",
-                "O" or "OTHER" => "др",
+                "M" or "MAN" => "Male",
+                "F" or "FEMALE" => "Female",
+                "O" or "OTHER" => "Other",
                 _ => string.Empty
             };
         }
@@ -26,9 +26,9 @@ namespace DataBaseGenerator.UI.Wpf.Converters
 
             return text switch
             {
-                "муж" or "m" or "man" => "M",
-                "жен" or "f" or "female" => "F",
-                "др" or "o" or "other" => "O",
+                "male" or "муж" or "m" or "man" => "M",
+                "female" or "жен" or "f" => "F",
+                "other" or "др" or "o" => "O",
                 _ => Binding.DoNothing
             };
         }
