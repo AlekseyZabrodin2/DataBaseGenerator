@@ -14,6 +14,7 @@
     <UserControl.Resources>
         <convert:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
         <convert:BoolToInverseBoolConverter x:Key="BoolToInverseBoolConverter" />
+        <convert:DicomSexToTextConverter x:Key="DicomSexToTextConverter" />
     </UserControl.Resources>
 
     <Grid Margin="5,0">
@@ -130,15 +131,6 @@
                             ItemsSource="{Binding Gender}"
                             SelectedItem="{Binding SingleSex}" />
 
-                        <TextBlock
-                            Margin="5,5,0,0"
-                            FontWeight="DemiBold"
-                            Text="Modality:" />
-                        <ComboBox
-                            Margin="5"
-                            ItemsSource="{Binding ModalityRules}"
-                            SelectedItem="{Binding SingleModality, Mode=TwoWay}" />
-
                         <Grid Margin="5">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -195,6 +187,16 @@
                             x:Name="DescriptionTextBox"
                             Margin="5,0"
                             Text="{Binding SingleDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock
+                            Margin="5,5,0,0"
+                            FontWeight="DemiBold"
+                            Text="Modality:" />
+                        <ComboBox
+                            Margin="5"
+                            ItemsSource="{Binding ModalityRules}"
+                            SelectedItem="{Binding SingleModality, Mode=TwoWay}" />
+
 
                         <Grid Margin="5">
                             <Grid.ColumnDefinitions>
@@ -339,46 +341,21 @@
                     VirtualizingPanel.VirtualizationMode="Recycling">
                     <DataGrid.Columns>
                         <DataGridTextColumn
-                            Width="140"
                             Binding="{Binding PatientId}"
                             Header="ID пациента"
                             SortDirection="Ascending" />
-                        <DataGridTextColumn
-                            Width="220"
-                            Binding="{Binding PatientName}"
-                            Header="Имя" />
-                        <DataGridTextColumn
-                            Width="50"
-                            Binding="{Binding PatientSex}"
-                            Header="Пол" />
-                        <DataGridTextColumn
-                            Width="110"
-                            Binding="{Binding PatientBirthDate}"
-                            Header="Дата рождения" />
-                        <DataGridTextColumn
-                            Width="140"
-                            Binding="{Binding AccessionNumber}"
-                            Header="Accession" />
-                        <DataGridTextColumn
-                            Width="160"
-                            Binding="{Binding ReferringPhysicianName}"
-                            Header="Направивший врач" />
-                        <DataGridTextColumn
-                            Width="90"
-                            Binding="{Binding Modality}"
-                            Header="Модальность" />
-                        <DataGridTextColumn
-                            Width="120"
-                            Binding="{Binding StationAeTitle}"
-                            Header="AE Title" />
-                        <DataGridTextColumn
-                            Width="130"
-                            Binding="{Binding ScheduledStart}"
-                            Header="Дата процедуры" />
-                        <DataGridTextColumn
-                            Width="200"
-                            Binding="{Binding Description}"
-                            Header="Описание шага" />
+                        <DataGridTextColumn Binding="{Binding PatientName}" Header="Имя" />
+                        <DataGridTextColumn Binding="{Binding PatientBirthDate}" Header="Дата рождения" />
+                        <DataGridTextColumn Binding="{Binding PatientSex, Converter={StaticResource DicomSexToTextConverter}}" Header="Пол" />
+                        <DataGridTextColumn Binding="{Binding PatientAddress}" Header="Адрес" />
+                        <DataGridTextColumn Binding="{Binding PatientTelephone}" Header="Телефон" />
+                        <DataGridTextColumn Binding="{Binding PatientComments}" Header="Описание пациента" />
+                        <DataGridTextColumn Binding="{Binding Description}" Header="Описание исследования" />
+                        <DataGridTextColumn Binding="{Binding ScheduledStart}" Header="Дата процедуры" />
+                        <DataGridTextColumn Binding="{Binding ReferringPhysicianName}" Header="Направивший врач" />
+                        <DataGridTextColumn Binding="{Binding AccessionNumber}" Header="Accession" />
+                        <DataGridTextColumn Binding="{Binding Modality}" Header="Модальность" />
+                        <DataGridTextColumn Binding="{Binding StationAeTitle}" Header="AE Title" />
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
