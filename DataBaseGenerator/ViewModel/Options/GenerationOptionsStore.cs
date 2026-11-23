@@ -38,12 +38,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
             PacsCallingAe = document?.PacsCallingAe ?? string.Empty;
             PacsCalledAe = document?.PacsCalledAe ?? string.Empty;
             PacsFolderPath = document?.PacsFolderPath ?? string.Empty;
-            var deliveryFromFile = document?.DeliveryDatabasePath;
-            DeliveryDatabasePath = !string.IsNullOrWhiteSpace(deliveryFromFile)
-                ? deliveryFromFile
-                : DefaultDeliveryDatabasePath();
-            if (string.IsNullOrWhiteSpace(deliveryFromFile) && !string.IsNullOrWhiteSpace(DeliveryDatabasePath))
-                Save();
+            DeliveryDatabasePath = document?.DeliveryDatabasePath ?? string.Empty;
 
             ParserConfig = NormalizeParserConfig(document?.Parser);
         }
@@ -187,12 +182,6 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
 
             DeliveryDatabasePath = path;
             Save();
-        }
-
-        private static string DefaultDeliveryDatabasePath()
-        {
-            const string candidate = @"D:\Develop\UniExpert\Build\Debug\delivery.db";
-            return File.Exists(candidate) ? candidate : string.Empty;
         }
 
         private PatientGenerationOptions Create(string groupName, GenerationOptionsData data)
