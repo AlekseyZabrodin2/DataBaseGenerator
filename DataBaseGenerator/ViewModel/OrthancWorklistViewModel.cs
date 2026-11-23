@@ -11,6 +11,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DataBaseGenerator.Core.GeneratorRules.WorkList;
 using DataBaseGenerator.Core.OrthancWorklists;
+using DataBaseGenerator.UI.Wpf.Model;
+using DataBaseGenerator.UI.Wpf.Service;
 using DataBaseGenerator.UI.Wpf.ViewModel.Options;
 
 namespace DataBaseGenerator.UI.Wpf.ViewModel;
@@ -18,23 +20,17 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel;
 public partial class OrthancWorklistViewModel : ObservableObject
 {
     private readonly GenerationOptionsStore _optionsStore;
-    private bool _loadingConnection = true;
+    private readonly ApplicationSettings _settings;
 
     public ObservableCollection<RandomModalityRule> ModalityRules { get; }
+
+    /// <summary>Address from Settings, shown on the page so it is clear which Orthanc is used.</summary>
+    public string OrthancAddress => _settings.OrthancBaseUrl;
 
     public PatientGenerationOptions GenerationOptions { get; }
 
     [ObservableProperty]
     public partial ObservableCollection<OrthancWorklistEntry> Rows { get; set; } = new();
-
-    [ObservableProperty]
-    public partial string BaseUrl { get; set; }
-
-    [ObservableProperty]
-    public partial string Username { get; set; }
-
-    [ObservableProperty]
-    public partial string Password { get; set; }
 
     [ObservableProperty]
     public partial int? WorkListCount { get; set; } = 0;
@@ -98,18 +94,18 @@ public partial class OrthancWorklistViewModel : ObservableObject
     [ObservableProperty]
     public partial bool PercentShow { get; set; }
 
-    partial void OnBaseUrlChanged(string value) => SaveConnection();
-
-    partial void OnUsernameChanged(string value) => SaveConnection();
-
-    partial void OnPasswordChanged(string value) => SaveConnection();
-
     partial void OnPatientIdFilterChanged(string value) => ApplyFilter();
 
 
-    public OrthancWorklistViewModel(GenerationOptionsStore optionsStore)
+    public OrthancWorklistViewModel(GenerationOptionsStore optionsStore, ApplicationSettingsService settingsService)
     {
         _optionsStore = optionsStore;
+        _settings = settingsService.Settings;
+        _settings.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(ApplicationSettings.OrthancBaseUrl))
+                OnPropertyChanged(nameof(OrthancAddress));
+        };
         var dx = new RandomModalityRule("DX");
         ModalityRules = new ObservableCollection<RandomModalityRule>
         {
@@ -119,43 +115,8 @@ public partial class OrthancWorklistViewModel : ObservableObject
         SelectModality = dx;
         SingleModality = dx;
         GenerationOptions = optionsStore.Orthanc;
-        BaseUrl = optionsStore.OrthancBaseUrl;
-        Username = optionsStore.OrthancUsername;
-        Password = optionsStore.OrthancPassword;
-        _loadingConnection = false;
     }
 
-
-    [RelayCommand]
-    private async Task EchoAsync()
-    {
-        if (string.IsNullOrWhiteSpace(BaseUrl))
-        {
-            UpdateText = "Укажите адрес Orthanc.";
-            return;
-        }
-
-        var stopwatch = Stopwatch.StartNew();
-        string operationSummary = null;
-        try
-        {
-            StartBusy("Проверка соединения…", percentShow: false);
-            using var client = OpenClient();
-            await client.PingAsync();
-            operationSummary = "Соединение с Orthanc установлено.";
-        }
-        catch (Exception ex)
-        {
-            UpdateText = $"Ошибка подключения к Orthanc: {ex.Message}";
-        }
-        finally
-        {
-            stopwatch.Stop();
-            StopBusy();
-            if (operationSummary != null)
-                UpdateText = $"{operationSummary} Время выполнения: {FormatTimeSpan(stopwatch.Elapsed)}";
-        }
-    }
 
     [RelayCommand]
     private async Task AddWorkListAsync()
@@ -437,7 +398,7 @@ public partial class OrthancWorklistViewModel : ObservableObject
     }
 
     private OrthancWorklistClient OpenClient() =>
-        OrthancWorklistClient.Open(BaseUrl, Username, Password);
+        OrthancWorklistClient.Open(_settings.OrthancBaseUrl, _settings.OrthancUsername, _settings.OrthancPassword);
 
     /// <summary>
     /// Next MXE patient number: continues after the highest MXE ID currently in Orthanc.
@@ -527,14 +488,6 @@ public partial class OrthancWorklistViewModel : ObservableObject
             var row = (OrthancWorklistEntry)item;
             return row.PatientId?.Contains(patientFilter, StringComparison.OrdinalIgnoreCase) == true;
         };
-    }
-
-    private void SaveConnection()
-    {
-        if (_loadingConnection)
-            return;
-
-        _optionsStore.SetOrthancConnection(BaseUrl, Username, Password);
     }
 
     private void StartBusy(string message, bool percentShow = true)

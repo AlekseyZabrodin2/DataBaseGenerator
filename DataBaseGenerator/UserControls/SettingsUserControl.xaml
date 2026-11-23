@@ -101,6 +101,78 @@
                     </Grid>
                 </GroupBox>
 
+                <!--  Orthanc  -->
+                <GroupBox
+                    Margin="0,0,0,20"
+                    Padding="15"
+                    Header="Orthanc">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock
+                            Grid.Row="0"
+                            VerticalAlignment="Center"
+                            FontWeight="DemiBold"
+                            Text="Адрес:" />
+                        <TextBox
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Margin="5"
+                            Text="{Binding Settings.OrthancBaseUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock
+                            Grid.Row="1"
+                            VerticalAlignment="Center"
+                            FontWeight="DemiBold"
+                            Text="Пользователь:" />
+                        <TextBox
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Margin="5"
+                            Text="{Binding Settings.OrthancUsername, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock
+                            Grid.Row="2"
+                            VerticalAlignment="Center"
+                            FontWeight="DemiBold"
+                            Text="Пароль:" />
+                        <TextBox
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Margin="5"
+                            Text="{Binding Settings.OrthancPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <StackPanel
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            Margin="5"
+                            Orientation="Horizontal">
+                            <Button
+                                Height="32"
+                                Padding="20,0"
+                                Background="{DynamicResource MahApps.Brushes.Accent}"
+                                Command="{Binding EchoOrthancCommand}"
+                                Content="Echo"
+                                ToolTip="Проверить подключение к Orthanc" />
+                            <TextBlock
+                                Margin="12,0,0,0"
+                                VerticalAlignment="Center"
+                                Text="{Binding OrthancStatus}"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+
                 <TextBlock
                     Margin="0,0,0,20"
                     HorizontalAlignment="Right"

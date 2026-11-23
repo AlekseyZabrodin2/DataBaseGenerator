@@ -260,49 +260,11 @@
                 BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
                 BorderThickness="4"
                 IsEnabled="{Binding IsBusy, Converter={StaticResource BoolToInverseBoolConverter}}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock
-                        Margin="5,0,8,0"
-                        VerticalAlignment="Center"
-                        FontWeight="Bold"
-                        Text="Orthanc URL" />
-                    <TextBox
-                        Width="280"
-                        Height="32"
-                        VerticalContentAlignment="Center"
-                        BorderBrush="Black"
-                        Text="{Binding BaseUrl, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock
-                        Margin="16,0,8,0"
-                        VerticalAlignment="Center"
-                        FontWeight="Bold"
-                        Text="User" />
-                    <TextBox
-                        Width="120"
-                        Height="32"
-                        VerticalContentAlignment="Center"
-                        BorderBrush="Black"
-                        Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock
-                        Margin="16,0,8,0"
-                        VerticalAlignment="Center"
-                        FontWeight="Bold"
-                        Text="Password" />
-                    <TextBox
-                        Width="120"
-                        Height="32"
-                        VerticalContentAlignment="Center"
-                        BorderBrush="Black"
-                        Text="{Binding Password, UpdateSourceTrigger=PropertyChanged}" />
-                    <Button
-                        Height="32"
-                        Margin="16,0,4,0"
-                        Padding="20,0"
-                        Background="{DynamicResource MahApps.Brushes.Accent}"
-                        Command="{Binding EchoCommand}"
-                        Content="Echo"
-                        ToolTip="Проверить подключение к Orthanc" />
-                </StackPanel>
+                <TextBlock
+                    Margin="5,0,8,0"
+                    VerticalAlignment="Center"
+                    FontWeight="Bold"
+                    Text="{Binding OrthancAddress, StringFormat='Orthanc: {0}'}" />
             </Border>
 
             <Grid Grid.Row="1" Background="{DynamicResource MahApps.Brushes.Accent}">
