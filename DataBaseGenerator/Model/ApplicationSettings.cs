@@ -14,9 +14,9 @@ namespace DataBaseGenerator.UI.Wpf.Model
         public partial string OrthancBaseUrl { get; set; } = "http://localhost:8042";
 
         [ObservableProperty]
-        public partial string OrthancUsername { get; set; } = "orthanc";
+        public partial string OrthancUsername { get; set; } = string.Empty;
 
         [ObservableProperty]
-        public partial string OrthancPassword { get; set; } = "orthanc";
+        public partial string OrthancPassword { get; set; } = string.Empty;
     }
 }

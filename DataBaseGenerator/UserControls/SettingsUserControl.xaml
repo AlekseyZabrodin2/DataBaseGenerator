@@ -94,6 +94,7 @@
                             FontWeight="DemiBold"
                             Text="Пароль:" />
                         <PasswordBox
+                            x:Name="MysqlPasswordBox"
                             Grid.Row="4"
                             Grid.Column="1"
                             Margin="5"
@@ -146,11 +147,12 @@
                             VerticalAlignment="Center"
                             FontWeight="DemiBold"
                             Text="Пароль:" />
-                        <TextBox
+                        <PasswordBox
+                            x:Name="OrthancPasswordBox"
                             Grid.Row="2"
                             Grid.Column="1"
                             Margin="5"
-                            Text="{Binding Settings.OrthancPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            PasswordChanged="OrthancPasswordBox_PasswordChanged" />
 
                         <StackPanel
                             Grid.Row="3"
