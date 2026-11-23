@@ -37,6 +37,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
         private DicomPacsUserControl _dicomPacsPage;
         private DicomParseUserControl _dicomParsePage;
         private DeliveryJournalUserControl _deliveryJournalPage;
+        private OrthancWorklistUserControl _orthancWorklistPage;
         private SettingsUserControl _settingsPage;
 
         [ObservableProperty]
@@ -97,6 +98,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
 
         [ObservableProperty]
         public partial bool IsDeliveryJournalMode { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsOrthancWorklistMode { get; set; }
 
         [ObservableProperty]
         public partial bool ShowPatients { get; set; } = true;
@@ -541,6 +545,27 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             IsDicomPacsMode = sectionName == "PACS mover";
             IsDicomParseMode = sectionName == "Dicom parser";
             IsDeliveryJournalMode = false;
+            IsOrthancWorklistMode = false;
+        }
+
+        [RelayCommand]
+        private async Task SwitchToOrthancWorklist()
+        {
+            LeaveLiteDbViewer();
+            _orthancWorklistPage ??= new OrthancWorklistUserControl();
+            CurrentPage = _orthancWorklistPage;
+            CurrentPageName = "Orthanc - Worklist";
+            IsMySqlMode = false;
+            IsLiteDbMode = false;
+            IsLiteDbPlannedStudiesMode = false;
+            ShowPatients = false;
+            ShowStudies = false;
+            ClearDicomMode();
+            IsOrthancWorklistMode = true;
+            await RequestServiceStatus();
+
+            if (_orthancWorklistPage.ViewModel.RefreshWorkListCommand.CanExecute(null))
+                await _orthancWorklistPage.ViewModel.RefreshWorkListCommand.ExecuteAsync(null);
         }
 
         private void ClearDicomMode()
@@ -550,6 +575,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel
             IsDicomPacsMode = false;
             IsDicomParseMode = false;
             IsDeliveryJournalMode = false;
+            IsOrthancWorklistMode = false;
         }
 
         private void LeaveLiteDbViewer()

@@ -27,6 +27,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
             var document = Read();
             MySql = Create("BirthdateMySql", document?.MySql);
             LiteDb = Create("BirthdateLiteDb", document?.LiteDb);
+            Orthanc = Create("BirthdateOrthanc", document?.Orthanc);
             PatientsDatabasePath = document?.PatientsDatabasePath ?? string.Empty;
             PlannedStudiesDatabasePath = document?.PlannedStudiesDatabasePath ?? string.Empty;
             DicomTestDataFolderPath = document?.DicomTestDataFolderPath ?? string.Empty;
@@ -41,7 +42,11 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
             DeliveryDatabasePath = !string.IsNullOrWhiteSpace(deliveryFromFile)
                 ? deliveryFromFile
                 : DefaultDeliveryDatabasePath();
-
+            OrthancBaseUrl = string.IsNullOrWhiteSpace(document?.OrthancBaseUrl)
+                ? "http://localhost:8042"
+                : document.OrthancBaseUrl.Trim();
+            OrthancUsername = document?.OrthancUsername ?? "orthanc";
+            OrthancPassword = document?.OrthancPassword ?? "orthanc";
             if (string.IsNullOrWhiteSpace(deliveryFromFile) && !string.IsNullOrWhiteSpace(DeliveryDatabasePath))
                 Save();
 
@@ -51,6 +56,8 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
         public PatientGenerationOptions MySql { get; }
 
         public PatientGenerationOptions LiteDb { get; }
+
+        public PatientGenerationOptions Orthanc { get; }
 
         public string PatientsDatabasePath { get; private set; }
 
@@ -73,6 +80,12 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
         public string PacsFolderPath { get; private set; }
 
         public string DeliveryDatabasePath { get; private set; }
+
+        public string OrthancBaseUrl { get; private set; }
+
+        public string OrthancUsername { get; private set; }
+
+        public string OrthancPassword { get; private set; }
 
         public ParserAppConfig ParserConfig { get; private set; }
 
@@ -187,6 +200,20 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
             Save();
         }
 
+        public void SetOrthancConnection(string baseUrl, string username, string password)
+        {
+            baseUrl = (baseUrl ?? string.Empty).Trim();
+            username ??= string.Empty;
+            password ??= string.Empty;
+            if (baseUrl == OrthancBaseUrl && username == OrthancUsername && password == OrthancPassword)
+                return;
+
+            OrthancBaseUrl = baseUrl;
+            OrthancUsername = username;
+            OrthancPassword = password;
+            Save();
+        }
+
         private static string DefaultDeliveryDatabasePath()
         {
             const string candidate = @"D:\Develop\UniExpert\Build\Debug\delivery.db";
@@ -234,6 +261,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
                 {
                     MySql = MySql.ToData(),
                     LiteDb = LiteDb.ToData(),
+                    Orthanc = Orthanc.ToData(),
                     PatientsDatabasePath = PatientsDatabasePath,
                     PlannedStudiesDatabasePath = PlannedStudiesDatabasePath,
                     DicomTestDataFolderPath = DicomTestDataFolderPath,
@@ -245,6 +273,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
                     PacsCalledAe = PacsCalledAe,
                     PacsFolderPath = PacsFolderPath,
                     DeliveryDatabasePath = DeliveryDatabasePath,
+                    OrthancBaseUrl = OrthancBaseUrl,
+                    OrthancUsername = OrthancUsername,
+                    OrthancPassword = OrthancPassword,
                     Parser = ParserConfig
                 };
 
@@ -260,6 +291,7 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
         {
             public GenerationOptionsData MySql { get; set; }
             public GenerationOptionsData LiteDb { get; set; }
+            public GenerationOptionsData Orthanc { get; set; }
             public string PatientsDatabasePath { get; set; }
             public string PlannedStudiesDatabasePath { get; set; }
             public string DicomTestDataFolderPath { get; set; }
@@ -271,6 +303,9 @@ namespace DataBaseGenerator.UI.Wpf.ViewModel.Options
             public string PacsCalledAe { get; set; }
             public string PacsFolderPath { get; set; }
             public string DeliveryDatabasePath { get; set; }
+            public string OrthancBaseUrl { get; set; }
+            public string OrthancUsername { get; set; }
+            public string OrthancPassword { get; set; }
             public ParserAppConfig Parser { get; set; }
         }
 
