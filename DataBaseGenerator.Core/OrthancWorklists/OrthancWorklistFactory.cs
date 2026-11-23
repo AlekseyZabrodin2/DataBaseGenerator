@@ -56,6 +56,7 @@ public static class OrthancWorklistFactory
             var birthDate = generator.BirthDate.GenerateBirthdate(generator);
             var sex = generator.Sex.Generate();
             var address = generator.Address.Generate();
+            var telephone = generator.Telephone.Generate();
             var addInfo = generator.AddInfo.Generate();
             var accession = $"{stamp}{(batch % 256):X2}{index:X4}";
             var description = new RandomStudyDescriptionRule().Generate();
@@ -67,7 +68,7 @@ public static class OrthancWorklistFactory
                 middleName,
                 sex,
                 address,
-                telephone: string.Empty,
+                telephone,
                 addInfo,
                 accession,
                 description,

@@ -10,6 +10,12 @@ public sealed class OrthancWorklistEntry
 
     public string PatientSex { get; init; } = string.Empty;
 
+    public string PatientAddress { get; init; } = string.Empty;
+
+    public string PatientTelephone { get; init; } = string.Empty; 
+    
+    public string PatientComments { get; init; } = string.Empty;
+
     public string PatientBirthDate { get; init; } = string.Empty;
 
     public string AccessionNumber { get; init; } = string.Empty;
