@@ -7,6 +7,7 @@
     <ApplicationIcon>Sources\DBGenerator.ico</ApplicationIcon>
     <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
 	<LangVersion>preview</LangVersion>
+	<AssemblyName>DataBaseGenerator</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
